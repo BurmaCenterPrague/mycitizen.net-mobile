@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="bottom"
+    android:gravity="bottom"
+    android:orientation="horizontal"
+    android:weightSum="20"
+    android:background="#EAE9E3">
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal">
+        <Button
+            android:id="@+id/message_load_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="30dp"
+            android:visibility="gone"
+            android:text="@string/load_more">
+        </Button>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/message_wrapper"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/message_list_avatar_right"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_weight="1"
+        android:gravity="bottom" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/user_img"
+            android:background="#A9A295"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/message_list_avatar_right"
+        android:layout_weight="19"
+        android:background="@drawable/bubble_a"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/object_title"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:padding="10dp"
+            android:textSize="16sp" android:layout_weight="0.2">
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:gravity="right|center_vertical" >
+
+            <Button
+                android:id="@+id/button_b"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/ico_trash" />
+
+            <Button
+                android:id="@+id/button_a"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/ic_action_reply"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+    </RelativeLayout>
+
+
+</RelativeLayout><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/message_list_owner_item.xml -->

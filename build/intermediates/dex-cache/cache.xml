@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/classes-462ee7293b10619f0b240b103ee5a259a95c30b8.jar"
+        jar="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-fe930dc68beb1e566675ce71b270d4091c6c249b.jar"
+        jar="/Applications/Android Studio.app/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/acra-4.5.0-f21d133f904595aba682658809cc1d5e931ff091.jar"
+        jar="/Users/chris/AndroidstudioProjects/MyCitizen/app/libs/acra-4.5.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="44a5eb946e0d83eed4a0128d877ca1fd8168b83a"/>
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/YouTubeAndroidPlayerApi-840370b18d743bf15a5aeb21dba8fafa7a827d53.jar"
+        jar="/Users/chris/AndroidstudioProjects/MyCitizen/app/libs/YouTubeAndroidPlayerApi.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="29ccfbddf99584bddbaab62c0cf50dcd1c564e43"/>
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/osmdroid-android-4.1-50166f4ed8e968a7ba11c93dcbd523ca529002ca.jar"
+        jar="/Users/chris/AndroidstudioProjects/MyCitizen/app/libs/osmdroid-android-4.1.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="60913edd9f91f63a5106e3bfc06b2fddda657303"/>
+    <item
+        dex="/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/pre-dexed/debug/slf4j-android-1.5.8-9099ef8210fe7b0b2a2beced2e8503887dc4cf02.jar"
+        jar="/Users/chris/AndroidstudioProjects/MyCitizen/app/libs/slf4j-android-1.5.8.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="404eece4bb07ea211f5a879c22458775c612f0df"/>
+
+</pre-dex-items>

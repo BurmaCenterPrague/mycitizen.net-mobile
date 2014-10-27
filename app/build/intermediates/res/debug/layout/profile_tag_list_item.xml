@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="40dp"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:id="@+id/object_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:background="@color/white"
+        android:src="@drawable/ico_tag" />
+	<CheckBox
+	    android:id="@+id/object_status"
+	    android:layout_width="40dp"
+	    android:layout_height="40dp"
+	    android:layout_alignParentRight="true" />
+	<TextView
+	    android:id="@+id/object_title"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_toLeftOf="@id/object_status"
+	    android:layout_toRightOf="@id/object_icon"
+	    android:padding="10dp"
+	    android:textSize="16sp" >
+
+	</TextView>
+
+	
+
+</RelativeLayout>
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/profile_tag_list_item.xml -->

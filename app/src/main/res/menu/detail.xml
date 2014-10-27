@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:mycitizen="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_friends"
+        android:title="@string/menu_friends"
+        android:orderInCategory="100"
+        mycitizen:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_person"/>
+    <item android:id="@+id/menu_connections"
+        android:title="@string/menu_connections"
+        android:orderInCategory="100"
+        mycitizen:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_favorite"/>
+    <item android:id="@+id/menu_locations"
+        android:title="@string/menu_location"
+        android:orderInCategory="100" 
+        mycitizen:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_map"/>
+    <item android:id="@+id/menu_messages"
+        android:title="@string/menu_messages"
+        android:orderInCategory="100" 
+        mycitizen:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_chat"/>
+</menu>

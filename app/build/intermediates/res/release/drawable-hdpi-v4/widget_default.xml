@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list	xmlns:android="http://schemas.android.com/apk/res/android">
+    <item >
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="0dip"
+        android:bottomLeftRadius="0dip"  
+        android:topRightRadius="0dip"
+        android:topLeftRadius="0dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#bbb8b0"
+            	android:endColor="#bbb8b0"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="#bbb8b0"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 <item android:top="0dp" android:bottom="1dp" >
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="0dip"
+        android:bottomLeftRadius="0dip"  
+        android:topRightRadius="0dip"
+        android:topLeftRadius="0dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#ffffff"
+            	android:endColor="#ffffff"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="#bbb8b0"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+    
+	 
+	 
+</layer-list>
+<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/drawable-hdpi/widget_default.xml -->

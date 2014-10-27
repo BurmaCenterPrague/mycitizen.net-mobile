@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="item_not_available_offline">Item not available offline.</string>
+    <string name="toast_crash">Sorry, the app crashed, but a report has been sent to the developers to help fix the issue!</string>
+    <string name="accept_friendship">accept friendship</string>
+    <string name="loadingdotdotdot">Loading...</string>
+    <string name="your_message_hint">your message</string>
+    <string name="help">help</string>
+    <string name="loading_data">Loading data</string>
+    <string name="profile_description">My Profile: Description</string>
+    <string name="tags">Tags</string>
+    <string name="languages">Languages</string>
+    <string name="connections">Connections</string>
+    <string name="video">Video</string>
+    <string name="load_more">Load more...</string>
+    <string name="dashboard_messages">Messages</string>
+    <string name="dashboard_new_messages">new</string>
+    <string name="error_loading_data">Error loading data</string>
+    <string name="finished">Finished</string>
+    <string name="user_member_of_groups">Member of Groups</string>
+    <string name="user_subscribed_resources">Subscribed Resources</string>
+    <string name="group_members">Group Members</string>
+    <string name="group_resources">Group Resources</string>
+    <string name="subscribed_users">Subscribed Users</string>
+    <string name="subscribed_groups">Subscribed Groups</string>
+    <string name="nothing_found">Nothing found.</string>
+    <string name="no_offline_data">No offline data.</string>
+    <string name="friends">Friends</string>
+    <string name="menu_friends">Friends</string>
+    <string name="moderator">moderator</string>
+    <string name="administrator">administrator</string>
+</resources>

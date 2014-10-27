@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#EAE9E3"
+    android:orientation="vertical"
+    android:weightSum="10" >
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/bg" />
+	<LinearLayout
+	    
+	    android:id="@+id/dialog_filter_map_top_menu"
+	    android:layout_width="match_parent"
+	    android:layout_height="60dp"
+	    android:layout_alignParentTop="true"
+	    android:layout_weight="1"
+	    android:orientation="vertical" >
+
+		<TextView
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:text="Filter by location" />
+
+	</LinearLayout>
+
+	<LinearLayout
+	    
+	    android:id="@+id/dialog_filter_map_bottom_menu"
+	    android:layout_width="match_parent"
+        android:layout_height="60dp"
+	    android:layout_alignParentBottom="true"
+	    android:layout_weight="1"
+	    android:orientation="horizontal" >
+
+		<Button
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:textColor="@color/white"
+		    android:background="@drawable/bottom_menu_button"
+		    android:layout_weight="1" />
+
+		<Button
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:textColor="@color/white"
+		    android:background="@drawable/bottom_menu_button"
+		    android:layout_weight="1" />
+
+	</LinearLayout>
+	<LinearLayout
+	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/dialog_filter_map_bottom_menu"
+	    android:layout_below="@id/dialog_filter_map_top_menu"
+	    android:layout_weight="8" >
+
+		<com.google.android.maps.MapView
+    	xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:id="@+id/mapview"
+    	android:layout_width="fill_parent"
+    	android:clickable="true"
+    	android:apiKey="0l1u3qW9NgksHJ5fLbM5LZi4NwVQpqCrZPrGVIQ"
+		android:layout_height="fill_parent"/>
+
+	</LinearLayout>
+
+	
+
+</RelativeLayout>
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/dialog_filter_map.xml -->

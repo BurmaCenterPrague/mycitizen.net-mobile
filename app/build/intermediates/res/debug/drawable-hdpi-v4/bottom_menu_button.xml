@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	
+    <item android:state_checked="true"
+       	android:drawable="@drawable/bottom_menu_button_pressed" 
+    /> <!-- checked -->
+    
+ 	<item android:state_pressed="true"
+       	android:drawable="@drawable/bottom_menu_button_pressed" 
+    /> <!-- pressed -->
+       
+ 	<item android:state_focused="true"
+       android:drawable="@drawable/bottom_menu_button_pressed"  
+    /> <!-- focused -->
+    
+ 	<item android:drawable="@drawable/bottom_menu_button_default" 
+ 	/> <!-- default -->
+ </selector><!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/drawable-hdpi/bottom_menu_button.xml -->

@@ -1,0 +1,148 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#EAE9E3"
+    android:orientation="vertical"
+    android:weightSum="10" >
+	<ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/bg" />
+    <LinearLayout
+        
+        android:id="@+id/detail_activities_top_menu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+	    android:layout_alignParentTop="true"
+        android:layout_weight="1" >
+        	
+			<TextView
+			    android:id="@+id/detail_activities_title"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginLeft="20dp"
+			    android:layout_marginRight="20dp"
+			    android:layout_marginTop="20dp"
+			    android:layout_weight="1" />
+		
+	</LinearLayout>
+	
+    <LinearLayout
+	    
+	    android:id="@+id/detail_activities_bottom_menu"
+	    android:layout_width="match_parent"
+        android:layout_height="60dp"
+	    android:layout_alignParentBottom="true"
+	    android:layout_weight="1" >
+
+			<Button
+			    android:id="@+id/widget_menu_filter"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ico_filter_off"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white" />
+
+			<Button
+			    android:id="@+id/widget_menu_dashboard"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ico_dashboard_low"
+			    android:paddingTop="11dp"
+			    android:text=""
+			    android:textColor="@color/white" />
+
+			<Button
+			    android:id="@+id/widget_menu_messages"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/message"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white" />
+
+		
+	</LinearLayout>
+
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/detail_activities_bottom_menu"
+	    android:layout_below="@id/detail_activities_top_menu"
+	    android:layout_marginBottom="10dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="10dp"
+	    android:layout_marginTop="10dp"
+	    android:layout_weight="8"
+	    android:orientation="vertical" >
+
+			<TextView
+			    android:id="@+id/object_users_title"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:text=""
+			    android:textSize="18dp"
+			    android:textStyle="bold" >
+			    
+			</TextView>
+
+	    	<ListView
+	    	    android:id="@+id/object_users"
+	    	    android:layout_width="fill_parent"
+	    	    android:layout_height="fill_parent"
+	    	    android:layout_weight="1"
+                android:paddingBottom="10dp">
+			    
+			</ListView>
+			
+	    	<TextView
+	    	    android:id="@+id/object_groups_title"
+	    	    android:layout_width="fill_parent"
+	    	    android:layout_height="wrap_content"
+	    	    android:text=""
+	    	    android:textSize="18dp"
+	    	    android:textStyle="bold" >
+			</TextView>
+			<ListView
+			    android:id="@+id/object_groups"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+                android:paddingBottom="10dp">
+			    
+			</ListView>
+
+			<TextView
+			    android:id="@+id/object_resources_title"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:text=""
+			    android:textSize="18dp"
+			    android:textStyle="bold" >
+			</TextView>
+			<ListView
+			    android:id="@+id/object_resources"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+                android:paddingBottom="10dp">
+			    
+			</ListView>
+
+	</LinearLayout>
+
+</RelativeLayout>
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/detail_activities_view.xml -->

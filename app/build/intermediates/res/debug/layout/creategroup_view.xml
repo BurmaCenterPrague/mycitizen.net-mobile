@@ -1,0 +1,337 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAE9E3"
+    android:orientation="vertical"
+    android:weightSum="10" >
+	<ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/bg" />
+
+	<LinearLayout
+	    android:id="@+id/profile_view_top_menu"
+	    android:layout_width="fill_parent"
+	    android:layout_height="0dp"
+	    android:layout_alignParentTop="true"
+	    android:orientation="vertical"
+	    android:visibility="visible" >
+
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:layout_weight="1" />
+
+	</LinearLayout>
+
+	<LinearLayout
+	    
+	    android:id="@+id/profile_view_bottom_menu"
+	    android:layout_width="match_parent"
+	    android:layout_height="60dp"
+	    android:layout_alignParentBottom="true"
+	    android:layout_weight="1" >
+        	
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1" >
+
+			<ToggleButton
+			    android:id="@+id/creategroup_map"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ic_action_map"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white"
+			    android:textOff=""
+			    android:textOn="" />
+
+			<ToggleButton
+			    android:id="@+id/creategroup_tags"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:text="" 
+			    android:drawableTop="@drawable/ico_tag"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white"
+			    android:textOn=""
+			    android:textOff=""
+       	    	/>
+
+			<Button
+			    android:id="@+id/creategroup_submit"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ic_action_accept"
+			    android:text=""
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white" />
+
+		</LinearLayout>
+	</LinearLayout>
+	
+	<LinearLayout
+	    android:id="@+id/creategroup_tab_main"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/profile_view_bottom_menu"
+	    android:layout_below="@id/profile_view_top_menu"
+	    android:layout_marginBottom="20dp"
+	    android:layout_marginLeft="20dp"
+	    android:layout_marginRight="20dp"
+	    android:layout_marginTop="20dp"
+	    android:layout_weight="9"
+	    android:orientation="vertical"
+	    android:visibility="visible" >
+		
+	<LinearLayout
+	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="6"
+	    android:orientation="vertical" >
+
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:gravity="center_vertical"
+		    android:orientation="vertical" >
+
+			<EditText
+			    android:id="@+id/creategroup_name"
+			    android:layout_width="fill_parent"
+			    android:layout_height="50dp"
+			    android:layout_marginBottom="10dp"
+                android:lines="1"
+                android:maxLines="1"
+			    android:hint="@string/name" />
+
+			<EditText
+			    android:id="@+id/creategroup_description"
+			    android:layout_width="fill_parent"
+			    android:layout_height="100dp"
+			    android:layout_marginBottom="10dp"
+			    android:layout_marginTop="10dp"
+			    android:hint="@string/description" />
+	
+		</LinearLayout>
+		
+
+	</LinearLayout>
+	
+	<LinearLayout
+	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="2" >
+        	
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"
+		    android:orientation="vertical" >
+
+			<TextView
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_marginTop="10dp"
+			    android:layout_weight="1"
+			    android:text="@string/visibility"
+			    android:textSize="16dp"
+			    android:textStyle="bold" />
+
+				<LinearLayout
+			    	
+			    	android:layout_width="fill_parent"
+			    	android:layout_height="fill_parent"
+			    	android:layout_weight="1"
+			    	android:orientation="horizontal" >
+
+					<RadioGroup
+					    android:id="@+id/creategroup_visibility"
+					    android:layout_width="fill_parent"
+					    android:layout_height="fill_parent"
+					    android:layout_weight="1"
+					    android:orientation="horizontal" >
+
+			    		<RadioButton
+			    		    android:id="@+id/creategroup_visibility_private"
+			    		    android:layout_width="fill_parent"
+			    		    android:layout_height="fill_parent"
+			    		    android:layout_weight="1"
+                            android:textSize="12sp"
+			    		    android:text="@string/visibility_private" />
+
+			    		<RadioButton
+			    		    android:id="@+id/creategroup_visibility_member"
+			    		    android:layout_width="fill_parent"
+			    		    android:layout_height="fill_parent"
+			    		    android:layout_weight="1"
+                            android:textSize="12sp"
+			    		    android:text="@string/visibility_members" />
+
+			    		<RadioButton
+			    		    android:id="@+id/creategroup_visibility_world"
+			    		    android:layout_width="fill_parent"
+			    		    android:layout_height="fill_parent"
+			    		    android:layout_gravity="right"
+			    		    android:layout_weight="1"
+                            android:textSize="12sp"
+			    		    android:gravity="center_vertical|start"
+			    		    android:text="@string/visibility_world" />
+
+					</RadioGroup>
+			
+				</LinearLayout>
+
+			</LinearLayout>
+		</LinearLayout>
+
+		<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="2" >
+
+			    <Spinner
+			        android:id="@+id/create_group_lng"
+			        android:layout_width="fill_parent"
+			        android:layout_height="50dp"
+			        android:layout_marginBottom="10dp"
+			        android:layout_marginTop="10dp"
+                    />
+
+			</LinearLayout>
+
+	    	
+
+		
+	</LinearLayout>
+
+	<LinearLayout
+	    android:id="@+id/creategroup_tab_tags"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/profile_view_bottom_menu"
+	    android:layout_alignParentTop="false"
+	    android:layout_below="@id/profile_view_top_menu"
+	    android:layout_marginBottom="20dp"
+	    android:layout_marginLeft="20dp"
+	    android:layout_marginRight="20dp"
+	    android:layout_marginTop="20dp"
+	    android:layout_weight="9"
+	    android:orientation="vertical"
+	    android:visibility="gone" >
+
+		<LinearLayout
+	    	
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="wrap_content"
+	    	android:layout_weight="8"
+	    	android:orientation="vertical" >
+
+			<ListView
+			    android:id="@+id/creategroup_tag_list"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent" />
+
+		</LinearLayout>
+	</LinearLayout>
+	
+	<LinearLayout
+	    android:id="@+id/creategroup_tab_map"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/profile_view_bottom_menu"
+	    android:layout_alignParentTop="false"
+	    android:layout_below="@id/profile_view_top_menu"
+	    android:layout_weight="9"
+	    android:orientation="vertical"
+	    android:visibility="gone" >
+
+		<LinearLayout
+	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="8"
+	    android:orientation="vertical" >
+
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:orientation="vertical" >
+
+			<org.osmdroid.views.MapView
+    			xmlns:android="http://schemas.android.com/apk/res/android"
+    			android:id="@+id/mapview"
+    			android:layout_width="fill_parent"
+    			android:clickable="true"
+    			android:layout_height="fill_parent"/>
+	
+		</LinearLayout>
+		
+
+	</LinearLayout>
+
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" >
+        	
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="40dp"
+		    android:layout_weight="1" 
+		    
+		     >
+
+			<ToggleButton
+			    android:id="@+id/map_edit_location"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ic_action_edit"
+			    android:paddingTop="5dp"
+			    android:textColor="@color/white"
+			    android:textOff=""
+			    android:textOn="" />
+
+			<Button
+			    android:id="@+id/map_my_location"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:paddingTop="5dp"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ic_action_location_found"
+			    android:text=""
+			    android:textColor="@color/white" />
+
+		</LinearLayout>
+	</LinearLayout>
+	</LinearLayout>    
+
+	
+
+</RelativeLayout>
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/creategroup_view.xml -->

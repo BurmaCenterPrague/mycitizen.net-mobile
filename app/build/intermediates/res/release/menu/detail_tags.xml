@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:mycitizen="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_tags"
+        android:title="@string/tags"
+        android:orderInCategory="50"
+        mycitizen:showAsAction="always"
+        android:icon="@drawable/ico_tag"/>
+
+</menu>
+<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/menu/detail_tags.xml -->

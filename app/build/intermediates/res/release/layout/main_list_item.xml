@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+         >
+
+	<TextView 
+    	android:id="@+id/object_title"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+    	android:padding="10dp"
+    	android:textSize="16sp"
+        android:layout_weight="0.2">
+	</TextView>
+	<ImageView
+    	android:id="@+id/object_icon"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+     	android:layout_weight="0.9"
+    />     
+</LinearLayout><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/main_list_item.xml -->

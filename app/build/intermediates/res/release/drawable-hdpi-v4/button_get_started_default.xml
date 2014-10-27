@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list	xmlns:android="http://schemas.android.com/apk/res/android">
+    <item >
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="20dp"
+        android:bottomLeftRadius="20dp"  
+        android:topRightRadius="0.1dp"
+        android:topLeftRadius="0.1dp" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#ff880d"
+            	android:endColor="#ff880d"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+    
+	 
+	 
+</layer-list><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/drawable-hdpi/button_get_started_default.xml -->

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bitmap
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:src="@drawable/bg"
+android:tileMode="clamp"
+android:dither="false" />
+<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/drawable-xhdpi/all_background.xml -->

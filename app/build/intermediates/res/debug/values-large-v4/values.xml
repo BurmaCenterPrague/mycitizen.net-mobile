@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values-large/values.xml -->
+    <eat-comment />
+
+    <bool name="abc_action_bar_embed_tabs_pre_jb">true</bool>
+    <bool name="abc_config_allowActionMenuItemTextWithIcon">true</bool>
+    <bool name="abc_split_action_bar_is_narrow">false</bool>
+
+    <dimen name="abc_config_prefDialogWidth">440dp</dimen>
+    <dimen name="abc_search_view_text_min_width">192dip</dimen>
+
+    <item name="dialog_fixed_height_major" type="dimen">60%</item>
+    <item name="dialog_fixed_height_minor" type="dimen">90%</item>
+    <item name="dialog_fixed_width_major" type="dimen">60%</item>
+    <item name="dialog_fixed_width_minor" type="dimen">90%</item>
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values-large/dimens.xml -->
+    <eat-comment />
+
+    <dimen name="padding_large">16dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_small">8dp</dimen>
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values-large/values.xml -->
+    <eat-comment />
+
+    <integer name="abc_max_action_buttons">4</integer>
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values-large/strings.xml -->
+    <eat-comment />
+
+    <string name="accept_friendship">accept friendship</string>
+    <string name="administrator">administrator</string>
+    <string name="connections">Connections</string>
+    <string name="dashboard_messages">Messages</string>
+    <string name="dashboard_new_messages">new</string>
+    <string name="error_loading_data">Error loading data</string>
+    <string name="finished">Finished</string>
+    <string name="friends">Friends</string>
+    <string name="group_members">Group Members</string>
+    <string name="group_resources">Group Resources</string>
+    <string name="help">help</string>
+    <string name="item_not_available_offline">Item not available offline.</string>
+    <string name="languages">Languages</string>
+    <string name="load_more">Load more...</string>
+    <string name="loading_data">Loading data</string>
+    <string name="loadingdotdotdot">Loading...</string>
+    <string name="menu_friends">Friends</string>
+    <string name="moderator">moderator</string>
+    <string name="no_offline_data">No offline data.</string>
+    <string name="nothing_found">Nothing found.</string>
+    <string name="profile_description">My Profile: Description</string>
+    <string name="subscribed_groups">Subscribed Groups</string>
+    <string name="subscribed_users">Subscribed Users</string>
+    <string name="tags">Tags</string>
+    <string name="toast_crash">Sorry, the app crashed, but a report has been sent to the developers to help fix the issue!</string>
+    <string name="user_member_of_groups">Member of Groups</string>
+    <string name="user_subscribed_resources">Subscribed Resources</string>
+    <string name="video">Video</string>
+    <string name="your_message_hint">your message</string>
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values-large/values.xml -->
+    <eat-comment />
+
+    <style name="Theme.Base.AppCompat.DialogWhenLarge" parent="Theme.Base.AppCompat.Dialog.FixedSize" />
+
+    <style name="Theme.Base.AppCompat.Light.DialogWhenLarge" parent="Theme.Base.AppCompat.Dialog.Light.FixedSize" />
+
+</resources>

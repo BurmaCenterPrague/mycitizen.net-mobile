@@ -1,0 +1,137 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAE9E3"
+    android:orientation="vertical"
+    android:weightSum="10" >
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart"
+        android:src="@drawable/bg" />
+    <LinearLayout
+	    
+	    android:id="@+id/edit_map_view_bottom_menu"
+	    android:layout_width="match_parent"
+	    android:layout_height="60dp"
+	    android:layout_alignParentBottom="true"
+	    android:layout_weight="0.5" >
+        	
+		<LinearLayout
+		    
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1" >
+
+			<Button
+			    android:id="@+id/map_back"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:textColor="@color/white"
+			    android:background="@drawable/bottom_menu_button"
+			    android:text="BACK" />
+
+			<Button
+			    android:id="@+id/map_edit_location"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:textColor="@color/white"
+			    android:background="@drawable/bottom_menu_button"
+			    android:text="EDIT" />
+
+			<Button
+			    android:id="@+id/map_remove_location"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:textColor="@color/white"
+			    android:background="@drawable/bottom_menu_button"
+			    android:text="REMOVE" />
+
+			
+
+		</LinearLayout>
+	</LinearLayout>
+	<LinearLayout
+	   
+	    android:layout_width="match_parent"
+	    android:layout_height="30dp"
+	    android:id="@+id/edit_map_view_slider"
+	    android:layout_above="@id/edit_map_view_bottom_menu"
+	    android:layout_weight="0.5" >
+        	
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1" >
+
+			<SeekBar
+			    android:id="@+id/map_radius"
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1" />
+
+		</LinearLayout>
+	</LinearLayout>
+	<LinearLayout
+	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_above="@id/edit_map_view_slider"
+	    android:layout_alignParentTop="true"
+	    android:layout_weight="10"
+	    android:orientation="vertical" >
+		<RelativeLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:orientation="vertical" >
+
+			<org.osmdroid.views.MapView
+    			xmlns:android="http://schemas.android.com/apk/res/android"
+    			android:id="@+id/mapview"
+    			android:layout_width="fill_parent"
+    			android:clickable="true"
+    			android:layout_height="fill_parent"/>
+
+			<Button
+			    android:id="@+id/zoomout"
+			    android:layout_width="40dp"
+			    android:layout_height="40dp"
+			    android:layout_alignParentBottom="true"
+			    android:layout_alignParentLeft="true"
+			    android:layout_alignParentTop="false"
+			    android:layout_marginLeft="40dp"
+			    android:text="-" />
+
+			<Button
+			    android:id="@+id/zoomin"
+			    android:layout_width="40dp"
+			    android:layout_height="40dp"
+			    android:layout_alignParentBottom="true"
+			    android:layout_alignParentLeft="true"
+			    android:layout_alignParentTop="false"
+			    android:text="+" />
+	
+		</RelativeLayout>
+		
+		
+
+	</LinearLayout>
+	
+	
+	
+
+</RelativeLayout>
+<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/edit_map_view.xml -->

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_row"
+    android:layout_width="fill_parent"
+    android:layout_height="60dp"
+    android:background="#A0EAE9E3"
+    android:orientation="horizontal"
+    android:weightSum="10"
+    >
+
+    <ImageView
+        android:id="@+id/object_icon"
+        android:layout_width="36dp"
+        android:layout_height="fill_parent"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/image_border"
+        android:padding="2dp"
+        />
+
+	<TextView
+	    android:id="@+id/object_title"
+	    android:layout_width="0dp"
+	    android:layout_height="fill_parent"
+	    android:layout_gravity="center_vertical"
+        android:layout_weight="10"
+	    android:gravity="center_vertical"
+	    android:padding="10dp"
+	    android:textSize="16sp"
+        android:singleLine="true"
+        android:ellipsize="end" >
+	</TextView>
+
+
+    <TextView
+        android:id="@+id/online_status"
+        android:layout_width="40dp"
+        android:layout_height="fill_parent"
+        android:gravity="right|top"
+        android:padding="10dp"
+        android:textSize="16sp"
+        >
+    </TextView>
+
+    <TextView
+        android:id="@+id/connection_status"
+        android:layout_width="40dp"
+        android:layout_height="fill_parent"
+        android:gravity="right|top"
+        android:padding="10dp"
+        android:textSize="16sp"
+        >
+    </TextView>
+     
+</LinearLayout>

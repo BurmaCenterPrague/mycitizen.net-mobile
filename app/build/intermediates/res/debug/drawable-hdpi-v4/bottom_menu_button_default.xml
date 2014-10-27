@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list	xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item>
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:radius="0dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#bbb8b0"
+            	android:endColor="#bbb8b0"
+            	android:type="linear" />
+	 		<stroke  android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 <item android:top="2dp">
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:radius="0dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#bbb8b0"
+            	android:endColor="#bbb8b0"
+            	android:type="linear" />
+	 		<stroke  android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 <item android:left="1dp" android:top="2dp">
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:radius="0dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#d0ccc3"
+            	android:endColor="#d0ccc3"
+            	android:type="linear" />
+	 		<stroke  android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 
+</layer-list>
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/drawable-hdpi/bottom_menu_button_default.xml -->

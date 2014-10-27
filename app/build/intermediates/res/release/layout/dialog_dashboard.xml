@@ -1,0 +1,239 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAE9E3"
+    android:orientation="vertical"
+    android:weightSum="10" >
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg" />
+    <LinearLayout
+        
+        android:id="@+id/dialog_dashboard_bottom_menu"
+	    android:layout_width="match_parent"
+        android:layout_height="60dp"
+	    android:layout_alignParentBottom="true"
+        android:layout_weight="1" >
+        	
+		<LinearLayout
+		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1" >
+
+			<Button
+			    android:id="@+id/widget_menu_filter"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ico_filter_off"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white" />
+
+			<ToggleButton
+			    android:id="@+id/widget_menu_dashboard"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:checked="true"
+			    android:drawableTop="@drawable/ico_dashboard_low"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white"
+			    android:textOff=""
+			    android:textOn="" />
+			
+			<Button
+			    android:id="@+id/widget_menu_messages"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:background="@drawable/bottom_menu_button"
+			    android:drawableTop="@drawable/ico_message_no"
+			    android:paddingTop="11dp"
+			    android:textColor="@color/white" />
+
+		</LinearLayout>
+	</LinearLayout>
+	
+    <LinearLayout
+	    
+	    android:id="@+id/dialog_dashboard_dashboard_menu"
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:layout_above="@id/dialog_dashboard_bottom_menu"
+	    android:layout_weight="1" >
+
+		<Button
+		    android:id="@+id/dashboard_help"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:background="@drawable/bottom_menu_button"
+		    android:drawableTop="@drawable/ic_action_help"
+		    android:textColor="@color/white"
+            android:padding="7dp"/>
+
+		<Button
+		    android:id="@+id/dashboard_profile"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:textColor="@color/white"
+            android:padding="7dp"
+		    android:background="@drawable/bottom_menu_button"
+		    android:drawableTop="@drawable/ico_my_profile"
+		    />
+
+		<Button
+		    android:id="@+id/dashboard_create_group"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:background="@drawable/bottom_menu_button"
+		    android:drawableTop="@drawable/ic_action_add_group"
+		    android:textColor="@color/white"
+            android:padding="7dp" />
+
+		<Button
+		    android:id="@+id/dashboard_refresh"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:background="@drawable/bottom_menu_button"
+		    android:drawableTop="@drawable/ic_action_refresh"
+		    android:textColor="@color/white"
+            android:padding="7dp" />
+
+		<Button
+		    android:id="@+id/dashboard_logout"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:textColor="@color/white"
+            android:padding="7dp"
+		    android:background="@drawable/bottom_menu_button"
+		    android:drawableTop="@drawable/ico_off"
+		    />
+
+	</LinearLayout>
+	
+	<LinearLayout
+	    
+	    android:id="@+id/dialog_dashboard_top_menu"
+	    android:layout_width="match_parent"
+	    android:layout_height="60dp"
+	    android:layout_above="@id/dialog_dashboard_dashboard_menu"
+	    android:layout_alignParentTop="true"
+	    android:layout_weight="9"
+	    android:orientation="vertical" >
+
+		<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_marginBottom="20dp"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="20dp"
+		    android:layout_marginTop="20dp"
+		    android:layout_weight="1"
+		    android:orientation="vertical" >
+
+		    <LinearLayout
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:layout_marginBottom="5dp"
+		        android:layout_weight="1"
+		        android:orientation="vertical"
+		        android:weightSum="10" >
+
+				<WebView
+				    android:id="@+id/dashboard_info"
+				    android:layout_width="fill_parent"
+				    android:layout_height="fill_parent"
+				    android:layout_weight="2" />
+
+				<LinearLayout
+				    android:layout_width="fill_parent"
+				    android:layout_height="fill_parent"
+				    android:layout_marginTop="10dp"
+				    android:layout_weight="8"
+				    android:orientation="vertical" >
+
+				<LinearLayout
+				    android:layout_width="fill_parent"
+				    android:layout_height="fill_parent"
+				    android:layout_weight="1" >
+
+		            <TextView
+		                android:layout_width="fill_parent"
+		                android:layout_height="fill_parent"
+		                android:text="Connection Quality"
+		                android:textStyle="bold" />
+
+				</LinearLayout>    
+				
+		        <ProgressBar
+		            android:id="@+id/dashboard_connection"
+		            style="?android:attr/progressBarStyleHorizontal"
+		            android:layout_width="fill_parent"
+		            android:layout_height="fill_parent"
+		            android:layout_weight="1"
+		            android:minHeight="26dp" />
+		        
+		        <LinearLayout
+		            android:layout_width="fill_parent"
+		            android:layout_height="fill_parent"
+		            android:layout_weight="1" >
+
+		            <TextView
+		                android:layout_width="fill_parent"
+		                android:layout_height="fill_parent"
+		                android:layout_weight="1"
+		                android:text="offline"
+		                android:textStyle="bold" />
+
+		            <TextView
+		                android:layout_width="fill_parent"
+		                android:layout_height="fill_parent"
+		                android:layout_weight="1"
+		                android:gravity="center"
+		                android:text="reduced"
+		                android:textStyle="bold" />
+
+		            <TextView
+		                android:layout_width="fill_parent"
+		                android:layout_height="fill_parent"
+		                android:layout_gravity="right"
+		                android:layout_weight="1"
+		                android:gravity="right"
+		                android:text="full"
+		                android:textStyle="bold" />
+
+		        </LinearLayout>
+				</LinearLayout>
+		    </LinearLayout>
+
+		    
+			
+			
+
+		</LinearLayout>
+		
+
+	</LinearLayout>
+
+	
+	
+	
+
+</RelativeLayout>
+<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/dialog_dashboard.xml -->

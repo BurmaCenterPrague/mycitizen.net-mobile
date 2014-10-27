@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list	xmlns:android="http://schemas.android.com/apk/res/android">
+    <item >
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="20dip"
+        android:bottomLeftRadius="20dip"  
+        android:topRightRadius="20dip"
+        android:topLeftRadius="20dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#ffbd3e"
+            	android:endColor="#ffbd3e"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+    <item android:top="1dp">
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="20dip"
+        android:bottomLeftRadius="20dip"  
+        android:topRightRadius="20dip"
+        android:topLeftRadius="20dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#ff880d"
+            	android:endColor="#ff880d"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 <item android:top="1dp" android:bottom="3dip">
+	 	<shape android:shape="rectangle" >
+	 		<corners  android:bottomRightRadius="20dip"
+        android:bottomLeftRadius="20dip"  
+        android:topRightRadius="20dip"
+        android:topLeftRadius="20dip" />
+	 		
+	 		<gradient
+            	android:angle="90"
+            	android:startColor="#ffbb33"
+            	android:endColor="#ffbb33"
+            	android:type="linear" />
+	 		<stroke android:width="0dip" android:color="@color/black"/>
+	 	
+	 	</shape>
+	 	
+	 </item>
+	 
+	 
+</layer-list>
+
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/drawable-hdpi/button_focused.xml -->
