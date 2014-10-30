@@ -39,20 +39,20 @@ public class SplashActivity extends ActionBarActivity {
         saved_login = settings.getString("login", null);
         saved_password = settings.getString("password", null);
 
-        if (settings.getString("saved_lng", null) != null) {
+        if (settings.getString("ui_language", null) != null) {
             String loc = "en";
-            if (settings.getString("saved_lng", null).equals("ces")) {
-                loc = "cs";
-            } else if (settings.getString("saved_lng", null).equals("hlt")) {
-                loc = "ht";
-            } else if (settings.getString("saved_lng", null).equals("mrh")) {
-                loc = "mt";
-            } else if (settings.getString("saved_lng", null).equals("zom")) {
-                loc = "zm";
+            if (settings.getString("ui_language", null).equals("ces")) {
+                loc = "cs_MM";
+            } else if (settings.getString("ui_language", null).equals("hlt")) {
+                loc = "ht_MM";
+            } else if (settings.getString("ui_language", null).equals("mrh")) {
+                loc = "mt_MM";
+            } else if (settings.getString("ui_language", null).equals("zom")) {
+                loc = "zm_MM";
             } else {
                 loc = "en";
             }
-            System.out.println("saved language: " + settings.getString("saved_lng", null));
+            System.out.println("Locale set to saved language: " + settings.getString("ui_language", null));
             Locale locale = new Locale(loc);
 
             Locale.setDefault(locale);

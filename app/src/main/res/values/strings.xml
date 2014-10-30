@@ -111,8 +111,8 @@
     <string name="profile_name">name</string>
     <string name="profile_surname">surname</string>
     <string name="profile_url">url</string>
-    <string name="profile_phone">phone</string>
-    <string name="profile_email">email</string>
+    <string name="profile_phone">Phone</string>
+    <string name="profile_email">Email</string>
     <string name="language_quit">If you have changed the language, the new language will be visible only after the a restart.</string>
     <string name="really_unsubscribe">Really unsubscribe?</string>
     <string name="ip_blocked">Your IP address seems to be blocked.</string>
@@ -152,4 +152,5 @@
     <string name="menu_friends">Friends</string>
     <string name="moderator">moderator</string>
     <string name="administrator">administrator</string>
+    <string name="no_link">no link</string>
 </resources>

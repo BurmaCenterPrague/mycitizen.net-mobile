@@ -20,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -76,6 +75,8 @@ public class MessagesActivity extends BaseActivity {
         Boolean removed_toggle_active = false;
         Boolean notopened_toggle_active = false;
 
+        // todo: set opened filter to "new" if first visit and user has unread messages
+
         if (inbox_filter != null) {
             try {
                 JSONObject filter_object = new JSONObject(inbox_filter);
@@ -92,8 +93,6 @@ public class MessagesActivity extends BaseActivity {
                 if (filter_object.has("filter_opened")) {
                     Boolean filter_open = filter_object.getBoolean("filter_opened");
                     if (filter_open) {
-
-
                         notopened_toggle_active = true;
                     }
                 }
@@ -113,10 +112,9 @@ public class MessagesActivity extends BaseActivity {
         objectId = intent.getStringExtra("objectId");
 
 
-        System.out.println(objectType + " " + objectId);
-
         messageViewType = intent.getStringExtra("type");
 
+        System.out.println("messageViewType: "+messageViewType);
         if (messageViewType != null && messageViewType.equals("dialog_inbox")) {
 
             filter = "filter[type][0]=1&filter[type][1]=9&filter[type][2]=10&filter[user_id]=" + logged_user_id;
@@ -186,6 +184,33 @@ public class MessagesActivity extends BaseActivity {
                 }
             });
 
+            Button load_more = (Button) findViewById(R.id.message_load_more);
+            if (load_more != null) {
+                load_more.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MessagesActivity.this, "Loading more (under development)",
+                                Toast.LENGTH_LONG).show();
+
+                        System.out.println("clicked on load more");
+                        ApiConnector api = new ApiConnector(MessagesActivity.this);
+                        if (api.isNetworkAvailable()) {
+                            Intent intent = new Intent(MessagesActivity.this, MessagesActivity.class);
+                            intent.putExtra("objectType", objectType);
+                            intent.putExtra("objectId", objectId);
+                            intent.putExtra("type", messageViewType);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(MessagesActivity.this, getString(R.string.not_available_offline),
+                                    Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                });
+            } else {
+                // todo: button not found
+                System.out.println("R.id.message_load_more not found!");
+            }
         } else {
             setContentView(R.layout.response_inbox);
 
@@ -222,8 +247,8 @@ public class MessagesActivity extends BaseActivity {
                 load_more.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //Toast.makeText(MessagesActivity.this, "Loading more (under development)",
-                        //        Toast.LENGTH_LONG).show();
+                        Toast.makeText(MessagesActivity.this, "Loading more (under development)",
+                                Toast.LENGTH_LONG).show();
 
                         System.out.println("clicked on load more");
                         ApiConnector api = new ApiConnector(MessagesActivity.this);
@@ -231,6 +256,7 @@ public class MessagesActivity extends BaseActivity {
                             Intent intent = new Intent(MessagesActivity.this, MessagesActivity.class);
                             intent.putExtra("objectType", objectType);
                             intent.putExtra("objectId", objectId);
+                            intent.putExtra("type", messageViewType);
                             startActivity(intent);
                         } else {
                             Toast.makeText(MessagesActivity.this, getString(R.string.not_available_offline),
@@ -239,6 +265,9 @@ public class MessagesActivity extends BaseActivity {
 
                     }
                 });
+            } else {
+                // todo: button not found
+                System.out.println("R.id.message_load_more not found!");
             }
         }
 
@@ -350,7 +379,7 @@ public class MessagesActivity extends BaseActivity {
                 if (messageViewType.equals("response_inbox")) {
                     author = api.getDetail(type[0], Integer.valueOf(type[1]));
                 }
-                messages = api.createDashboard("resource", filter, false, "10");
+                messages = api.getData("resource", filter, false, "10");
             }
             return messages;
         }
@@ -422,13 +451,15 @@ public class MessagesActivity extends BaseActivity {
 
             if (messageViewType.equals("response_inbox")) {
 
-                if (objectType.equals("user")) {
-                    actionBar.setTitle("Messages (" + ((UserObject) author).getName() + ")");
-                } else if (objectType.equals("group")) {
-                    actionBar.setTitle("Chat (" + ((GroupObject) author).getTitle() + ")");
-                } else if (objectType.equals("resource")) {
-                    actionBar.setTitle("Comments (" + ((ResourceObject) author).getTitle() + ")");
-                }
+                try {
+                    if (objectType.equals("user")) {
+                        actionBar.setTitle("Messages (" + ((UserObject) author).getName() + ")");
+                    } else if (objectType.equals("group")) {
+                        actionBar.setTitle("Chat (" + ((GroupObject) author).getTitle() + ")");
+                    } else if (objectType.equals("resource")) {
+                        actionBar.setTitle("Comments (" + ((ResourceObject) author).getTitle() + ")");
+                    }
+                } catch (NullPointerException e) {}
             }
 
 
@@ -651,6 +682,7 @@ public class MessagesActivity extends BaseActivity {
         } else {
             inflater.inflate(R.menu.messages, menu);
         }
+        inflater.inflate(R.menu.help, menu);
         return super.onCreateOptionsMenu(menu);
 
     }
@@ -673,6 +705,12 @@ public class MessagesActivity extends BaseActivity {
                     });
 
                 }
+                return true;
+            case R.id.menu_help:
+                intent = new Intent(MessagesActivity.this, HelpActivity.class);
+
+                intent.putExtra("topic", "messages");
+                startActivity(intent);
                 return true;
 
 

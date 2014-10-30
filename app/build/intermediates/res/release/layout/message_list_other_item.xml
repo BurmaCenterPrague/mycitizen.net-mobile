@@ -65,7 +65,7 @@
             android:id="@+id/object_title"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:padding="10dp"
+            android:padding="5dp"
             android:textSize="16sp" android:layout_weight="0.2">
         </TextView>
 
@@ -92,4 +92,4 @@
     </LinearLayout>
     </RelativeLayout>
 
-</RelativeLayout><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/message_list_other_item.xml -->
+</RelativeLayout><!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/message_list_other_item.xml -->

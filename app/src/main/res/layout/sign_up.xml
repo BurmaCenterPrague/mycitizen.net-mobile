@@ -3,8 +3,8 @@
     android:layout_height="match_parent"
     android:background="#EAE9E3"
     android:orientation="vertical"
-    android:weightSum="10" >
-	
+    android:weightSum="10">
+
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
@@ -25,131 +25,155 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
-        android:layout_weight="1" >
-        	
-		<LinearLayout
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_marginLeft="20dp"
-		    android:layout_weight="1" >
+        android:layout_weight="1">
 
-			<TextView
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_weight="1">
 
-		</LinearLayout>
-		<LinearLayout
-       
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1" >
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
-			<TextView
-			    android:id="@+id/used_api"
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:layout_gravity="center_vertical"
-			    android:text="@string/url"
-			    android:textStyle="bold" />
+        </LinearLayout>
 
-		</LinearLayout>
-	</LinearLayout>
+        <LinearLayout
+
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/used_api"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/url"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
-	    
-	    android:id="@+id/sign_up_bottom_menu"
-	    android:layout_width="match_parent"
+
+        android:id="@+id/sign_up_bottom_menu"
+        android:layout_width="match_parent"
         android:layout_height="60dp"
-	    android:layout_alignParentBottom="true"
-	    android:layout_weight="1" >
-		
-			<Button
-			    android:id="@+id/signup_cancel"
-			    android:layout_width="fill_parent"
-			    android:layout_height="fill_parent"
-			    android:layout_gravity="bottom"
-			    android:layout_weight="1"
-			    android:background="@drawable/bottom_menu_button"
-			    android:drawableTop="@drawable/ic_action_help"
-			    android:paddingTop="11dp"
-			    android:text=""
-			    android:textColor="@color/white" />
+        android:layout_alignParentBottom="true"
+        android:layout_weight="1">
 
-			<Button
-			    android:id="@+id/sign_up_register"
-			    android:layout_width="fill_parent"
-			    android:layout_height="fill_parent"
-			    android:layout_gravity="bottom"
-			    android:layout_weight="1"
-			    android:background="@drawable/bottom_menu_button"
-			    android:drawableTop="@drawable/ic_action_accept"
-			    android:text=""
-			    android:paddingTop="11dp"
-			    android:textColor="@color/white" />
+        <Button
+            android:id="@+id/signup_cancel"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:background="@drawable/bottom_menu_button"
+            android:drawableTop="@drawable/ic_action_help"
+            android:paddingTop="11dp"
+            android:text=""
+            android:textColor="@color/white" />
 
-	</LinearLayout>
+        <Button
+            android:id="@+id/sign_up_register"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:background="@drawable/bottom_menu_button"
+            android:drawableTop="@drawable/ic_action_accept"
+            android:paddingTop="11dp"
+            android:text=""
+            android:textColor="@color/white" />
 
-	<LinearLayout
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_above="@id/sign_up_bottom_menu"
-	    android:layout_below="@id/sign_up_top_menu"
-	    android:layout_marginLeft="20dp"
-	    android:layout_marginRight="20dp"
-	    android:layout_weight="3"
-	    android:orientation="vertical" >
+    </LinearLayout>
 
-		<LinearLayout
-		    
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    android:layout_weight="1"
-		    android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/sign_up_bottom_menu"
+        android:layout_below="@id/sign_up_top_menu"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_weight="3"
+        android:orientation="vertical">
 
-			<TextView
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:text="@string/username" />
+        <LinearLayout
 
-			<EditText
-			    android:id="@+id/sign_up_username"
-			    android:layout_width="fill_parent"
-			    android:layout_height="50dp"
-			    android:inputType="text" />
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-			<TextView
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:text="@string/password" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/username" />
 
-			<EditText
-			    android:id="@+id/sign_up_password"
-			    android:layout_width="fill_parent"
-			    android:layout_height="50dp"
-			    android:inputType="textPassword" />
+            <EditText
+                android:id="@+id/sign_up_username"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:inputType="text" />
 
-			<TextView
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:text="@string/email" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/password" />
 
-			<EditText
-			    android:id="@+id/sign_up_email"
-			    android:layout_width="fill_parent"
-			    android:layout_height="50dp"
-			    android:inputType="textEmailAddress" />
+            <EditText
+                android:id="@+id/sign_up_password"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:inputType="textPassword" />
 
-			<TextView
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:layout_marginTop="30dp"
-			    android:text="@string/signup_help" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/email" />
 
-		</LinearLayout>
-		
+            <EditText
+                android:id="@+id/sign_up_email"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:inputType="textEmailAddress" />
 
-	</LinearLayout>
+            <LinearLayout
+                android:id="@+id/security_question_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-	
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Security Question" />
+
+                <EditText
+                    android:id="@+id/security_question"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp" />
+
+                <ImageView
+                    android:id="@+id/captcha_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="@string/signup_help" />
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
 
 </RelativeLayout>

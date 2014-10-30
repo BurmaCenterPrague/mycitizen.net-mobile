@@ -152,4 +152,5 @@
     <string name="menu_friends">Friends</string>
     <string name="moderator">moderator</string>
     <string name="administrator">administrator</string>
+    <string name="no_link">no link</string>
 </resources>

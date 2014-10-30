@@ -84,15 +84,14 @@
 	    android:id="@+id/edit_map_view_slider"
 	    android:layout_above="@id/edit_map_view_bottom_menu"
 	    android:layout_weight="0.5"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
         >
         	
 		<LinearLayout
 		    
 		    android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
-		    android:layout_weight="1" >
+		    android:layout_weight="1"
+            android:padding="5px">
 
 			<SeekBar
 			    android:id="@+id/map_radius"
@@ -155,4 +154,4 @@
 	
 
 </RelativeLayout>
-<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/layout/filter_map_view.xml -->
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/layout/filter_map_view.xml -->

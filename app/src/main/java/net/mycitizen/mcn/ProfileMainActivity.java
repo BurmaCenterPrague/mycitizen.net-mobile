@@ -920,26 +920,41 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
 
                 }
-                String lng = "eng";
+                // String lng = "eng";
+
+                String languageCode = api.translateLanguageNameToCode(profile_language.getSelectedItem().toString());
+
+                editor.putString("logged_user_language", profile_language.getSelectedItem().toString());
+                // Don't save a saved_lng - that is for UI only!
+                editor.putString("ui_language", languageCode);
+
+                /*
                 if (profile_language.getSelectedItem().toString().equals("Čeština")) {
                     lng = "ces";
 
                     editor.putString("logged_user_language", "Čeština");
 
                     editor.putString("saved_lng", "ces");
-                    Locale locale = new Locale("cs");
+                    Locale locale = new Locale("cs_MM");
+
+                    Locale locale = new Locale("en");
                     Locale.setDefault(locale);
+
                     Configuration config = new Configuration();
                     config.locale = locale;
                     getBaseContext().getResources().updateConfiguration(config,
                             getBaseContext().getResources().getDisplayMetrics());
+
                 } else if (profile_language.getSelectedItem().toString().equals("Matu")) {
                     lng = "hlt";
 
                     editor.putString("logged_user_language", "Matu");
                     editor.putString("saved_lng", "hlt");
-                    Locale locale = new Locale("ht");
+                    Locale locale = new Locale("ht_MM");
+
+                    Locale locale = new Locale("en");
                     Locale.setDefault(locale);
+
                     Configuration config = new Configuration();
                     config.locale = locale;
                     getBaseContext().getResources().updateConfiguration(config,
@@ -949,8 +964,11 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
                     editor.putString("logged_user_language", "Mara");
                     editor.putString("saved_lng", "mrh");
-                    Locale locale = new Locale("mt");
+                    Locale locale = new Locale("mt_MM");
+
+                    Locale locale = new Locale("en");
                     Locale.setDefault(locale);
+
                     Configuration config = new Configuration();
                     config.locale = locale;
                     getBaseContext().getResources().updateConfiguration(config,
@@ -960,8 +978,11 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
                     editor.putString("logged_user_language", "Zolai");
                     editor.putString("saved_lng", "zom");
-                    Locale locale = new Locale("zm");
+                    Locale locale = new Locale("zm_MM");
+
+                    Locale locale = new Locale("en");
                     Locale.setDefault(locale);
+
                     Configuration config = new Configuration();
                     config.locale = locale;
                     getBaseContext().getResources().updateConfiguration(config,
@@ -969,16 +990,19 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 } else {
                     lng = "eng";
                     editor.putString("logged_user_language", "English");
-                    editor.putString("saved_lng", "en");
+                    editor.putString("saved_lng", "eng");
+
                     Locale locale = new Locale("en");
                     Locale.setDefault(locale);
+
                     Configuration config = new Configuration();
                     config.locale = locale;
                     getBaseContext().getResources().updateConfiguration(config,
                             getBaseContext().getResources().getDisplayMetrics());
                 }
+                */
                 editor.commit();
-                result = api.changeProfile(profile_name.getText().toString(), profile_surname.getText().toString(), profile_email.getText().toString(), profile_phone.getText().toString(), profile_url.getText().toString(), String.valueOf(profile_notification_selected_timer), profile_description.getText().toString(), String.valueOf(visibility), String.valueOf(mapCenter.getLatitudeE6()), String.valueOf(mapCenter.getLongitudeE6()), encodedImage, lng);
+                result = api.changeProfile(profile_name.getText().toString(), profile_surname.getText().toString(), profile_email.getText().toString(), profile_phone.getText().toString(), profile_url.getText().toString(), String.valueOf(profile_notification_selected_timer), profile_description.getText().toString(), String.valueOf(visibility), String.valueOf(mapCenter.getLatitudeE6()), String.valueOf(mapCenter.getLongitudeE6()), encodedImage, languageCode);
 
             }
 

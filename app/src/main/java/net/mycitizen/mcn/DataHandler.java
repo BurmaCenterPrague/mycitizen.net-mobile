@@ -177,24 +177,18 @@ public class DataHandler {
         String where = translateFilterStorageWHERE(params);
         int size = translateFilterStorageSize(params);
         String[] where_values = translateFilterStorageVALUE(params, size);
-        System.out.println("where_values: " + Arrays.toString(where_values));
+        // System.out.println("where_values: " + Arrays.toString(where_values));
 
         Cursor cursor = this.db.rawQuery("SELECT id FROM " + TABLE_NAME_OBJECTS + " WHERE " + where, where_values);
 
-        int data = 0;
+        Boolean found = false;
         while (cursor.moveToNext()) {
-            //data++;
-            data = 1;
+            found = true;
             break;
         }
         cursor.close();
 
-        if (data == 0) {
-            return false;
-        } else {
-            return true;
-        }
-
+        return found;
 
     }
 
@@ -368,10 +362,9 @@ public class DataHandler {
                 sql_key = "type";
                 // todo: should it not be "= id for type"?
                 where += sql_key + " = ?";
-            } else if (key.equals("filter[language]")) {
+            } else if (key.equals("filter[language_iso_639_3]")) {
 
-                // todo: !!! why should value be in English?
-                if (!value.equals("All")) {
+                if (!value.equals(R.string.language_all)) {
                     if (!where.equals("")) {
                         where += " AND ";
                     }
@@ -483,8 +476,8 @@ public class DataHandler {
 
             if (key.equals("type[0]") || key.equals("type[1]") || key.equals("type[2]")) {
                 size++;
-            } else if (key.equals("filter[language]")) {
-                if (!value.equals("All")) {
+            } else if (key.equals("filter[language_iso_639_3]")) {
+                if (!value.equals(R.string.language_all)) {
                     size++;
                 }
             } else if (key.equals("filter[name]")) {
@@ -549,7 +542,7 @@ public class DataHandler {
                     value[i] = "resource";
                 }
                 i++;
-            } else if (key.equals("filter[language]")) {
+            } else if (key.equals("filter[language_iso_639_3]")) {
                 if (!value_p.equals(R.string.language_all)) { //"All"
                     value[i] = pairs.getValue().toString();
                     i++;

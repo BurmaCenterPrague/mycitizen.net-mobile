@@ -4,4 +4,4 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 android:src="@drawable/bg"
 
 android:dither="false" />
-<!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/drawable-mdpi/all_background.xml -->
+<!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/drawable-mdpi/all_background.xml -->

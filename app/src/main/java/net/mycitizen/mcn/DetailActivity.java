@@ -32,6 +32,8 @@ import android.support.v7.app.ActionBar;
 import android.text.Html;
 import android.widget.VideoView;
 
+import java.security.acl.Group;
+
 
 public class DetailActivity extends BaseActivity {
     public ApiConnector api;
@@ -239,6 +241,23 @@ public class DetailActivity extends BaseActivity {
                             break;
                     }
                 }
+            }
+        });
+
+
+        avatar.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                if (url != null && !url.equals("")) {
+                    Toast.makeText(getApplicationContext(), url, Toast.LENGTH_LONG).show();
+                } else if (videoId != null && !videoId.equals("")) {
+                    Toast.makeText(getApplicationContext(), "YouTube", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.no_link), Toast.LENGTH_LONG).show();
+                }
+
+                return true;
             }
         });
 
@@ -529,14 +548,16 @@ public class DetailActivity extends BaseActivity {
                 } else if (objectType.equals("group")) {
                     try {
                         title = ((GroupObject) result).getTitle();
+                        realName.setText(((GroupObject) result).getTitle());
                         actionBar.setTitle(((GroupObject) result).getTitle());
                     } catch (NullPointerException e) {
                         title = "Undefined Name";
                         actionBar.setTitle("Undefined Name");
                     }
-                    //avatar.
+
                     try {
-                        information.setText(Html.fromHtml(((GroupObject) result).getDetail()));
+                        Context ctx = getApplicationContext();
+                        information.setText(Html.fromHtml(((GroupObject) result).getDetail(ctx)));
                         information.setMovementMethod(LinkMovementMethod.getInstance());
                     } catch (NullPointerException e) {
                         information.setText("");
@@ -621,6 +642,7 @@ public class DetailActivity extends BaseActivity {
 
                     try {
                         title = ((ResourceObject) result).getTitle();
+                        realName.setText(((ResourceObject) result).getTitle());
                         actionBar.setTitle(((ResourceObject) result).getTitle());
                     } catch (NullPointerException e) {
                         title = "Undefined Title";
@@ -628,7 +650,8 @@ public class DetailActivity extends BaseActivity {
                     }
                     //avatar.
                     try {
-                        information.setText(Html.fromHtml(((ResourceObject) result).getDetail()));
+                        Context ctx = getApplicationContext();
+                        information.setText(Html.fromHtml(((ResourceObject) result).getDetail(ctx)));
                         information.setMovementMethod(MovementCheck.getInstance());
                         //information.setMovementMethod(LinkMovementMethod.getInstance());
                     } catch (NullPointerException e) {
@@ -857,11 +880,21 @@ public class DetailActivity extends BaseActivity {
         }
 
         inflater.inflate(R.menu.detail_tags, menu);
+        inflater.inflate(R.menu.help, menu);
 
         if (!connection_rights) {
-            menu.findItem(R.id.menu_friends).setVisible(false);
-            menu.findItem(R.id.menu_connections).setVisible(false);
-            menu.findItem(R.id.menu_messages).setVisible(false);
+            MenuItem menu_friends = menu.findItem(R.id.menu_friends);
+            MenuItem menu_connections = menu.findItem(R.id.menu_connections);
+            MenuItem menu_messages = menu.findItem(R.id.menu_messages);
+            if (menu_friends != null) {
+                menu_friends.setVisible(false);
+            }
+            if (menu_connections != null) {
+                menu_connections.setVisible(false);
+            }
+            if (menu_messages != null) {
+                menu_messages.setVisible(false);
+            }
 
         }
         if (!map_visible) {
@@ -892,7 +925,7 @@ public class DetailActivity extends BaseActivity {
                 if (!api.isNetworkAvailable()) {
                     Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
                 } else {
-                    intent = new Intent(DetailActivity.this, DetailActivitiesActivity.class);
+                    intent = new Intent(DetailActivity.this, DetailConnectionsActivity.class);
                     intent.putExtra("objectType", objectType);
                     intent.putExtra("objectId", objectId);
                     startActivity(intent);
@@ -932,6 +965,12 @@ public class DetailActivity extends BaseActivity {
                 }
                 return true;
 
+            case R.id.menu_help:
+                intent = new Intent(DetailActivity.this, HelpActivity.class);
+
+                intent.putExtra("topic", objectType + "_detail");
+                startActivity(intent);
+                return true;
 
             default:
                 popupMessage.dismiss();

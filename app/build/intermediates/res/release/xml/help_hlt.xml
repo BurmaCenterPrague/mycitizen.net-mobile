@@ -70,9 +70,9 @@
     <h2>Users, Groups and Resources</h2>
         <div>
         This is the main screen. If the filter is off, you see all users, groups and resources. If the filter is on, you see only those that match the filter settings.<br/>
-        At the bottom you can open the <a href="net.mycitizen.mcn://filter">filter</a>, the <a href=netz.shodan.mycitizen://dashboard">dashboard</a> or your <a href="net.mycitizen.mcn://messages">messages</a>. The color of these button indicates their status.
+        At the bottom you can open the <a href="net.mycitizen.mcn://filter">filter</a>, the <a href=net.mycitizen.mcn://dashboard">dashboard</a> or your <a href="net.mycitizen.mcn://messages">messages</a>. The color of these button indicates their status.
         </div>
-    <br/><br/><a hrefnetcz.shodan.mycitizen://about">More information</a>
+    <br/><br/><a href="net.mycitizen.mcn://about">More information</a>
         ]]>
     </main>
     <filter>
@@ -118,12 +118,12 @@
         You also can access the following functions:
         <ul>
         <li><a href="net.mycitizen.mcn://profile">Edit your profile</a>.</li>
-        <li><a href=netz.shodan.mycitizen://create_group">Create a group</a> - only available after being member for some time.</li>
+        <li><a href=net.mycitizen.mcn://create_group">Create a group</a> - only available after being member for some time.</li>
         <li>Reload data from deployment</li>
         <li>Sign out (and forget username and password). If you just want to quite and keep your credentials, use the phone's "back" function.</li>
         </ul>
         </div>
-    <br/><br/><a hrefnetcz.shodan.mycitizen://about">More information</a>
+    <br/><br/><a href="net.mycitizen.mcn://about">More information</a>
         ]]>
     </dashboard>
     <messages>
@@ -211,4 +211,4 @@
         </div>
         ]]>
     </map>
-</help><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/xml/help_hlt.xml -->
+</help><!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/xml/help_hlt.xml -->

@@ -9,12 +9,12 @@ license
 
 latest version
 --------------
-June 2014
+0.1 Beta
 
 
 authors
 -------
-code:	Jan Fišer
+code:	Jan Fišer (until October 2014), Christoph Amthor (since November 2014) 
 
 design:	[Šárka Vašků](http://www.ecn.cz)
 
@@ -23,7 +23,10 @@ logo:	[Kateřina Kropáčová](http://kanadruhou.cz)
 
 included packages
 -----------------
-(will soon be updated)
+- ACRA 4.5.0
+- Osmdroid 4.1
+- slf4j 1.5.8
+- YouTube Android Player API 1.0
 
 
 other credits
@@ -32,7 +35,7 @@ other credits
 
 system requirements
 -------------------
-- Android (version: ...)
+- Android 2.2 (version: SDK versions 8-19)
 
 
 installation

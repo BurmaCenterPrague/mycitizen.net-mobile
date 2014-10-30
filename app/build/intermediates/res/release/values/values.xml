@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="http://schemas.android.com/tools">
 
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <attr name="actionBarDivider" format="reference" />
@@ -78,7 +78,7 @@
     <color name="abc_search_url_text_normal">#7fa87f</color>
     <color name="abc_search_url_text_pressed">@android:color/black</color>
     <color name="abc_search_url_text_selected">@android:color/black</color>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/values/colors.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values/colors.xml -->
     <eat-comment />
 
     <color name="bacground_grey_light">#F0F0F0</color>
@@ -99,7 +99,7 @@
     <color name="transparent_blue">#754390c8</color>
     <color name="white">#ffffff</color>
     <color name="widgets_line">#A9A295</color>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <declare-styleable name="ActionBar">
@@ -536,13 +536,13 @@
     <item name="dialog_fixed_height_minor" type="dimen">100%</item>
     <item name="dialog_fixed_width_major" type="dimen">320dp</item>
     <item name="dialog_fixed_width_minor" type="dimen">320dp</item>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/values/dimens.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values/dimens.xml -->
     <eat-comment />
 
     <dimen name="padding_large">16dp</dimen>
     <dimen name="padding_medium">8dp</dimen>
     <dimen name="padding_small">8dp</dimen>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <item name="action_bar_activity_content" type="id"/>
@@ -553,12 +553,12 @@
     <item name="progress_horizontal" type="id"/>
 
     <integer name="abc_max_action_buttons">2</integer>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values/strings.xml -->
     <eat-comment />
 
     <string name="Reply">reply</string>
     <string name="a_message_with_a_confirmation_link_was_sent">A message with a confirmation link has been sent.</string>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <string name="abc_action_bar_home_description">Navigate home</string>
@@ -574,7 +574,7 @@
     <string name="abc_searchview_description_voice">Voice search</string>
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values/strings.xml -->
     <eat-comment />
 
     <string name="accept_friendship">accept friendship</string>
@@ -651,6 +651,7 @@
     <string name="name">Name</string>
     <string name="next">next</string>
     <string name="no">No</string>
+    <string name="no_link">no link</string>
     <string name="no_offline_data">No offline data.</string>
     <string name="not_available_offline">This section is not available in offline mode.</string>
     <string name="nothing_found">Nothing found.</string>
@@ -663,11 +664,11 @@
     <string name="please_wait">Please wait...</string>
     <string name="profile_description">My Profile: Description</string>
     <string name="profile_description_title">Enter your description</string>
-    <string name="profile_email">email</string>
+    <string name="profile_email">Email</string>
     <string name="profile_map_title">My location</string>
     <string name="profile_name">name</string>
     <string name="profile_not_saved">Profile changes couldn\'t be saved.</string>
-    <string name="profile_phone">phone</string>
+    <string name="profile_phone">Phone</string>
     <string name="profile_portrait_title">Choose your avatar</string>
     <string name="profile_saved">Profile changes saved successfully.</string>
     <string name="profile_saved_email_changed">A message with a confirmation link was sent to your email address.</string>
@@ -728,7 +729,7 @@
     <string name="visibility_world">world</string>
     <string name="yes">Yes</string>
     <string name="your_message_hint">your message</string>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/values/styles.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/values/styles.xml -->
     <eat-comment />
 
     <style name="AppTheme" parent="android:Theme.Light" />
@@ -764,7 +765,7 @@
         <item name="android:textColor">@color/black</item>
         <!-- The textColor property is backward compatible with the Support Library -->
     </style>
-    <!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <style name="TextAppearance.AppCompat.Base.CompactMenu.Dialog" parent="android:TextAppearance.Medium">

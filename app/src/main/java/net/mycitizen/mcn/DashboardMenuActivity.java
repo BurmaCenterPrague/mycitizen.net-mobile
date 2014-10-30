@@ -57,8 +57,6 @@ public class DashboardMenuActivity extends BaseActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(DashboardMenuActivity.this, HelpActivity.class);
 
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
                 intent.putExtra("topic", "dashboard");
                 startActivity(intent);
             }
@@ -115,7 +113,7 @@ public class DashboardMenuActivity extends BaseActivity {
                     Toast.makeText(getApplicationContext(), getString(R.string.please_wait), Toast.LENGTH_LONG).show();
 
                     // 1. Determine the Connection Quality
-                    // todo 2. Retrieve the Deployment information
+                    // 2. Retrieve the Deployment information
                     // 3. Reset timeout to retrieve Users, Groups and Resources and save to database
 
                     fillDatabaseTask task = new fillDatabaseTask();
@@ -241,7 +239,8 @@ public class DashboardMenuActivity extends BaseActivity {
 
         String username = save_settings.getString("current_login", null);
         String visibility = save_settings.getString("logged_user_visibility", null);
-
+        String deployment_name = save_settings.getString("deployment_name","");
+        String deployment_description = save_settings.getString("deployment_description","");
 
         String messages = "0";
         String data_source = "";
@@ -254,11 +253,12 @@ public class DashboardMenuActivity extends BaseActivity {
 
         String text = "<div><table><tr><td colspan=2><h1>" + getString(R.string.dashboard) + "</h1></td></tr>" +
                 "<tr><td><b>Version:</b></td><td><span>" + Config.version + "</span></td></tr>" +
-                "<tr><td><b>" + getString(R.string.deployment) + ":</b></td><td><span>" + used_api + "</span></td></tr>" +
+                "<tr><td><b>" + getString(R.string.deployment) + ":</b></td><td><span><a href=\"http://" + used_api + "\">"+deployment_name+"</a></span></td></tr>" +
+                "<tr><td colspan=\"2\"><span>" + deployment_description + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.username) + ":</b></td><td><span>" + username + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.visibility) + ":</b></td><td><span>" + visibility + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.dashboard_messages) + ":</b></td><td><span>" + messages + " " + getString(R.string.dashboard_new_messages) +
-                "</span></td></tr></table>" + data_source +
+                //"</span></td></tr></table>" + data_source +
                 "</div>";
         dashboard_info.loadData(text, "text/html", "UTF-8");
         //dashboard_info.setText(Html.fromHtml(text));
@@ -339,10 +339,13 @@ public class DashboardMenuActivity extends BaseActivity {
         protected Void doInBackground(Void... voids) {
             api.determineConnectionQuality();
 
+            api.getDeploymentInfo();
+
             // todo: first delete all table contents? (to get rid of items that are gone)
-            ArrayList<DataObject> users = api.createDashboard("user", null, true, String.valueOf(settings.getInt("length_users_retrieved", 20)));
-            ArrayList<DataObject> groups = api.createDashboard("group", null, true, String.valueOf(settings.getInt("length_groups_retrieved", 20)));
-            ArrayList<DataObject> resources = api.createDashboard("resource", "filter[type][0]=2&filter[type][1]=3&filter[type][2] 4&filter[type][3]=5&filter[type][5]=6", true, String.valueOf(settings.getInt("length_resources_retrieved", 50)));
+            ArrayList<DataObject> users = api.getData("user", null, true, String.valueOf(settings.getInt("length_users_retrieved", 20)));
+            ArrayList<DataObject> groups = api.getData("group", null, true, String.valueOf(settings.getInt("length_groups_retrieved", 20)));
+            ArrayList<DataObject> resources = api.getData("resource", "filter[type][0]=2&filter[type][1]=3&filter[type][2] 4&filter[type][3]=5&filter[type][5]=6", true, String.valueOf(settings.getInt("length_resources_retrieved", 50)));
+
 
             return null;
         }

@@ -9,3 +9,4 @@
 *.apk
 .gradle
 .idea
+app/build/

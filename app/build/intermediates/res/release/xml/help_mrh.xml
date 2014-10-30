@@ -70,9 +70,9 @@
     <h2>Users, Groups and Resources</h2>
         <div>
         This is the main screen. If the filter is off, you see all users, groups and resources. If the filter is on, you see only those that match the filter settings.<br/>
-        At the bottom you can open the <a href="net.mycitizen.mcn://filter">filter</a>, the <a href="net.mycitizen.mcn://dashboard">dashboard</a> or your <a href=netz.shodan.mycitizen://messages">messages</a>. The color of these button indicates their status.
+        At the bottom you can open the <a href="net.mycitizen.mcn://filter">filter</a>, the <a href="net.mycitizen.mcn://dashboard">dashboard</a> or your <a href=net.mycitizen.mcn://messages">messages</a>. The color of these button indicates their status.
         </div>
-    <br/><br/><a hrefnetcz.shodan.mycitizen://about">More information</a>
+    <br/><br/><a href="net.mycitizen.mcn://about">More information</a>
         ]]>
     </main>
     <filter>
@@ -211,4 +211,4 @@
         </div>
         ]]>
     </map>
-</help><!-- From: file:/Users/chris/AndroidstudioProjects/MyCitizen/app/src/main/res/xml/help_mrh.xml -->
+</help><!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/xml/help_mrh.xml -->

@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.osmdroid.util.GeoPoint;
 
+import android.content.Context;
 import android.content.SyncAdapterType;
 import android.graphics.Bitmap;
 
@@ -168,7 +169,7 @@ public class ResourceObject extends DataObject {
         return this.trashFlag;
     }
 
-    public String getDetail() {
+    public String getDetail(Context ctx) {
         String html = "<div>";
         if (this.visibility == 1) {
             html += "<span><b>Visibility: </b></span><span>world</span><br/>";
@@ -177,11 +178,9 @@ public class ResourceObject extends DataObject {
         } else {
             html += "<span><b>Visibility: </b></span><span>friends/members</span><br/>";
         }
-        if (this.language.equals("mya")) {
-            html += "<span><b>Language: </b></span><span>Burmese</span><br/>";
-        } else {
-            html += "<span><b>Language: </b></span><span>English</span><br/>";
-        }
+        ApiConnector api = new ApiConnector(ctx);
+        String language_name = api.translateLanguageCodeToName(this.language);
+        html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>"+language_name+"</span><br/>";
         html += "<div>" + this.description + "</div>";
 
         html += "</div>";

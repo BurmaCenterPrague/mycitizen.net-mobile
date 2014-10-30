@@ -19,7 +19,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class DetailActivitiesActivity extends BaseActivity {
+public class DetailConnectionsActivity extends BaseActivity {
     public ApiConnector api;
 
     TextView title;
@@ -98,7 +98,7 @@ public class DetailActivitiesActivity extends BaseActivity {
                                     long id) {
                 DataObject widget_object = user_list_items.get(position);
 
-                Intent intent = new Intent(DetailActivitiesActivity.this, DetailActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, DetailActivity.class);
 
                 intent.putExtra("ObjectType", widget_object.getObjectType());
                 intent.putExtra("ObjectId", String.valueOf(widget_object.getObjectId()));
@@ -114,12 +114,11 @@ public class DetailActivitiesActivity extends BaseActivity {
                                     long id) {
                 DataObject widget_object = group_list_items.get(position);
 
-                Intent intent = new Intent(DetailActivitiesActivity.this, DetailActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, DetailActivity.class);
 
                 intent.putExtra("ObjectType", widget_object.getObjectType());
                 intent.putExtra("ObjectId", String.valueOf(widget_object.getObjectId()));
 
-                System.out.println("XXXX: " + String.valueOf(widget_object.getObjectId()));
                 startActivity(intent);
             }
         });
@@ -131,7 +130,7 @@ public class DetailActivitiesActivity extends BaseActivity {
                                     long id) {
                 DataObject widget_object = resource_list_items.get(position);
 
-                Intent intent = new Intent(DetailActivitiesActivity.this, DetailActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, DetailActivity.class);
 
                 intent.putExtra("ObjectType", widget_object.getObjectType());
                 intent.putExtra("ObjectId", String.valueOf(widget_object.getObjectId()));
@@ -144,7 +143,7 @@ public class DetailActivitiesActivity extends BaseActivity {
         task.execute(new String[]{objectType, objectId});
 
         Button menu_filter = (Button) findViewById(R.id.widget_menu_filter);
-        SharedPreferences icon_settings = DetailActivitiesActivity.this.getSharedPreferences("MyCitizen", 0);
+        SharedPreferences icon_settings = DetailConnectionsActivity.this.getSharedPreferences("MyCitizen", 0);
         if (icon_settings.getBoolean("filter_active", false)) {
             menu_filter.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.ico_filter_on), null, null);
         }
@@ -152,7 +151,7 @@ public class DetailActivitiesActivity extends BaseActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DetailActivitiesActivity.this, FilterMenuActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, FilterMenuActivity.class);
 
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -167,7 +166,7 @@ public class DetailActivitiesActivity extends BaseActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DetailActivitiesActivity.this, DashboardMenuActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, DashboardMenuActivity.class);
 
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -183,7 +182,7 @@ public class DetailActivitiesActivity extends BaseActivity {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DetailActivitiesActivity.this, MessagesActivity.class);
+                Intent intent = new Intent(DetailConnectionsActivity.this, MessagesActivity.class);
 
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
@@ -206,11 +205,12 @@ public class DetailActivitiesActivity extends BaseActivity {
         protected DataObject doInBackground(String... urls) {
             String[] type = urls;
 
-            ApiConnector api = new ApiConnector(DetailActivitiesActivity.this);
+            ApiConnector api = new ApiConnector(DetailConnectionsActivity.this);
             DataObject object = null;
             if (api.sessionInitiated()) {
                 object = api.getDetail(type[0], Integer.valueOf(type[1]));
             }
+            System.out.println("DetailConnectionsActivity, DashboardInit; type: "+type[0]+", id: "+Integer.valueOf(type[1]));
             if (objectType.equals("user")) {
                 //user_list_items = result.getUsers();
                 group_list_items = object.getGroups(api);
@@ -253,21 +253,21 @@ public class DetailActivitiesActivity extends BaseActivity {
                 //user_list_items = result.getUsers();
 
                 //user_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "tag",user_list_items));
-                group_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", group_list_items));
-                resource_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", resource_list_items));
+                group_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", group_list_items));
+                resource_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", resource_list_items));
 
             } else if (objectType.equals("group")) {
 
 
-                user_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", user_list_items));
+                user_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", user_list_items));
                 //group_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "tag",group_list_items));
-                resource_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", resource_list_items));
+                resource_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", resource_list_items));
 
             } else if (objectType.equals("resource")) {
 
 
-                user_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", user_list_items));
-                group_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "widget", group_list_items));
+                user_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", user_list_items));
+                group_list.setAdapter(new ObjectListItemAdapter(DetailConnectionsActivity.this, "widget", group_list_items));
                 //resource_list.setAdapter(new ObjectListItemAdapter(DetailActivitiesActivity.this, "tag",resource_list_items));
 
             }

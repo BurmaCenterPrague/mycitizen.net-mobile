@@ -248,18 +248,16 @@ public class UserObject extends DataObject {
             html += "<span><b>" + ctx.getString(R.string.visibility) + ": </b></span><span>" + ctx.getString(R.string.visibility_private) + "</span><br/>";
         }
 
-        // todo ### Allow for other languages
-        if (this.language.equals("mya")) {
-            html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>Burmese</span><br/>";
-        } else {
-            html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>English</span><br/>";
-        }
+        ApiConnector api = new ApiConnector(ctx);
+        String language_name = api.translateLanguageCodeToName(this.language);
+            html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>"+language_name+"</span><br/>";
 
-        if (this.phone != null && this.phone != "") {
+
+        if (this.phone != null && !this.phone.equals("")) {
             html += "<span><b>" + ctx.getString(R.string.profile_phone) + ": </b></span><span>" + this.phone + "</span>";
         }
         /*
-        if(this.url != null  && this.url != "") {
+        if(this.url != null  && !this.url.equals("")) {
             html += "<span><b>"+ctx.getString(R.string.homepage)+": </b></span><span><a href=\""+this.url+"\">"+this.url+"</a></span>";
         }
         */

@@ -101,8 +101,8 @@ public class GetStartedActivity extends ActionBarActivity {
                 editor.putString("default_lng", get_started_language.getSelectedItem().toString());
 
                 if (get_started_language.getSelectedItem().toString().equals("Čeština")) {
-                    Locale locale = new Locale("cs");
-                    editor.putString("saved_lng", "ces");
+                    Locale locale = new Locale("cs_MM");
+                    editor.putString("ui_language", "ces");
                     editor.putString("logged_user_language", "Čeština");
                     Locale.setDefault(locale);
                     Configuration config = new Configuration();
@@ -113,8 +113,8 @@ public class GetStartedActivity extends ActionBarActivity {
 
 
                 } else if (get_started_language.getSelectedItem().toString().equals("Matu")) {
-                    Locale locale = new Locale("ht");
-                    editor.putString("saved_lng", "hlt");
+                    Locale locale = new Locale("ht_MM");
+                    editor.putString("ui_language", "hlt");
                     editor.putString("logged_user_language", "Matu");
                     Locale.setDefault(locale);
                     Configuration config = new Configuration();
@@ -125,8 +125,8 @@ public class GetStartedActivity extends ActionBarActivity {
 
 
                 } else if (get_started_language.getSelectedItem().toString().equals("Mara")) {
-                    Locale locale = new Locale("mt");
-                    editor.putString("saved_lng", "mrh");
+                    Locale locale = new Locale("mt_MM");
+                    editor.putString("ui_language", "mrh");
                     editor.putString("logged_user_language", "Mara");
                     Locale.setDefault(locale);
                     Configuration config = new Configuration();
@@ -137,8 +137,8 @@ public class GetStartedActivity extends ActionBarActivity {
 
 
                 } else if (get_started_language.getSelectedItem().toString().equals("Zolai")) {
-                    Locale locale = new Locale("zm");
-                    editor.putString("saved_lng", "zom");
+                    Locale locale = new Locale("zm_MM");
+                    editor.putString("ui_language", "zom");
                     editor.putString("logged_user_language", "Zolai");
                     Locale.setDefault(locale);
                     Configuration config = new Configuration();
@@ -151,7 +151,7 @@ public class GetStartedActivity extends ActionBarActivity {
                 } else {
                     Locale locale = new Locale("en");
                     Locale.setDefault(locale);
-                    editor.putString("saved_lng", "en");
+                    editor.putString("ui_language", "eng");
                     Configuration config = new Configuration();
                     config.locale = locale;
                     ACRA.getErrorReporter().putCustomData("locale", String.valueOf(locale));

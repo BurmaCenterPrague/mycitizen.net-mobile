@@ -66,6 +66,7 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
 
         api = new ApiConnector(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.top_title_map);
         actionBar.setIcon(null);
@@ -490,7 +491,7 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.filter_help:
+            case R.id.menu_help:
                 Intent intent = new Intent(MapActivity.this, HelpActivity.class);
 
                 if (mapType != null && mapType.equals("filter_edit")) {

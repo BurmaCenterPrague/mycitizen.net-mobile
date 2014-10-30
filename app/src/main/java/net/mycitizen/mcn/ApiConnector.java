@@ -14,8 +14,11 @@ import java.net.URLEncoder;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -42,6 +45,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Base64;
+import android.widget.Toast;
 
 public class ApiConnector {
     final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
@@ -291,19 +295,19 @@ public class ApiConnector {
                 description += responseobject.getString("resource_description");
 
                 if (!responseobject.isNull("event_description") && !responseobject.getString("event_description").equals("")) {
-                    description += "<br/><br/><span>Event description:</span><br/><div>" + responseobject.getString("event_description") + "</div>";
+                    description += "<br/><br/><div>" + responseobject.getString("event_description") + "</div>";
                 }
 
                 if (!responseobject.isNull("organization_information") && !responseobject.getString("organization_information").equals("")) {
-                    description += "<br/><span>Organization information:</span><br/><div>" + responseobject.getString("organization_information") + "</div>";
+                    description += "<br/><br/><div>" + responseobject.getString("organization_information") + "</div>";
                 }
 
                 if (!responseobject.isNull("text_information") && !responseobject.getString("text_information").equals("")) {
-                    description += "<br/><br/><span>Text information:</span><br/><div>" + responseobject.getString("text_information") + "</div>";
+                    description += "<br/><br/><div>" + responseobject.getString("text_information") + "</div>";
                 }
 
                 if (!responseobject.isNull("event_timestamp") && !responseobject.getString("event_timestamp").equals("")) {
-                    description += "<br/><br/><span>Date and time:</span> <span>" + responseobject.getString("event_timestamp") + "</span>";
+                    description += "<br/><br/> <span>" + responseobject.getString("event_timestamp") + "</span>";
                     //description += "<br/><br/><span>Event term:</span><span>"+DateFormat.format("yyyy-MM-dd", Long.valueOf(responseobject.getString("event_timestamp")) * 1000)+"</span>";
                 }
 
@@ -357,7 +361,7 @@ public class ApiConnector {
     }
 
 
-    public ArrayList<DataObject> createDashboard(String type, String filter, boolean use_filter_override, String length) {
+    public ArrayList<DataObject> getData(String type, String filter, boolean use_filter_override, String length) {
 
         ArrayList<DataObject> objects = new ArrayList<DataObject>();
         String api_url = cfg.getApiUrl() + "Base/Data.json";
@@ -408,10 +412,15 @@ public class ApiConnector {
         SharedPreferences.Editor editor = settings.edit();
 
 
-        if (isNetworkAvailable()
+        if (filter != null && filter != "" && !isNetworkAvailable()) {
+            // cannot use complex filtering on local database (e.g. items connected to group or database)
+            return null;
+        }
+
+        if ((isNetworkAvailable()
                 && settings.getBoolean("filter_active", false)
-                && (time_lists_retrieved + retrieve_lists_timeout < System.currentTimeMillis()
-                || length_retrieved < length_int)) {
+                && (time_lists_retrieved + retrieve_lists_timeout < System.currentTimeMillis() || length_retrieved < length_int)
+                || (filter != null && filter != ""))) {
 
             System.out.println("Retrieving data from network: " + type);
             responseBody = getNetworkResult(api_url, api_params);
@@ -468,6 +477,8 @@ public class ApiConnector {
                 }
 
                 String connectionStatus = "0";
+                String language = "eng";
+
                 DataObject object = null;
                 if (type.equals("user")) {
                     // SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
@@ -495,6 +506,9 @@ public class ApiConnector {
                     if (responseobject.has("avatar")) {
                         image = responseobject.getString("avatar");
                     }
+                    if (responseobject.has("language_iso_639_3")) {
+                        language = responseobject.getString("language_iso_639_3");
+                    }
 
 
                     if (responseobject.has("user_logged_user") && responseobject.has("logged_user_user")) {
@@ -515,6 +529,7 @@ public class ApiConnector {
                     ((UserObject) object).setIconId(image);
                     ((UserObject) object).setNow_online(now_online);
                     ((UserObject) object).setConnectionStatus(connectionStatus);
+                    ((UserObject) object).setLanguage(language);
 
                     // save retrieved data to DB
                     if (isNetworkAvailable()) {
@@ -554,7 +569,9 @@ public class ApiConnector {
                         String image = responseobject.getString("avatar");
                         ((GroupObject) object).setIconId(image);
                     }
-
+                    if (responseobject.has("language_iso_639_3")) {
+                        language = responseobject.getString("language_iso_639_3");
+                    }
 /*
                     if (id == 0 && source.equals("database")) {
                         continue;
@@ -566,6 +583,7 @@ public class ApiConnector {
                     }
 
                     ((GroupObject) object).setConnectionStatus(connectionStatus);
+                    ((GroupObject) object).setLanguage(language);
 
                     // save retrieved data to DB
                     if (isNetworkAvailable()) {
@@ -606,6 +624,11 @@ public class ApiConnector {
                     ((ResourceObject) object).setTitle(name);
 
                     ((ResourceObject) object).setSubType(sub_type);
+
+                    if (responseobject.has("language_iso_639_3")) {
+                        language = responseobject.getString("language_iso_639_3");
+                    }
+                    ((ResourceObject) object).setLanguage(language);
 
                     if (!responseobject.isNull("resource_data")) {
                         JSONObject object_data = responseobject.getJSONObject("resource_data");
@@ -751,7 +774,40 @@ public class ApiConnector {
 
 
     public LinkedHashMap<String, String> getSupportedLanguages() {
+        LinkedHashMap<String, String> languages = new LinkedHashMap<String, String>();
 
+        SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+
+        String deployment_languages = settings.getString("deployment_languages", null);
+
+        JSONObject languages_json_o;
+        JSONArray languages_json_a;
+        JSONObject json_data;
+        String languageCode;
+        String languageName;
+
+        try {
+
+            languages_json_o = new JSONObject(deployment_languages);
+            languages_json_a = languages_json_o.getJSONArray("languages");
+
+            for (int i = 0; i < languages_json_a.length(); i++) {
+
+                json_data = languages_json_a.getJSONObject(i);
+
+                languageCode = json_data.getString("iso_code");
+                languageName = json_data.getString("name");
+                languages.put(languageCode, languageName);
+                System.out.println("Deployment languages - name: " + languageName + ", code: " + languageCode);
+
+            }
+        } catch (JSONException e) {
+            System.out.println("Error parsing deployment languages.");
+        }
+
+        return languages;
+
+    /*
         LinkedHashMap<String, String> languages = new LinkedHashMap<String, String>();
         languages.put("en", "English");
         languages.put("ces", "Čeština");
@@ -760,7 +816,36 @@ public class ApiConnector {
         languages.put("zom", "Zolai");
 
         return languages;
+*/
+    }
 
+
+    public String translateLanguageNameToCode(String languageName) {
+
+        LinkedHashMap<String, String> languages = getSupportedLanguages();
+        Iterator<Map.Entry<String, String>> it = languages.entrySet().iterator();
+        while (it.hasNext()) {
+            HashMap.Entry pairs = (HashMap.Entry) it.next();
+            if (pairs.getValue().toString().equals(languageName)) {
+                return pairs.getKey().toString();
+            }
+        }
+
+        return "eng";
+    }
+
+    public String translateLanguageCodeToName(String languageCode) {
+
+        LinkedHashMap<String, String> languages = getSupportedLanguages();
+        Iterator<Map.Entry<String, String>> it = languages.entrySet().iterator();
+        while (it.hasNext()) {
+            HashMap.Entry pairs = (HashMap.Entry) it.next();
+            if (pairs.getKey().toString().equals(languageCode)) {
+                return pairs.getValue().toString();
+            }
+        }
+
+        return "English";
     }
 
     public LinkedHashMap<Integer, String> getSupportedTimers() {
@@ -987,6 +1072,9 @@ public class ApiConnector {
 
                 editor.commit();
 
+                if (!getDeploymentInfo()) {
+                    return "session_null";
+                }
                 return "success";
             } else {
                 return "session_null";
@@ -1485,7 +1573,7 @@ public class ApiConnector {
         } else {
             api_params = "firstName=" + firstName + "&lastName=" + lastName + "&email=" + userEmail + "&phone=" + userPhone + "&url=" + userUrl + "&user_send_notifications=" + userTimer + "&description=" + userDescription + "&visibility=" + visibilityLevel + "&position_gpsx=" + (gpsx) + "&position_gpsy=" + gpsy + "&language_iso_639_3=" + language;
         }
-        System.out.println(api_params);
+        System.out.println("changeProfile: "+api_params);
         String responseBody;
         if (isNetworkAvailable()) {
             responseBody = getNetworkResult(cfg.getApiUrl() + "Base/ChangeProfile.json", api_params);
@@ -1712,14 +1800,10 @@ public class ApiConnector {
             return 0;
         }
         try {
-
             JSONObject result = new JSONObject(responseBody);
             boolean status = (Boolean) result.getBoolean("result");
             int count = (int) result.getInt("message_count");
-
-
             return count;
-
         } catch (JSONException e) {
             e.printStackTrace();
             failFunction();
@@ -1732,15 +1816,15 @@ public class ApiConnector {
         //LinkedHashMap<String,String> help = new LinkedHashMap<String,String>();
         SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
         String loc = "eng";
-        if (settings.getString("saved_lng", null) != null) {
+        if (settings.getString("ui_language", null) != null) {
             loc = "eng";
-            if (settings.getString("saved_lng", null) == "ces") {
+            if (settings.getString("ui_language", null) == "ces") {
                 loc = "ces";
-            } else if (settings.getString("saved_lng", null) == "hlt") {
+            } else if (settings.getString("ui_language", null) == "hlt") {
                 loc = "hlt";
-            } else if (settings.getString("saved_lng", null) == "mrh") {
+            } else if (settings.getString("ui_language", null) == "mrh") {
                 loc = "mrh";
-            } else if (settings.getString("saved_lng", null) == "zom") {
+            } else if (settings.getString("ui_language", null) == "zom") {
                 loc = "zom";
             } else {
                 loc = "eng";
@@ -1777,7 +1861,10 @@ public class ApiConnector {
 
                         String body = xpp.getText();
 
+
                         body = body.replace("{DEPLOYMENT_URL}", cfg.getApiUrl().replace("/API/", ""));
+                        body = body.replace("{SUPPORT_URL}", settings.getString("support_url", "http://forum.mycitizen.org"));
+                        body = body.replace("{VERSION}", Config.version);
 
                         stringBuffer.append(body);
                         current_tag = "";
@@ -1810,7 +1897,6 @@ public class ApiConnector {
 
         String filter = settings.getString("help", null);
         String inbox_filter = settings.getString("inbox_filter", null);
-        ;
 
         String filter_params = "";
 
@@ -1831,17 +1917,21 @@ public class ApiConnector {
                     }
                 }
                 if (filter_object.has("filter_language")) {
-                    String filter_language = filter_object.getString("filter_language");
-                    String filter_language_iso = "eng";
-                    if (!filter_language.equals("")) {
+                    String filter_language_iso = filter_object.getString("filter_language");
+
+                    // System.out.println("api.createFilter, filter_language: "+filter_language);
+                    // String filter_language_iso = "eng";
+                    if (!filter_language_iso.equals("")) {
+                        /*
                         if (filter_language.equals("English")) {
-                            filter_language = "1";
+                            // filter_language = "1";
                             filter_language_iso = "eng";
                         } else if (filter_language.equals("Burmese")) {
-                            filter_language = "2";
+                            // filter_language = "2";
                             filter_language_iso = "mya";
                         }
-                        filter_params += "&filter[language]=" + filter_language;
+                        // filter_params += "&filter[language]=" + filter_language;
+                        */
                         filter_params += "&filter[language_iso_639_3]=" + filter_language_iso;
                     }
                 }
@@ -1870,28 +1960,28 @@ public class ApiConnector {
 
             } catch (JSONException e) {
                 e.printStackTrace();
-                // todo Instead of returning to LoginActivity, switch to offline mode.
-                /*
+                // todo testing: Instead of returning to LoginActivity, switch to offline mode.
+
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putLong("last_network_request", 5000);
                 editor.putLong("time_connection_measured", System.currentTimeMillis());
                 editor.commit();
-                */
+                Toast.makeText(this.context, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+                /*
                 Intent intent = new Intent(context, LoginActivity.class);
                 intent.putExtra("type", "apiError");
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
 
 
                 ((Activity) context).startActivity(intent);
 
                 ((Activity) context).finish();
+                */
                 return null;
             }
 
         }
         /*
-		if(inbox_filter != null) {
+        if(inbox_filter != null) {
 			try {
 				JSONObject filter_object = new JSONObject(inbox_filter);
 							
@@ -1939,10 +2029,13 @@ public class ApiConnector {
         for (int i = 0; i < p.length; i++) {
             String[] key_value = p[i].split("=");
             try {
+
                 String key = key_value[0];
                 String value = key_value[1];
 
-                where.put(key, value);
+                if (!key.equals("filter[count]")) {
+                    where.put(key, value);
+                }
             } catch (Exception e) {
 
             }
@@ -1971,7 +2064,6 @@ public class ApiConnector {
         long time_passed = last_determined + repeat_measuring_speed;
         System.out.println("Determine connection quality, last time " + (System.currentTimeMillis() - last_determined) / 1000 + " seconds ago.");
         if (time_passed < System.currentTimeMillis()) {
-
             determineConnectionQuality();
         } else {
             System.out.println("... skipped");
@@ -2013,6 +2105,7 @@ public class ApiConnector {
 
             request = new OutputStreamWriter(connection.getOutputStream());
 
+            // todo: Why two different cases?
             if (api_params != null) {
                 int speed = settings.getInt("connection_strength", 0);
                 if (speed <= 50) {
@@ -2043,10 +2136,7 @@ public class ApiConnector {
                 sb.append(line + "\n");
             }
 
-            // Response from server after login process will be stored in response variable.
             String responseBody = sb.toString();
-            // You can perform UI operations here
-
 
             isr.close();
             reader.close();
@@ -2234,13 +2324,14 @@ public class ApiConnector {
     public void failFunction() {
         if (isNetworkAvailable()) {
 
-            // todo Instead of returning to LoginActivity, switch to offline mode.
+            // todo testing: Instead of returning to LoginActivity, switch to offline mode.
+            SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putLong("last_network_request", 5000);
+            editor.putLong("time_connection_measured", System.currentTimeMillis());
+            editor.commit();
+            Toast.makeText(this.context, R.string.error_loading_data, Toast.LENGTH_LONG).show();
             /*
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putLong("last_network_request", 5000);
-                editor.putLong("time_connection_measured", System.currentTimeMillis());
-                editor.commit();
-                */
             Intent intent = new Intent(context, LoginActivity.class);
             intent.putExtra("type", "apiError");
 
@@ -2248,6 +2339,7 @@ public class ApiConnector {
             ((Activity) context).startActivity(intent);
 
             ((Activity) context).finish();
+            */
         }
     }
 
@@ -2277,6 +2369,100 @@ public class ApiConnector {
             e.printStackTrace();
         }
     }
+
+    protected Boolean getDeploymentInfo() {
+        if (!isNetworkAvailable()) {
+            System.out.println("getDeploymentInfo: no network");
+            return true;
+        }
+        SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+        SharedPreferences.Editor editor = settings.edit();
+
+        HttpURLConnection connection;
+        OutputStreamWriter request = null;
+
+        URL url = null;
+        String response = null;
+
+        try {
+            url = new URL(cfg.getApiUrl() + "Base/Deployment.json");
+            HttpURLConnection http = null;
+
+            if (url.getProtocol().toLowerCase().equals("https")) {
+                trustAllHosts();
+                HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+                https.setHostnameVerifier(DO_NOT_VERIFY);
+                http = https;
+            } else {
+                http = (HttpURLConnection) url.openConnection();
+            }
+
+            connection = http;
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            String ua = settings.getString("userAgent", null);
+
+            if (ua != null) {
+                connection.setRequestProperty("User-Agent", ua);
+            } else {
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; U; Android 2.2; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1");
+            }
+            connection.setDoOutput(true);
+
+            request = new OutputStreamWriter(connection.getOutputStream());
+            request.flush();
+            request.close();
+
+            String line = "";
+            InputStreamReader isr = new InputStreamReader(connection.getInputStream());
+            BufferedReader reader = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+
+            response = sb.toString();
+            System.out.println("getDeploymentInfo: " + response);
+            JSONObject result = new JSONObject(response);
+
+            // todo save data to settings
+            if (result.has("name")) {
+                editor.putString("deployment_name", result.getString("name"));
+            }
+            if (result.has("description")) {
+                editor.putString("deployment_description", result.getString("description"));
+            }
+            if (result.has("registration_question")) {
+                editor.putString("registration_question", result.getString("registration_question"));
+            }
+            if (result.has("languages")) {
+                editor.putString("deployment_languages", "{\"languages\":" + result.getString("languages") + "}");
+            }
+            if (result.has("support_url")) {
+                editor.putString("support_url", result.getString("support_url"));
+            }
+            editor.commit();
+
+            isr.close();
+            reader.close();
+
+        } catch (IOException e) {
+            // Error
+            e.printStackTrace();
+            failFunction();
+            return false;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            failFunction();
+            return false;
+        } finally {
+            return true;
+        }
+
+    }
+
 
 
 }

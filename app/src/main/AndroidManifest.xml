@@ -5,7 +5,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="21" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -73,6 +73,7 @@
             android:name="net.mycitizen.mcn.DetailActivity"
             android:parentActivityName="net.mycitizen.mcn.WidgetActivity"
             android:theme="@style/Theme.AppCompat.Light"
+            android:launchMode="singleTop"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -84,7 +85,7 @@
     
     
     <activity
-            android:name="net.mycitizen.mcn.DetailActivitiesActivity"
+            android:name=".DetailConnectionsActivity"
             android:parentActivityName="net.mycitizen.mcn.DetailActivity"
             android:theme="@style/Theme.AppCompat.Light"
             android:label="@string/title_activity_main" >
@@ -126,7 +127,7 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 				<action android:name="android.intent.action.VIEW" />
-    			<data android:scheme="cz.shodan.mycitizen" />
+    			<data android:scheme="net.mycitizen.mcn" />
                 
             </intent-filter>
         </activity>
@@ -136,6 +137,7 @@
     <activity
             android:name="net.mycitizen.mcn.MapActivity"
             android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName="net.mycitizen.mcn.DetailActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

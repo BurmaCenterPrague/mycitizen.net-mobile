@@ -651,6 +651,7 @@
     <string name="name">Name</string>
     <string name="next">next</string>
     <string name="no">No</string>
+    <string name="no_link">no link</string>
     <string name="no_offline_data">No offline data.</string>
     <string name="not_available_offline">This section is not available in offline mode.</string>
     <string name="nothing_found">Nothing found.</string>
@@ -663,11 +664,11 @@
     <string name="please_wait">Please wait...</string>
     <string name="profile_description">My Profile: Description</string>
     <string name="profile_description_title">Enter your description</string>
-    <string name="profile_email">email</string>
+    <string name="profile_email">Email</string>
     <string name="profile_map_title">My location</string>
     <string name="profile_name">name</string>
     <string name="profile_not_saved">Profile changes couldn\'t be saved.</string>
-    <string name="profile_phone">phone</string>
+    <string name="profile_phone">Phone</string>
     <string name="profile_portrait_title">Choose your avatar</string>
     <string name="profile_saved">Profile changes saved successfully.</string>
     <string name="profile_saved_email_changed">A message with a confirmation link was sent to your email address.</string>

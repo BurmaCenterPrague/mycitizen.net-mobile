@@ -46,6 +46,7 @@
     <string name="loadingdotdotdot">Loading...</string>
     <string name="menu_friends">Friends</string>
     <string name="moderator">moderator</string>
+    <string name="no_link">no link</string>
     <string name="no_offline_data">No offline data.</string>
     <string name="nothing_found">Nothing found.</string>
     <string name="profile_description">My Profile: Description</string>

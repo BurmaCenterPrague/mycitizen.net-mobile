@@ -374,7 +374,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                         } else if (selected_tab.equals("group")) {
                             loader = loadingDialog();
                             DashboardInit task = new DashboardInit();
-                            task.execute(new String[]{"user"});
+                            task.execute(new String[]{"user", length});
                             selected_tab = "user";
                             tab_user.setChecked(true);
                             tab_group.setChecked(false);
@@ -419,7 +419,6 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
     private class DashboardInit extends AsyncTask<String, Void, ArrayList<DataObject>> {
 
-
         @Override
         protected ArrayList<DataObject> doInBackground(String... urls) {
             runOnUiThread(new Runnable() {
@@ -435,7 +434,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
             ApiConnector api = new ApiConnector(WidgetActivity.this);
             ArrayList<DataObject> widgets = null;
-            System.out.println("TTTTTtt");
+
             if (api.sessionInitiated()) {
                 String filter = null;
                 if (type[0].equals("resource")) {
@@ -447,9 +446,12 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                     String length = "10"; //Config.retrieveLength(getApplicationContext());
                 }
 
-                widgets = api.createDashboard(type[0], filter, true, length);
+                widgets = api.getData(type[0], filter, true, length);
+
                 if (widgets != null)
-                    System.out.println("Asked for " + length + " items, received: " + widgets.size());
+                    System.out.println("Asked for " + length + " items, received: " + widgets.size()+", used filter: "+filter);
+                else
+                    System.out.println("Asked for " + length + " items, received: NULL, used filter: "+filter);
 
                 //System.out.println("Number of items: "+widgets.size());
 

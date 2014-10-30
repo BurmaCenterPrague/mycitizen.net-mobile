@@ -156,25 +156,6 @@ public class FilterMenuActivity extends BaseActivity {
             }
         });
 
-/*
-        Button help = (Button) findViewById(R.id.button_filter_help);
-        help.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                //page1.setVisibility(View.VISIBLE);
-                //page2.setVisibility(View.GONE);
-
-                Intent intent = new Intent(FilterMenuActivity.this, HelpActivity.class);
-
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
-                intent.putExtra("topic", "help");
-
-                startActivity(intent);
-            }
-        });
-*/
 
         Button filter_suggest = (Button) findViewById(R.id.filter_suggest);
         filter_suggest.setOnClickListener(new OnClickListener() {
@@ -188,18 +169,15 @@ public class FilterMenuActivity extends BaseActivity {
                 filter_my.setChecked(false);
 
                 SharedPreferences settings = FilterMenuActivity.this.getSharedPreferences("MyCitizen", 0);
-                String logged_user_language = settings.getString("logged_user_language", "English");
+                String logged_user_language = settings.getString("logged_user_language", "eng");
 
                 ArrayAdapter langAdap = (ArrayAdapter) filter_language.getAdapter();
 
                 int langPosition = langAdap.getPosition(logged_user_language);
                 filter_language.setSelection(langPosition);
 
-                //filter_tag.setSelection(0);
-
-                //filter_language.setSelection(0);
                 String logged_user_tags = settings.getString("logged_user_tags", "[]");
-                System.out.println("LUT " + logged_user_tags);
+
                 ArrayList<DataObject> my_tags = new ArrayList<DataObject>();
 
                 try {
@@ -248,9 +226,6 @@ public class FilterMenuActivity extends BaseActivity {
                         default_items.add(current_item.getTitle());
                         default_items_vals.add(current_item.getStatus());
                     }
-                    //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, default_items);
-                    //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    //filter_tag.setAdapter(new ObjectListItemAdapter(FilterMenuActivity.this,"filter_tag", items));
 
 
                     filter_tag.setItems(default_items_ids, default_items, default_items_vals, getString(R.string.tags_all));
@@ -295,7 +270,7 @@ public class FilterMenuActivity extends BaseActivity {
             public void onClick(View v) {
                 filter_status.setChecked(true);
                 if (!api.isNetworkAvailable()) {
-                    Toast.makeText(getApplicationContext(), "This section is not avalable in offline mode.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.not_available_offline, Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(FilterMenuActivity.this, MapActivity.class);
 
@@ -384,7 +359,9 @@ public class FilterMenuActivity extends BaseActivity {
             result += "'filter_tag':[" + tag_ids + "],";
 
         }
-        result += "'filter_language':'" + filter_language.getSelectedItem() + "',";
+        String languageName = filter_language.getSelectedItem().toString();
+        String languageCode = api.translateLanguageNameToCode(languageName);
+        result += "'filter_language':'" + languageCode + "',";
 
         if (filter_my.isChecked()) {
             result += "'filter_my':true,";
@@ -404,7 +381,7 @@ public class FilterMenuActivity extends BaseActivity {
     }
 
     public void translateFilterStorage(String storage) throws JSONException {
-        System.out.println("TGS");
+        System.out.println("translateFilterStorage");
 
         if (storage == null) {
             return;
@@ -430,7 +407,8 @@ public class FilterMenuActivity extends BaseActivity {
             int langPosition = 0;
             filter_language.setSelection(langPosition);
         } else {
-            int langPosition = langAdap.getPosition(json.getString("filter_language"));
+            String languageName = api.translateLanguageCodeToName(json.getString("filter_language"));
+            int langPosition = langAdap.getPosition(languageName);
             filter_language.setSelection(langPosition);
         }
 
@@ -479,15 +457,12 @@ public class FilterMenuActivity extends BaseActivity {
                         }
                     }
                 }
-                System.out.println("TTTTT");
+
                 filter_tag_result.put(current_item.getObjectId(), current_item.getStatus());
                 default_items_ids.add(current_item.getObjectId());
                 default_items.add(current_item.getTitle());
                 default_items_vals.add(current_item.getStatus());
             }
-            //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, default_items);
-            //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            //filter_tag.setAdapter(new ObjectListItemAdapter(FilterMenuActivity.this,"filter_tag", items));
 
 
             filter_tag.setItems(default_items_ids, default_items, default_items_vals, getString(R.string.tags_all));
@@ -585,8 +560,6 @@ public class FilterMenuActivity extends BaseActivity {
             if (api.sessionInitiated()) {
                 supported_lng = api.getSupportedLanguages();
                 supported_tags = api.getSupportedTags();
-
-
             }
             return true;
         }
@@ -594,17 +567,22 @@ public class FilterMenuActivity extends BaseActivity {
         @Override
         protected void onPostExecute(Boolean result) {
             if (supported_lng != null) {
+
                 ArrayList<String> items = new ArrayList<String>();
                 Iterator<Entry<String, String>> it = supported_lng.entrySet().iterator();
                 items.add(getString(R.string.language_all));
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
-                    //pairs.getKey();
+//                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
                     items.add(pairs.getValue().toString());
                 }
+
+
+
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(FilterMenuActivity.this, android.R.layout.simple_spinner_item, items);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
                 filter_language.setAdapter(adapter);
 
 
@@ -675,7 +653,7 @@ public class FilterMenuActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.filter_help:
+            case R.id.menu_help:
                 Intent intent = new Intent(FilterMenuActivity.this, HelpActivity.class);
                 intent.putExtra("topic", "filter");
                 startActivity(intent);
@@ -684,6 +662,5 @@ public class FilterMenuActivity extends BaseActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
 }
