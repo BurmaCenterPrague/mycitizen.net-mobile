@@ -33,21 +33,21 @@ public abstract class DataObject {
 
     public ArrayList<DataObject> getUsers(ApiConnector api) {
         // todo load all if viewing friends/connections
-        ArrayList<DataObject> users = api.getData("user", "filter[" + this.objectType + "_id" + "]=" + this.objectId, true, "10");
+        ArrayList<DataObject> users = api.getData("user", "filter[" + this.objectType + "_id" + "]=" + this.objectId, true, null);
 
         return users;
     }
 
     public ArrayList<DataObject> getGroups(ApiConnector api) {
         // todo load all if viewing friends/connections
-        ArrayList<DataObject> groups = api.getData("group", "filter[" + this.objectType + "_id" + "]=" + this.objectId, true, "10");
+        ArrayList<DataObject> groups = api.getData("group", "filter[" + this.objectType + "_id" + "]=" + this.objectId, true, null);
 
         return groups;
     }
 
     public ArrayList<DataObject> getResources(ApiConnector api) {
         // todo load all if viewing friends/connections
-        ArrayList<DataObject> resources = api.getData("resource", "filter[" + this.objectType + "_id" + "]=" + this.objectId + "filter[type][0]=2&filter[type][1]=3&filter[type][2]=4&filter[type][3]=5&filter[type][5]=6", true, "10");
+        ArrayList<DataObject> resources = api.getData("resource", "filter[" + this.objectType + "_id" + "]=" + this.objectId + "&filter[type][0]=2&filter[type][1]=3&filter[type][2]=4&filter[type][3]=5&filter[type][5]=6", true, null);
 
         return resources;
     }

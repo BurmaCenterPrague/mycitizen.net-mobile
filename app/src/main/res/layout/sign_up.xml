@@ -20,7 +20,7 @@
     <LinearLayout
         android:id="@+id/sign_up_top_menu"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="40dp"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -30,8 +30,8 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginLeft="20dp"
-            android:layout_weight="1">
+            android:layout_marginLeft="0dp"
+            android:layout_weight="2">
 
             <TextView
                 android:layout_width="fill_parent"
@@ -57,7 +57,6 @@
     </LinearLayout>
 
     <LinearLayout
-
         android:id="@+id/sign_up_bottom_menu"
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -100,6 +99,9 @@
         android:layout_weight="3"
         android:orientation="vertical">
 
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
         <LinearLayout
 
             android:layout_width="fill_parent"
@@ -110,6 +112,7 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
                 android:text="@string/username" />
 
             <EditText
@@ -121,6 +124,8 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:paddingTop="10dp"
                 android:text="@string/password" />
 
             <EditText
@@ -132,6 +137,8 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:paddingTop="10dp"
                 android:text="@string/email" />
 
             <EditText
@@ -150,28 +157,39 @@
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="Security Question" />
+                    android:paddingTop="20dp"
+                    android:textStyle="bold"
+                    android:text="@string/security_question_for_signup" />
+                <TextView
+                    android:id="@+id/security_question"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                     />
 
                 <EditText
-                    android:id="@+id/security_question"
+                    android:id="@+id/security_question_answer"
                     android:layout_width="fill_parent"
                     android:layout_height="50dp" />
 
                 <ImageView
                     android:id="@+id/captcha_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:scaleType="fitCenter"/>
             </LinearLayout>
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="30dp"
+                android:paddingBottom="10dp"
                 android:text="@string/signup_help" />
 
 
         </LinearLayout>
 
+        </ScrollView>
 
     </LinearLayout>
 

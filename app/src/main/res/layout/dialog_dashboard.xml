@@ -76,12 +76,12 @@
         android:layout_weight="1">
 
         <Button
-            android:id="@+id/dashboard_help"
+            android:id="@+id/dashboard_activity"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:background="@drawable/bottom_menu_button"
-            android:drawableTop="@drawable/ic_action_help"
+            android:drawableTop="@drawable/ic_action_view_as_list"
             android:textColor="@color/white"
             android:padding="7dp" />
 

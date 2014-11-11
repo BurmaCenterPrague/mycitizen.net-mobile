@@ -4,7 +4,14 @@
     android:background="#EAE9E3"
     android:orientation="vertical"
     android:weightSum="10" >
-   
+
+    <!-- catch the focus -->
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px"
+        />
 	
 	<ImageView
         android:id="@+id/imageView2"
@@ -80,6 +87,8 @@
         android:background="#CCEAE9E3"
         android:padding="5dp">
 
+
+
 	    <EditText
 	        android:id="@+id/response_input"
 	        android:layout_width="fill_parent"
@@ -94,6 +103,7 @@
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:layout_weight="3"
+            android:background="@drawable/button"
 		    android:text="@string/send" />
 
 	</LinearLayout>

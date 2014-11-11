@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.support.v7.app.ActionBar;
 
@@ -33,7 +35,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
     boolean forceReload = false;
 
-    String length = "10";
+    String length = "20";
 
     ProgressDialog loader = null;
     final Handler handler = new Handler() {
@@ -74,7 +76,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
                         @Override
                         public void run() {
-                            System.out.println("DataUpdate finish");
+                            Log.d(Config.DEBUG_TAG, "DataUpdate finish");
                             if (loader != null) {
                                 loader.dismiss();
                             }
@@ -116,16 +118,22 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
         actionBar.setIcon(null);
         actionBar.hide();
 
+        Intent intent = getIntent();
+        if (intent.getStringExtra("profile") != null && intent.getStringExtra("profile").equals("incomplete")) {
+            intent = new Intent(WidgetActivity.this, ProfileMainActivity.class);
+            Toast.makeText(getApplicationContext(), getString(R.string.please_complete_profile), Toast.LENGTH_LONG).show();
+            startActivity(intent);
+        }
+
         widget_list = (ListView) findViewById(R.id.widget_list);
         widget_list.setOnTouchListener(this);
-
         widget_list.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
                 if (widget_list_items != null) {
-                    System.out.println("Size: " + widget_list_items.size() + ", Position: " + position);
+                    // Log.d(Config.DEBUG_TAG, "Size: " + widget_list_items.size() + ", Position: " + position);
                     DataObject widget_object = widget_list_items.get(position);
 
                     // message, not clickable
@@ -141,14 +149,14 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                         forceReload = true;
                         length = Integer.toString(widget_list_items.size() + 9);
 
-                        System.out.println("load more, new length: " + length);
+                        Log.d(Config.DEBUG_TAG, "load more, new length: " + length);
                         DashboardInit task = new DashboardInit();
                         last_index = widget_list.getFirstVisiblePosition();
                         View v = widget_list.getChildAt(0);
                         int top = (v == null) ? 0 : v.getTop();
                         last_top = top;
                         loader = loadingDialog();
-                        task.execute(new String[]{selected_tab, length, "load_more"});
+                        task.execute(selected_tab, length, "load_more");
                         // finish();
                         return;
                     }
@@ -158,7 +166,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                     intent.putExtra("ObjectType", widget_object.getObjectType());
                     intent.putExtra("ObjectId", String.valueOf(widget_object.getObjectId()));
 
-                    System.out.println("ObjectId: " + String.valueOf(widget_object.getObjectId()));
+                    Log.d(Config.DEBUG_TAG, "ObjectType: "+widget_object.getObjectType()+", ObjectId: " + String.valueOf(widget_object.getObjectId()));
 
                     last_index = widget_list.getFirstVisiblePosition();
                     View v = widget_list.getChildAt(0);
@@ -173,7 +181,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
         //loader = loadingDialog();
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{"user", length});
+        task.execute("user", length);
 
         tab_user = (ToggleButton) findViewById(R.id.widget_select_user);
         tab_group = (ToggleButton) findViewById(R.id.widget_select_group);
@@ -186,7 +194,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                 loader = loadingDialog();
                 DashboardInit task = new DashboardInit();
                 length = Config.retrieveLength(getApplicationContext());
-                task.execute(new String[]{"user", length});
+                task.execute("user", length);
                 selected_tab = "user";
                 tab_user.setChecked(true);
                 tab_group.setChecked(false);
@@ -202,7 +210,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                 loader = loadingDialog();
                 DashboardInit task = new DashboardInit();
                 length = Config.retrieveLength(getApplicationContext());
-                task.execute(new String[]{"group", length});
+                task.execute("group", length);
                 selected_tab = "group";
                 tab_user.setChecked(false);
                 tab_group.setChecked(true);
@@ -218,7 +226,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                 loader = loadingDialog();
                 DashboardInit task = new DashboardInit();
                 length = Config.retrieveLength(getApplicationContext());
-                task.execute(new String[]{"resource", length});
+                task.execute("resource", length);
                 selected_tab = "resource";
                 tab_user.setChecked(false);
                 tab_group.setChecked(false);
@@ -261,7 +269,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -302,13 +310,13 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
         Intent intent = getIntent();
         String origin = intent.getStringExtra("origin");
-        System.out.println("origin: " + origin);
+        Log.d(Config.DEBUG_TAG, "origin: " + origin);
 
         if ((origin != null && (origin.equals("filter") || origin.equals("login") || origin.equals("widget")))
                 || forceReload) {
             loader = loadingDialog();
             DashboardInit task = new DashboardInit();
-            task.execute(new String[]{selected_tab, length});
+            task.execute(selected_tab, length);
             intent.removeExtra("origin");
             forceReload = false;
         } else {
@@ -333,15 +341,15 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                 last_x = event.getX();
             case MotionEvent.ACTION_UP:
                 if (event.getX() > last_x || event.getX() < last_x) {
-                    System.out.println(event.getX() + " " + last_x);
+                    Log.d(Config.DEBUG_TAG, event.getX() + " " + last_x);
                     if ((event.getX() - last_x) < -120) {
-                        System.out.println("SWIPE LEFT");
+                        Log.d(Config.DEBUG_TAG, "SWIPE LEFT");
                         last_x = 0;
                         if (selected_tab.equals("user")) {
                             loader = loadingDialog();
                             DashboardInit task = new DashboardInit();
                             length = Config.retrieveLength(getApplicationContext());
-                            task.execute(new String[]{"group", length});
+                            task.execute("group", length);
                             selected_tab = "group";
                             tab_user.setChecked(false);
                             tab_group.setChecked(true);
@@ -350,7 +358,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                             loader = loadingDialog();
                             DashboardInit task = new DashboardInit();
                             length = Config.retrieveLength(getApplicationContext());
-                            task.execute(new String[]{"resource", length});
+                            task.execute("resource", length);
                             selected_tab = "resource";
                             tab_user.setChecked(false);
                             tab_group.setChecked(false);
@@ -359,14 +367,14 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
 
                         return true;
                     } else if ((event.getX() - last_x) > 120) {
-                        System.out.println("SWIPE RIGHT");
+                        Log.d(Config.DEBUG_TAG, "SWIPE RIGHT");
                         last_x = 0;
 
                         if (selected_tab.equals("resource")) {
                             loader = loadingDialog();
                             DashboardInit task = new DashboardInit();
                             length = Config.retrieveLength(getApplicationContext());
-                            task.execute(new String[]{"group", length});
+                            task.execute("group", length);
                             selected_tab = "group";
                             tab_user.setChecked(false);
                             tab_group.setChecked(true);
@@ -374,7 +382,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                         } else if (selected_tab.equals("group")) {
                             loader = loadingDialog();
                             DashboardInit task = new DashboardInit();
-                            task.execute(new String[]{"user", length});
+                            task.execute("user", length);
                             selected_tab = "user";
                             tab_user.setChecked(true);
                             tab_group.setChecked(false);
@@ -436,9 +444,10 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
             ArrayList<DataObject> widgets = null;
 
             if (api.sessionInitiated()) {
-                String filter = null;
+                //String filter = null;
                 if (type[0].equals("resource")) {
-                    filter = "filter[type][0]=2&filter[type][1]=3&filter[type][2]=4&filter[type][3]=5&filter[type][5]=6";
+                    type[0] = "default_resource";
+                    // filter = "filter[type][0]=2&filter[type][1]=3&filter[type][2]=4&filter[type][3]=5&filter[type][5]=6";
                 }
                 if (type.length > 1) {
                     String length = type[1];
@@ -446,18 +455,23 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                     String length = "10"; //Config.retrieveLength(getApplicationContext());
                 }
 
-                widgets = api.getData(type[0], filter, true, length);
+
+                if (api.isNetworkAvailable()) {
+                    api.getSupportedTags();
+                }
+
+                widgets = api.getData(type[0], null, true, length);
 
                 if (widgets != null)
-                    System.out.println("Asked for " + length + " items, received: " + widgets.size()+", used filter: "+filter);
+                    Log.d(Config.DEBUG_TAG, "Asked for " + length + " items, received: " + widgets.size() + ", used filter: null");
                 else
-                    System.out.println("Asked for " + length + " items, received: NULL, used filter: "+filter);
+                    Log.d(Config.DEBUG_TAG, "Asked for " + length + " items, received: NULL, used filter: null");
 
-                //System.out.println("Number of items: "+widgets.size());
+                //Log.d(Config.DEBUG_TAG, "Number of items: "+widgets.size());
 
-                if (widgets != null && widgets.size() == 0) {
+                if (widgets == null || widgets.size() == 0) {
                     if (type[0].equals("user")) {
-                        DataObject object = null;
+                        DataObject object;
                         object = new UserObject(-1);
                         if (api.isNetworkAvailable()) {
                             ((UserObject) object).setName(getString(R.string.nothing_found));
@@ -466,11 +480,18 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                         }
                         ((UserObject) object).setIconId(null);
                         ((UserObject) object).setNow_online("");
-                        widgets.add(object);
+
+                        if (widgets == null) {
+                            ArrayList<DataObject> objects = new ArrayList<DataObject>();
+                            objects.add(object);
+                            return objects;
+                        } else {
+                            widgets.add(object);
+                        }
                     }
 
                     if (type[0].equals("group")) {
-                        DataObject object = null;
+                        DataObject object;
                         object = new GroupObject(-1);
                         if (api.isNetworkAvailable()) {
                             ((GroupObject) object).setTitle(getString(R.string.nothing_found));
@@ -478,10 +499,17 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                             ((GroupObject) object).setTitle(getString(R.string.no_offline_data));
                         }
                         ((GroupObject) object).setIconId(null);
-                        widgets.add(object);
+
+                        if (widgets == null) {
+                            ArrayList<DataObject> objects = new ArrayList<DataObject>();
+                            objects.add(object);
+                            return objects;
+                        } else {
+                            widgets.add(object);
+                        }
                     }
-                    if (type[0].equals("resource")) {
-                        DataObject object = null;
+                    if (type[0].equals("resource") || type[0].equals("default_resource")) {
+                        DataObject object;
                         object = new ResourceObject(-1);
                         if (api.isNetworkAvailable()) {
                             ((ResourceObject) object).setTitle(getString(R.string.nothing_found));
@@ -490,14 +518,17 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                         }
                         ((ResourceObject) object).setIconId(null);
 
-                        widgets.add(object);
+                        if (widgets == null) {
+                            ArrayList<DataObject> objects = new ArrayList<DataObject>();
+                            objects.add(object);
+                            return objects;
+                        } else {
+                            widgets.add(object);
+                        }
                     }
                 }
 
-                // if widgets nicht null und size == 0 , Nachricht zeigen
-                if (api.isNetworkAvailable()) {
-                    api.getSupportedTags();
-                }
+
             }
             return widgets;
         }
@@ -527,7 +558,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
                     tab_resource.setChecked(false);
                     */
                 } catch (IllegalArgumentException e) {
-                    System.out.println("I caught an IllegalArgumentException.");
+                    Log.d(Config.DEBUG_TAG, "I caught an IllegalArgumentException.");
                 }
             }
 
@@ -543,7 +574,7 @@ public class WidgetActivity extends BaseActivity implements OnTouchListener {
             String action_type = b.getString("type");
 
             if (action_type.equals("start")) {
-                System.out.println("DataUpdater startr eceived ");
+                Log.d(Config.DEBUG_TAG, "DataUpdater startr eceived ");
                 Message msg = handler.obtainMessage();
                 msg.what = 1;
 

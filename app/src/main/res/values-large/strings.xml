@@ -3,7 +3,7 @@
     <string name="item_not_available_offline">Item not available offline.</string>
     <string name="toast_crash">Sorry, the app crashed, but a report has been sent to the developers to help fix the issue!</string>
     <string name="accept_friendship">accept friendship</string>
-    <string name="loadingdotdotdot">Loading...</string>
+    <string name="loadingdotdotdot">Loading…</string>
     <string name="your_message_hint">your message</string>
     <string name="help">help</string>
     <string name="loading_data">Loading data</string>
@@ -12,7 +12,7 @@
     <string name="languages">Languages</string>
     <string name="connections">Connections</string>
     <string name="video">Video</string>
-    <string name="load_more">Load more...</string>
+    <string name="loading_more">Load more…</string>
     <string name="dashboard_messages">Messages</string>
     <string name="dashboard_new_messages">new</string>
     <string name="error_loading_data">Error loading data</string>
@@ -30,4 +30,16 @@
     <string name="moderator">moderator</string>
     <string name="administrator">administrator</string>
     <string name="no_link">no link</string>
+    <string name="please_complete_profile">Please complete your profile!</string>
+    <string name="logout_confirmation_question">Do you really want to logout?</string>
+    <string name="email_already_in_use">This email address is already in use.</string>
+    <string name="email_address_wrong">Please correct your email address.</string>
+    <string name="username_already_in_use">This username is already in use.</string>
+    <string name="wrong_security_answer">The security answer was wrong.</string>
+    <string name="security_question_for_signup">Security Question</string>
+    <string name="profile_completed">Profile completed</string>
+    <string name="error_deployment_test_failed">Error: Deployment test failed.</string>
+    <string name="recent_activities">Recent Activities</string>
+    <string name="load_more">load more...</string>
+    <string name="toggle_status">toggle status</string>
 </resources>

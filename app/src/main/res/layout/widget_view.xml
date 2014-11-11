@@ -136,17 +136,17 @@
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
         android:scaleType="fitStart"
-        android:paddingTop="5dp"
+        android:paddingTop="2dp"
         android:src="@drawable/bg" />
 
 			<ListView
 			    android:id="@+id/widget_list"
 			    android:layout_width="fill_parent"
 			    android:layout_height="fill_parent"
-			    android:layout_marginBottom="10dp"
-			    android:layout_marginLeft="5dp"
-			    android:layout_marginRight="5dp"
-			    android:layout_marginTop="5dp" >
+			    android:layout_marginBottom="5dp"
+			    android:layout_marginLeft="2dp"
+			    android:layout_marginRight="2dp"
+			    android:layout_marginTop="2dp" >
 
 			</ListView>
 		</RelativeLayout>

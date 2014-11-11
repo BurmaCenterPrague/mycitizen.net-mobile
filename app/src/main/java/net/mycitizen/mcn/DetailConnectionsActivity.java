@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -60,7 +61,7 @@ public class DetailConnectionsActivity extends BaseActivity {
         objectType = intent.getStringExtra("objectType");
         objectId = intent.getStringExtra("objectId");
 
-        setContentView(R.layout.detail_activities_view);
+        setContentView(R.layout.detail_connections_view);
 
         title = (TextView) findViewById(R.id.detail_activities_title);
 
@@ -140,7 +141,7 @@ public class DetailConnectionsActivity extends BaseActivity {
         });
 
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{objectType, objectId});
+        task.execute(objectType, objectId);
 
         Button menu_filter = (Button) findViewById(R.id.widget_menu_filter);
         SharedPreferences icon_settings = DetailConnectionsActivity.this.getSharedPreferences("MyCitizen", 0);
@@ -177,7 +178,7 @@ public class DetailConnectionsActivity extends BaseActivity {
 
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -210,7 +211,7 @@ public class DetailConnectionsActivity extends BaseActivity {
             if (api.sessionInitiated()) {
                 object = api.getDetail(type[0], Integer.valueOf(type[1]));
             }
-            System.out.println("DetailConnectionsActivity, DashboardInit; type: "+type[0]+", id: "+Integer.valueOf(type[1]));
+            Log.d(Config.DEBUG_TAG, "DetailConnectionsActivity, DashboardInit; type: " + type[0] + ", id: " + Integer.valueOf(type[1]));
             if (objectType.equals("user")) {
                 //user_list_items = result.getUsers();
                 group_list_items = object.getGroups(api);

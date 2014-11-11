@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013ff. mycitizen.net
+ *
+ * Licensed under the GPLv3 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.mycitizen.mcn;
 
 import java.util.List;
@@ -17,6 +33,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -86,18 +103,22 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
             location_filter_gpsy = settings.getString("filter_gpsy", null);
             int location_filter_radius = settings.getInt("filter_radius", 0);
 
-            System.out.println("load " + location_filter_gpsx + " " + location_filter_gpsy);
+            Log.d(Config.DEBUG_TAG, "load " + location_filter_gpsx + " " + location_filter_gpsy);
             if (location_filter_gpsx == null || location_filter_gpsy == null) {
-                //location_filter_gpsx = "50278137";
-                //location_filter_gpsy = "14328357";
+                location_filter_gpsx = settings.getString("gps_default_latitude", "0");
+                location_filter_gpsy = settings.getString("gps_default_longitude", "0");
             } else {
-                System.out.println("START: " + location_filter_gpsx + " " + location_filter_gpsy);
-                mapCenter = new GeoPoint(Integer.valueOf(location_filter_gpsx), Integer.valueOf(location_filter_gpsy));
+                Log.d(Config.DEBUG_TAG, "START: " + location_filter_gpsx + " " + location_filter_gpsy);
+                try {
+                    mapCenter = new GeoPoint(Integer.valueOf(location_filter_gpsx), Integer.valueOf(location_filter_gpsy));
+                } catch (NumberFormatException e) {
+
+                }
             }
             circleRadius = (SeekBar) findViewById(R.id.map_radius);
             circleRadius.setMax(500000);
-            circleRadius.setEnabled(false);
-            System.out.println("PROGRESS " + location_filter_radius);
+            // circleRadius.setEnabled(false);
+            Log.d(Config.DEBUG_TAG, "PROGRESS " + location_filter_radius);
             circleRadius.setProgress(location_filter_radius);
 
             circleRadius.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -153,13 +174,9 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
                 @Override
                 public void onClick(View v) {
                     // TODO system zadavani bodu na mapu
-                    if (edit.isChecked()) {
-                        inEditMode = true;
-                        circleRadius.setEnabled(true);
-                    } else {
-                        inEditMode = false;
-                        circleRadius.setEnabled(false);
-                    }
+                    // circleRadius.setEnabled(true);
+//circleRadius.setEnabled(false);
+                    inEditMode = edit.isChecked();
                 }
             });
 
@@ -194,7 +211,7 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
 
             mc = mapView.getController();
             if (mapCenter != null) {
-                System.out.println("XXX: " + mapCenter.getLatitudeE6() + " " + mapCenter.getLongitudeE6());
+                Log.d(Config.DEBUG_TAG, "XXX: " + mapCenter.getLatitudeE6() + " " + mapCenter.getLongitudeE6());
                 //mc.setCenter(mapCenter);
 
                 overlay.updateCenter(mapCenter);
@@ -252,7 +269,7 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
             loader = loadingDialog();
 
             DashboardInit task = new DashboardInit();
-            task.execute(new String[]{objectType, objectId});
+            task.execute(objectType, objectId);
 
             Button mylocation = (Button) findViewById(R.id.map_my_location);
             mylocation.setOnClickListener(new OnClickListener() {
@@ -285,7 +302,7 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
 
             mc = mapView.getController();
             if (mapCenter != null) {
-                System.out.println("XXX: " + mapCenter.getLatitudeE6() + " " + mapCenter.getLongitudeE6());
+                Log.d(Config.DEBUG_TAG, "XXX: " + mapCenter.getLatitudeE6() + " " + mapCenter.getLongitudeE6());
                 //mc.setCenter(mapCenter);
 
                 overlay.updateCenter(mapCenter);
@@ -351,8 +368,8 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
                     editor.putString("filter_gpsx", String.valueOf(finale.getLatitudeE6()));
                     editor.putString("filter_gpsy", String.valueOf(finale.getLongitudeE6()));
                     editor.putInt("filter_radius", circleRadius.getProgress());
-                    System.out.println("PROGRESSSET " + circleRadius.getProgress());
-                    System.out.println("save " + finale.getLatitudeE6() + " " + finale.getLongitudeE6());
+                    Log.d(Config.DEBUG_TAG, "PROGRESSSET " + circleRadius.getProgress());
+                    Log.d(Config.DEBUG_TAG, "save " + finale.getLatitudeE6() + " " + finale.getLongitudeE6());
                     editor.commit();
 
                     mapView.invalidate();
@@ -410,8 +427,21 @@ public class MapActivity extends ActionBarActivity implements OnTouchListener, L
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
+
+        SharedPreferences settings = getSharedPreferences("MyCitizen", 0);
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("last_latitude", Double.toString(latitude));
+            editor.putString("last_longitude", Double.toString(longitude));
+        }
+        if (latitude == 0 || longitude == 0) {
+            String deployment_latitude = settings.getString("deployment_latitude", "0");
+            String deployment_longitude = settings.getString("deployment_longitude", "0");
+            latitude = Long.valueOf(settings.getString("last_latitude", deployment_latitude));
+            longitude = Long.valueOf(settings.getString("last_longitude", deployment_longitude));
+        }
 
         overlay.updateMyLocation(new GeoPoint(latitude, longitude));
 

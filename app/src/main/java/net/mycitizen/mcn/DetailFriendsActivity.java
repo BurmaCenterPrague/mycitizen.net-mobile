@@ -77,7 +77,7 @@ public class DetailFriendsActivity extends BaseActivity {
 
 
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{objectType, objectId});
+        task.execute(objectType, objectId);
 
         Button menu_filter = (Button) findViewById(R.id.widget_menu_filter);
         SharedPreferences icon_settings = DetailFriendsActivity.this.getSharedPreferences("MyCitizen", 0);
@@ -114,7 +114,7 @@ public class DetailFriendsActivity extends BaseActivity {
 
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override

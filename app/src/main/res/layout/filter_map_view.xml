@@ -80,7 +80,7 @@
 	<LinearLayout
 	    
 	    android:layout_width="match_parent"
-	    android:layout_height="30dp"
+	    android:layout_height="40dp"
 	    android:id="@+id/edit_map_view_slider"
 	    android:layout_above="@id/edit_map_view_bottom_menu"
 	    android:layout_weight="0.5"
@@ -91,12 +91,13 @@
 		    android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
 		    android:layout_weight="1"
-            android:padding="5px">
+            >
 
 			<SeekBar
 			    android:id="@+id/map_radius"
 			    android:layout_width="match_parent"
 			    android:layout_height="wrap_content"
+                android:layout_margin="5dp"
 			    android:layout_weight="1" />
 
 		</LinearLayout>
@@ -131,7 +132,7 @@
 			    android:layout_alignParentBottom="true"
 			    android:layout_alignParentLeft="true"
 			    android:layout_alignParentTop="false"
-			    android:layout_marginLeft="40dp"
+			    android:layout_marginLeft="70dp"
                 android:padding="10dp"
 			    android:text="+" />
 

@@ -116,6 +116,14 @@
 			    android:text=""
 			    android:textColor="@color/white" />
 
+            <Spinner
+                android:id="@+id/filter_map_alternative"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bottom_menu_button"
+                android:visibility="gone"/>
+
 		</LinearLayout>
 
 	</LinearLayout>

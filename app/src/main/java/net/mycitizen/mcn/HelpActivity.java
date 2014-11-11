@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.widget.TextView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -38,11 +39,11 @@ public class HelpActivity extends ActionBarActivity {
 
         Uri data = getIntent().getData();
         if (data != null) {
-            System.out.println(data.toString());
+            Log.d(Config.DEBUG_TAG, data.toString());
             topic = data.toString().replace("net.mycitizen.mcn://", "");
         }
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{topic});
+        task.execute(topic);
 
     }
 
@@ -58,10 +59,10 @@ public class HelpActivity extends ActionBarActivity {
             String[] type = urls;
 
             ApiConnector api = new ApiConnector(HelpActivity.this);
-            String data = null;
-            if (api.sessionInitiated()) {
+            String data;
+            // if (api.sessionInitiated()) {
                 data = api.createHelp(type[0]);
-            }
+            //}
 
             if (data == null) {
                 data = "";
@@ -75,6 +76,7 @@ public class HelpActivity extends ActionBarActivity {
             help_content.setText(Html.fromHtml(result));
             //Linkify.addLinks(help_content, Linkify.ALL);
             help_content.setMovementMethod(LinkMovementMethod.getInstance());
+            help_content.setTextSize(15);
             loader.dismiss();
         }
     }

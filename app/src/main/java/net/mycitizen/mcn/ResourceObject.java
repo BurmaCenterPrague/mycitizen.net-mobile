@@ -7,6 +7,7 @@ import org.osmdroid.util.GeoPoint;
 import android.content.Context;
 import android.content.SyncAdapterType;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 public class ResourceObject extends DataObject {
     private String title;
@@ -34,12 +35,14 @@ public class ResourceObject extends DataObject {
     private String response_user_name;
     private String ownerAvatar;
 
-    private String connectionStatus;
+    private String status;
 
     private int contentType;
     private String url;
 
     private int id;
+
+    private String source = "d";
 
     public ResourceObject(int id) {
         super(id, "resource");
@@ -53,7 +56,7 @@ public class ResourceObject extends DataObject {
         this.id = id;
     }
 
-    public void setConnectionStatus(String connectionStatus) {
+    /*public void setConnectionStatus(String connectionStatus) {
         this.connectionStatus = connectionStatus;
     }
 
@@ -63,7 +66,7 @@ public class ResourceObject extends DataObject {
         } else {
             return "0";
         }
-    }
+    }*/
 
     public String getTitle() {
         return title;
@@ -179,7 +182,7 @@ public class ResourceObject extends DataObject {
             html += "<span><b>Visibility: </b></span><span>friends/members</span><br/>";
         }
         ApiConnector api = new ApiConnector(ctx);
-        String language_name = api.translateLanguageCodeToName(this.language);
+        String language_name = Config.translateLanguageCodeToName(ctx, this.language);
         html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>"+language_name+"</span><br/>";
         html += "<div>" + this.description + "</div>";
 
@@ -190,6 +193,11 @@ public class ResourceObject extends DataObject {
     public int getRelationshipMeResource() {
         return this.relationship_me_resource;
     }
+
+    public void setRelationshipMeResource(int relationship) {
+        this.relationship_me_resource = relationship;
+    }
+
 
     public boolean isDeleted() {
         return this.trashed;
@@ -213,10 +221,6 @@ public class ResourceObject extends DataObject {
 
     public String getResponseUserName() {
         return this.response_user_name;
-    }
-
-    public void setRelationshipMeResource(int relationship) {
-        this.relationship_me_resource = relationship;
     }
 
     @Override
@@ -247,7 +251,7 @@ public class ResourceObject extends DataObject {
 
 
     public int getContentType() {
-        System.out.println("subType: " + subType + ", contentType: " + contentType);
+        Log.d(Config.DEBUG_TAG, "subType: " + subType + ", contentType: " + contentType);
         return 10 * subType + contentType;
     }
 
@@ -264,7 +268,7 @@ public class ResourceObject extends DataObject {
         if (contentTypeLabel.equals("media_soundcloud")) {
             contentType = 4;
         }
-        System.out.println("contentTypeLabel: " + contentTypeLabel + ", contentType: " + contentType);
+        Log.d(Config.DEBUG_TAG, "contentTypeLabel: " + contentTypeLabel + ", contentType: " + contentType);
     }
 
     public String getUrl() {
@@ -273,6 +277,26 @@ public class ResourceObject extends DataObject {
 
     public void setUrl(String url) {
         this.url = url;
-        System.out.println("url set to " + url);
+        Log.d(Config.DEBUG_TAG, "url set to " + url);
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getStatus() {
+        if (status != null && !status.equals("")) {
+            return status;
+        } else {
+            return "1";
+        }
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

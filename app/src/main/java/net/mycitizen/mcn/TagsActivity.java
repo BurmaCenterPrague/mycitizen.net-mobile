@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
@@ -38,9 +39,9 @@ public class TagsActivity extends ActionBarActivity {
 
         String objectType = intent.getStringExtra("ObjectType");
         String objectId = intent.getStringExtra("ObjectId");
-        System.out.println("SSS: " + objectId);
+        Log.d(Config.DEBUG_TAG, "SSS: " + objectId);
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{objectType, objectId});
+        task.execute(objectType, objectId);
 
 
         ImageButton profile_tags_save = (ImageButton) findViewById(R.id.profile_tags_save);

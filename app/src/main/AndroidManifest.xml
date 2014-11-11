@@ -4,7 +4,7 @@
     android:versionName="0.1 Beta" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="21" />
 
     <application
@@ -16,6 +16,7 @@
         <activity
             android:name="net.mycitizen.mcn.SplashActivity"
             android:theme="@style/Theme.AppCompat.Light"
+            android:configChanges="locale"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,6 +28,7 @@
         <activity
             android:name="net.mycitizen.mcn.LoginActivity"
             android:theme="@style/Theme.AppCompat.Light"
+            android:configChanges="locale"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +36,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
+
+        <activity
+            android:name="net.mycitizen.mcn.BaseActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:configChanges="locale"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name="net.mycitizen.mcn.WidgetActivity"
             android:theme="@style/Theme.AppCompat.Light"
@@ -49,7 +63,8 @@
         <activity
             android:name="net.mycitizen.mcn.GetStartedActivity"
             android:theme="@style/Theme.AppCompat.Light"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_main"
+            android:configChanges="locale">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -253,6 +268,17 @@
                 </intent-filter>
             </activity>
 
+        <activity
+            android:name="net.mycitizen.mcn.ActivitiesActivity"
+            android:parentActivityName="net.mycitizen.mcn.DashboardMenuActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 

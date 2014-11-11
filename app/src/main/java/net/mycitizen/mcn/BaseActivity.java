@@ -15,6 +15,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.ToggleButton;
@@ -46,7 +47,7 @@ public class BaseActivity extends ActionBarActivity {
 
         // do application-specific task(s) based on the current network state, such
         // as enabling queuing of HTTP requests when currentNetworkInfo is connected etc.
-        System.out.println(currentNetworkInfo);
+        Log.d(Config.DEBUG_TAG, "currentNetworkInfo: " + currentNetworkInfo);
         //activity.loadUrl("javascript:window.location.reload();");
         int strength = 5;
         if (currentNetworkInfo != null) {
@@ -61,7 +62,7 @@ public class BaseActivity extends ActionBarActivity {
                         strength = 100;
                     } else {
                         if (user_settings.getLong("last_network_request", -1) == 0 || user_settings.getLong("last_network_request", -1) == 5000) {
-                            strength = 1;
+                            strength = 5;
                         } else {
                             strength = 50;
                         }
@@ -79,12 +80,6 @@ public class BaseActivity extends ActionBarActivity {
                     }
                 }
             }
-
-            editor.putInt("connection_strength", strength);
-            long timeMeasured = System.currentTimeMillis();
-            editor.putLong("time_connection_measured", timeMeasured);
-
-            editor.commit();
 
 
             if (strength <= 25) {
@@ -112,7 +107,7 @@ public class BaseActivity extends ActionBarActivity {
                 }
             }
 
-            System.out.println("STRENGTH: " + user_settings.getLong("last_network_request", 0));
+
 
             if (dashboard_connection != null) {
                 dashboard_connection.setProgress(strength);
@@ -127,6 +122,7 @@ public class BaseActivity extends ActionBarActivity {
         } else {
             editor.putLong("last_network_request", -1);
             editor.commit();
+            strength = 1;
 
             if (dashboard_button != null) {
                 dashboard_button.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.ico_dashboard_low), null, null);
@@ -143,6 +139,16 @@ public class BaseActivity extends ActionBarActivity {
 
             }
         }
+
+
+        editor.putInt("connection_strength", strength);
+        long timeMeasured = System.currentTimeMillis();
+        editor.putLong("time_connection_measured", timeMeasured);
+
+        editor.commit();
+
+        Log.d(Config.DEBUG_TAG, "last_network_request: " + user_settings.getLong("last_network_request", 0));
+        Log.d(Config.DEBUG_TAG, "strength: " + strength);
     }
 
     private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
@@ -186,7 +192,7 @@ public class BaseActivity extends ActionBarActivity {
 
         registerReceivers();
 
-        System.out.println("resuming");
+        Log.d(Config.DEBUG_TAG, "resuming");
         updateConnection();
     }
 

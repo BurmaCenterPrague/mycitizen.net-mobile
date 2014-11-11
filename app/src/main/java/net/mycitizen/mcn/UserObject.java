@@ -6,6 +6,7 @@ import org.osmdroid.util.GeoPoint;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 public class UserObject extends DataObject {
     private String objectType;
@@ -17,7 +18,7 @@ public class UserObject extends DataObject {
 
     private String now_online;
 
-    private String connectionStatus;
+    private String status;
 
     private String description;
 
@@ -42,6 +43,8 @@ public class UserObject extends DataObject {
 
     private int id;
 
+    private String source = "d";
+
     public UserObject(int id, String firstName, String lastName, String login) {
         super(id, "user");
         this.firstName = firstName;
@@ -54,7 +57,7 @@ public class UserObject extends DataObject {
     public UserObject(int id) {
         super(id, "user");
         this.id = id;
-        System.out.println("id: " + id);
+        Log.d(Config.DEBUG_TAG, "id: " + id);
     }
 
     public String getName() {
@@ -86,9 +89,11 @@ public class UserObject extends DataObject {
         return "";
     }
 
+    /*
     public void setConnectionStatus(String connectionStatus) {
         this.connectionStatus = connectionStatus;
     }
+
 
     public String getConnectionStatus() {
         if (this.connectionStatus != null) {
@@ -106,6 +111,7 @@ public class UserObject extends DataObject {
         }
         return "";
     }
+    */
 
     public void setRealName(String firstName, String lastName) {
         this.firstName = firstName;
@@ -193,7 +199,6 @@ public class UserObject extends DataObject {
 
     public GeoPoint getPosition() {
         if (gpsx == null || gpsy == null) {
-            System.out.println("User coords are null");
             return null;
         }
         if (this.gpsx.equals("null") || this.gpsy.equals("null")) {
@@ -233,12 +238,6 @@ public class UserObject extends DataObject {
     public String getDetail(Context ctx) {
         String html = "";
 
-        if (this.access == 2) {
-            html += "<div>" + ctx.getString(R.string.moderator) + "</div>";
-        } else if (this.access == 3) {
-            html += "<div>" + ctx.getString(R.string.administrator) + "</div>";
-        }
-
         html += "<div>";
         if (this.visibility == 1) {
             html += "<span><b>" + ctx.getString(R.string.visibility) + ": </b></span><span>" + ctx.getString(R.string.visibility_world) + "</span><br/>";
@@ -249,7 +248,7 @@ public class UserObject extends DataObject {
         }
 
         ApiConnector api = new ApiConnector(ctx);
-        String language_name = api.translateLanguageCodeToName(this.language);
+        String language_name = Config.translateLanguageCodeToName(ctx, this.language);
             html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>"+language_name+"</span><br/>";
 
 
@@ -290,5 +289,29 @@ public class UserObject extends DataObject {
 
     public int getId() {
         return id;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getTitle() {
+        return this.name;
+    }
+
+    public String getStatus() {
+        if (status != null && !status.equals("")) {
+            return status;
+        } else {
+            return "1";
+        }
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

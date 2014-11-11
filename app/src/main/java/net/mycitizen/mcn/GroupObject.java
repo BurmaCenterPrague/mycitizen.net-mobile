@@ -23,11 +23,13 @@ public class GroupObject extends DataObject {
 
     private String iconId;
 
-    private String connectionStatus;
+    private String status;
 
     private int id;
 
     private int relationship_me_group;
+
+    private String source = "d";
 
     public GroupObject(int id) {
         super(id, "group");
@@ -40,7 +42,7 @@ public class GroupObject extends DataObject {
         this.id = id;
     }
 
-    public void setConnectionStatus(String connectionStatus) {
+    /*public void setConnectionStatus(String connectionStatus) {
         this.connectionStatus = connectionStatus;
     }
 
@@ -50,7 +52,7 @@ public class GroupObject extends DataObject {
         } else {
             return "0";
         }
-    }
+    }*/
 
     public String getTitle() {
         return title;
@@ -136,7 +138,7 @@ public class GroupObject extends DataObject {
         }
 
         ApiConnector api = new ApiConnector(ctx);
-        String language_name = api.translateLanguageCodeToName(this.language);
+        String language_name = Config.translateLanguageCodeToName(ctx, this.language);
             html += "<span><b>" + ctx.getString(R.string.language) + ": </b></span><span>"+language_name+"</span><br/>";
 
         html += "<div>" + this.description + "</div>";
@@ -159,5 +161,25 @@ public class GroupObject extends DataObject {
 
     public int getId() {
         return id;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getStatus() {
+        if (status != null && !status.equals("")) {
+            return status;
+        } else {
+            return "1";
+        }
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

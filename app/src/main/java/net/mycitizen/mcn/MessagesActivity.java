@@ -11,11 +11,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -42,7 +44,7 @@ public class MessagesActivity extends BaseActivity {
 
     String filter;
 
-    String objectType, objectId, recipient;
+    String objectType, objectId, objectName;
 
     DataObject author;
 
@@ -54,6 +56,7 @@ public class MessagesActivity extends BaseActivity {
 
     int last_index = 0;
     int last_top = 0;
+    int length = 10;
 
     @Override
     protected void onResume() {
@@ -70,7 +73,7 @@ public class MessagesActivity extends BaseActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         actionBar = getSupportActionBar();
-        actionBar.setTitle("Messages");
+        actionBar.setTitle(R.string.menu_messages);
         actionBar.setIcon(null);
         Boolean removed_toggle_active = false;
         Boolean notopened_toggle_active = false;
@@ -110,14 +113,18 @@ public class MessagesActivity extends BaseActivity {
 
         objectType = intent.getStringExtra("objectType");
         objectId = intent.getStringExtra("objectId");
+        objectName = intent.getStringExtra("recipient");
 
+        if (objectName != null) {
+            actionBar.setTitle(objectName);
+        }
 
         messageViewType = intent.getStringExtra("type");
 
-        System.out.println("messageViewType: "+messageViewType);
+        Log.d(Config.DEBUG_TAG, "messageViewType: " + messageViewType);
         if (messageViewType != null && messageViewType.equals("dialog_inbox")) {
 
-            filter = "filter[type][0]=1&filter[type][1]=9&filter[type][2]=10&filter[user_id]=" + logged_user_id;
+            filter = ""; //"filter[type][0]=1&filter[type][1]=8&filter[type][2]=9&filter[type][3]=10&filter[user_id]=" + logged_user_id;
             setContentView(R.layout.dialog_inbox);
 
             filter_opened = (ToggleButton) findViewById(R.id.inbox_message_toggle);
@@ -125,6 +132,8 @@ public class MessagesActivity extends BaseActivity {
                 filter_opened.setChecked(true);
                 filter += "&filter[opened]=1";
             }
+
+            // Log.d(Config.DEBUG_TAG, "objectType, objectId: "+objectType+", "+objectId);
             filter_opened.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
                 @Override
@@ -148,7 +157,7 @@ public class MessagesActivity extends BaseActivity {
                     loader = loadingDialog();
 
                     DashboardInit task = new DashboardInit();
-                    task.execute(new String[]{objectType, objectId});
+                    task.execute(objectType, objectId);
                 }
             });
 
@@ -180,118 +189,62 @@ public class MessagesActivity extends BaseActivity {
                     loader = loadingDialog();
 
                     DashboardInit task = new DashboardInit();
-                    task.execute(new String[]{objectType, objectId});
+                    task.execute(objectType, objectId);
                 }
             });
 
-            Button load_more = (Button) findViewById(R.id.message_load_more);
-            if (load_more != null) {
-                load_more.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(MessagesActivity.this, "Loading more (under development)",
-                                Toast.LENGTH_LONG).show();
-
-                        System.out.println("clicked on load more");
-                        ApiConnector api = new ApiConnector(MessagesActivity.this);
-                        if (api.isNetworkAvailable()) {
-                            Intent intent = new Intent(MessagesActivity.this, MessagesActivity.class);
-                            intent.putExtra("objectType", objectType);
-                            intent.putExtra("objectId", objectId);
-                            intent.putExtra("type", messageViewType);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(MessagesActivity.this, getString(R.string.not_available_offline),
-                                    Toast.LENGTH_LONG).show();
-                        }
-
-                    }
-                });
-            } else {
-                // todo: button not found
-                System.out.println("R.id.message_load_more not found!");
-            }
         } else {
             setContentView(R.layout.response_inbox);
 
             if (objectType.equals("user")) {
                 filter = "filter[type][0]=1&filter[all_members_only][0][type]=1&filter[all_members_only][0][id]=" + logged_user_id + "&filter[all_members_only][1][type]=1&filter[all_members_only][1][id]=" + objectId;
-                actionBar.setTitle("Messages");
+                // actionBar.setTitle("Messages");
             } else if (objectType.equals("group")) {
                 filter = "filter[type][0]=8&filter[all_members_only][0][type]=2&filter[all_members_only][0][id]=" + objectId;
-                actionBar.setTitle("Chat");
+                // actionBar.setTitle("Chat");
             } else if (objectType.equals("resource")) {
                 // filter = "filter[type][0]=8&filter[resource_id]="+objectId;
                 filter = "filter[type][0]=8&filter[all_members_only][0][type]=3&filter[all_members_only][0][id]=" + objectId;
-                actionBar.setTitle("Comments");
+                // actionBar.setTitle("Comments");
             }
 
             response_input = (EditText) findViewById(R.id.response_input);
-
+            response_input.clearFocus();
             Button send_response = (Button) findViewById(R.id.send_response);
+
+            api = new ApiConnector(this);
+
+            if (api.isNetworkAvailable()) {
+                response_input.setEnabled(true);
+                response_input.setHint(R.string.your_message_hint);
+                send_response.setEnabled(true);
+            } else {
+                response_input.setEnabled(false);
+                response_input.setHint(R.string.not_available_offline);
+                send_response.setEnabled(false);
+            }
+
             send_response.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
                     loader = loadingDialog();
-                    System.out.println("OBJECT ID " + objectId);
+                    Log.d(Config.DEBUG_TAG, "OBJECT ID " + objectId);
                     String response = response_input.getText().toString();
 
                     MessageSender task = new MessageSender();
-                    task.execute(new String[]{objectType, objectId, response});
+                    task.execute(objectType, objectId, response);
                 }
             });
 
-            Button load_more = (Button) findViewById(R.id.message_load_more);
-            if (load_more != null) {
-                load_more.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(MessagesActivity.this, "Loading more (under development)",
-                                Toast.LENGTH_LONG).show();
-
-                        System.out.println("clicked on load more");
-                        ApiConnector api = new ApiConnector(MessagesActivity.this);
-                        if (api.isNetworkAvailable()) {
-                            Intent intent = new Intent(MessagesActivity.this, MessagesActivity.class);
-                            intent.putExtra("objectType", objectType);
-                            intent.putExtra("objectId", objectId);
-                            intent.putExtra("type", messageViewType);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(MessagesActivity.this, getString(R.string.not_available_offline),
-                                    Toast.LENGTH_LONG).show();
-                        }
-
-                    }
-                });
-            } else {
-                // todo: button not found
-                System.out.println("R.id.message_load_more not found!");
-            }
         }
 
-/*
-        ImageView avatar = (ImageView) findViewById(R.id.avatar);
-        avatar.setOnClickListener(new OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MessagesActivity.this, DetailActivity.class);
-                intent.putExtra("ObjectType", "1");
-                //intent.putExtra("ObjectId", String.valueOf(widget_object.getObjectId()));
-                System.out.println("OBJECT ID " + objectId);
-
-                //startActivity(intent);
-            }
-        });
-        */
         loader = loadingDialog();
 
-        api = new ApiConnector(this);
 
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{objectType, objectId});
+        task.execute(objectType, objectId);
 
         message_list = (ListView) findViewById(R.id.message_list);
 
@@ -314,6 +267,7 @@ public class MessagesActivity extends BaseActivity {
 
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent(MessagesActivity.this, FilterMenuActivity.class);
 
                 //String message = editText.getText().toString();
@@ -342,7 +296,7 @@ public class MessagesActivity extends BaseActivity {
 
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -357,6 +311,34 @@ public class MessagesActivity extends BaseActivity {
             }
         });
 
+
+        // TextView load_more = (TextView) findViewById(R.id.message_load_more);
+        message_list.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                if (i == 0) {
+                    length += 10;
+
+                    api = new ApiConnector(getApplicationContext());
+                    if (api.isNetworkAvailable()) {
+                        // todo find better trigger, and fix
+                        //Toast.makeText(getApplicationContext(), getString(R.string.loading_more)+" - under development", Toast.LENGTH_LONG).show();
+
+                        // last_index = message_list.getFirstVisiblePosition();
+                        // DashboardInit task = new DashboardInit();
+                        //task.execute(new String[]{null, null});
+                    } else {
+                        // Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
     }
 
     private ProgressDialog loadingDialog() {
@@ -376,10 +358,34 @@ public class MessagesActivity extends BaseActivity {
                 SharedPreferences settings = MessagesActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
                 int logged_user_id = settings.getInt("logged_user_id", 0);
-                if (messageViewType.equals("response_inbox")) {
+                if (messageViewType.equals("response_inbox") && type[1] != null) {
                     author = api.getDetail(type[0], Integer.valueOf(type[1]));
                 }
-                messages = api.getData("resource", filter, false, "10");
+
+                Log.d(Config.DEBUG_TAG, "DashboardInit, filter: " + filter + ", length: " + length);
+
+                messages = api.getData("messages", filter, false, Integer.toString(length));
+            }
+
+            // if (messages != null) Log.d(Config.DEBUG_TAG, "messages.size(): "+messages.size());
+
+            if (messages == null || (messages.size() == 0)) {
+                    DataObject object;
+                    object = new ResourceObject(-1);
+                    if (api.isNetworkAvailable()) {
+                        ((ResourceObject) object).setSecondaryTitle(getString(R.string.nothing_found));
+                    } else {
+                        ((ResourceObject) object).setSecondaryTitle(getString(R.string.no_offline_data));
+                    }
+                    ((ResourceObject) object).setSubType(0);
+                    //((ResourceObject) object).setIconId(null);
+                    if (messages == null) {
+                        ArrayList<DataObject> objects = new ArrayList<DataObject>();
+                        objects.add(object);
+                        return objects;
+                    } else {
+                        messages.add(object);
+                    }
             }
             return messages;
         }
@@ -401,28 +407,28 @@ public class MessagesActivity extends BaseActivity {
                     public void onTrashMessageAction(int message_id) {
                         loader = loadingDialog();
                         Trasher task = new Trasher();
-                        task.execute(new String[]{String.valueOf(message_id)});
+                        task.execute(String.valueOf(message_id));
                     }
 
                     @Override
                     public void onUntrashMessageAction(int message_id) {
                         loader = loadingDialog();
                         Untrasher task = new Untrasher();
-                        task.execute(new String[]{String.valueOf(message_id)});
+                        task.execute(String.valueOf(message_id));
                     }
 
                     @Override
                     public void onAcceptMessageAction(int message_id, int sender_id) {
                         loader = loadingDialog();
                         Responder task = new Responder();
-                        task.execute(new String[]{"accept", String.valueOf(message_id), String.valueOf(sender_id)});
+                        task.execute("accept", String.valueOf(message_id), String.valueOf(sender_id));
                     }
 
                     @Override
                     public void onDeclineMessageAction(int message_id, int sender_id) {
                         loader = loadingDialog();
                         Responder task = new Responder();
-                        task.execute(new String[]{"decline", String.valueOf(message_id), String.valueOf(sender_id)});
+                        task.execute("decline", String.valueOf(message_id), String.valueOf(sender_id));
                     }
 
                     @Override
@@ -433,35 +439,28 @@ public class MessagesActivity extends BaseActivity {
                 message_list.setAdapter(o);
 
 
-                // scroll to bottom
+                // scroll to latest message at bottom
+                if (last_index == 0) {
+                    last_index = message_list_items.size();
+                    message_list.invalidate();
+                    message_list.setSelectionFromTop(last_index, 10);
+                }
 
-                last_index = message_list_items.size();
-                //message_list.setAdapter(new ObjectListItemAdapter(MessagesActivity.this, message_type, result));
-                message_list.invalidate();
 
-                message_list.setSelectionFromTop(last_index, 10);
-                /*
-                    if (last_index != 0) {
-
-                        last_index = 0;
-                        last_top = 0;
-                    }
-*/
             }
 
             if (messageViewType.equals("response_inbox")) {
 
                 try {
                     if (objectType.equals("user")) {
-                        actionBar.setTitle("Messages (" + ((UserObject) author).getName() + ")");
+                        actionBar.setTitle( ((UserObject) author).getName() + ": " + getString(R.string.menu_messages));
                     } else if (objectType.equals("group")) {
-                        actionBar.setTitle("Chat (" + ((GroupObject) author).getTitle() + ")");
+                        actionBar.setTitle( ((GroupObject) author).getTitle() + ": " + getString(R.string.menu_messages_group));
                     } else if (objectType.equals("resource")) {
-                        actionBar.setTitle("Comments (" + ((ResourceObject) author).getTitle() + ")");
+                        actionBar.setTitle( ((ResourceObject) author).getTitle() + ": " + getString(R.string.menu_messages_resource));
                     }
                 } catch (NullPointerException e) {}
             }
-
 
             loader.dismiss();
         }
@@ -481,7 +480,7 @@ public class MessagesActivity extends BaseActivity {
 
             if (result) {
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{objectType, objectId});
+                task.execute(objectType, objectId);
 
                 if (response_input != null) {
                     runOnUiThread(new Runnable() {
@@ -523,7 +522,7 @@ public class MessagesActivity extends BaseActivity {
 
             if (result) {
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{objectType, objectId});
+                task.execute(objectType, objectId);
 
 
                 return "true";
@@ -559,7 +558,7 @@ public class MessagesActivity extends BaseActivity {
 
             if (result) {
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{objectType, objectId});
+                task.execute(objectType, objectId);
 
 
                 return "true";
@@ -595,7 +594,7 @@ public class MessagesActivity extends BaseActivity {
 
             if (result) {
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{objectType, objectId});
+                task.execute(objectType, objectId);
 
 
                 return "true";
@@ -634,7 +633,7 @@ public class MessagesActivity extends BaseActivity {
 
             if (result) {
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{objectType, objectId});
+                task.execute(objectType, objectId);
 
 
                 return "true";
@@ -692,6 +691,7 @@ public class MessagesActivity extends BaseActivity {
         Intent intent;
         switch (item.getItemId()) {
             case R.id.menu_empty_trash:
+
                 if (!api.isNetworkAvailable()) {
                     Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
                 } else {
@@ -700,7 +700,7 @@ public class MessagesActivity extends BaseActivity {
                         @Override
                         public void run() {
                             Emptyer task = new Emptyer();
-                            task.execute(new String[]{});
+                            task.execute();
                         }
                     });
 
@@ -718,6 +718,10 @@ public class MessagesActivity extends BaseActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    // TextView load_more = (TextView) findViewById(R.id.message_load_more);
+    // load_more.setVisibility(View.VISIBLE);
+
 
 
 }

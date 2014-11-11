@@ -27,7 +27,7 @@ public class ProfileDescriptionActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                description.getText().toString();
+                String output = description.getText().toString();
                 //todo save
 
                 Intent intent = new Intent(ProfileDescriptionActivity.this, ProfileMainActivity.class);

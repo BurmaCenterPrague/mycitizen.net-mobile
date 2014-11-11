@@ -10,15 +10,20 @@ import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osmdroid.util.GeoPoint;
 
 import net.mycitizen.mcn.MultiSpinner.MultiSpinnerListener;
 
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -39,14 +44,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class FilterMenuActivity extends BaseActivity {
+public class FilterMenuActivity extends BaseActivity implements LocationListener {
     public ApiConnector api;
     ProgressDialog loader = null;
     ToggleButton filter_status;
     EditText filter_input;
     MultiSpinner filter_tag;
     Spinner filter_language;
+    Spinner filter_map_alternative;
     CheckBox filter_my;
+
+    LocationManager locationManager;
+    double latitude, longitude;
 
     LinkedHashMap<Integer, Boolean> filter_tag_result = null;
 
@@ -70,6 +79,22 @@ public class FilterMenuActivity extends BaseActivity {
         api = new ApiConnector(this);
 
         my_tags = new ArrayList<DataObject>();
+
+        filter_map_alternative = (Spinner) findViewById(R.id.filter_map_alternative);
+
+        filter_map_alternative.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1,
+                                       int arg2, long arg3) {
+                filter_status.setChecked(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+
+            }
+        });
 
         filter_input = (EditText) findViewById(R.id.filter_input);
 
@@ -113,19 +138,17 @@ public class FilterMenuActivity extends BaseActivity {
         loader = loadingDialog();
 
         Init task = new Init();
-        task.execute(new String[]{""});
+        task.execute("");
 
 
         filter_tag.setMultiselectListener(new MultiSpinnerListener() {
 
             @Override
             public void onItemsSelected(LinkedHashMap<Integer, Boolean> result) {
-                System.out.println("david");
-
                 Iterator<Entry<Integer, Boolean>> it = result.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     filter_tag_result = result;
                     filter_status.setChecked(true);
                 }
@@ -207,20 +230,20 @@ public class FilterMenuActivity extends BaseActivity {
                     Iterator<Entry<String, String>> it = supported_tags.entrySet().iterator();
                     while (it.hasNext()) {
                         HashMap.Entry pairs = (HashMap.Entry) it.next();
-                        System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                        Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                         //pairs.getKey();
                         TagObject current_item = new TagObject(Integer.valueOf(pairs.getKey().toString()), pairs.getValue().toString());
-                        if (my_tags != null) {
+
                             Iterator<DataObject> iter = my_tags.iterator();
                             while (iter.hasNext()) {
                                 TagObject c = (TagObject) iter.next();
                                 if (c.getObjectId() == current_item.getObjectId()) {
-                                    System.out.println(c.getStatus());
+                                    Log.d(Config.DEBUG_TAG, String.valueOf(c.getStatus()));
                                     current_item.setStatus(true);
                                     break;
                                 }
                             }
-                        }
+
                         filter_tag_result.put(current_item.getObjectId(), current_item.getStatus());
                         default_items_ids.add(current_item.getObjectId());
                         default_items.add(current_item.getTitle());
@@ -251,6 +274,8 @@ public class FilterMenuActivity extends BaseActivity {
 
                 filter_tag_result = null;
 
+                filter_map_alternative.setSelection(0);
+
                 SharedPreferences save_settings = FilterMenuActivity.this.getSharedPreferences("MyCitizen", 0);
                 SharedPreferences.Editor editor = save_settings.edit();
 
@@ -258,6 +283,7 @@ public class FilterMenuActivity extends BaseActivity {
                 editor.putString("filter_gpsx", null);
                 editor.putString("filter_gpsy", null);
                 editor.putInt("filter_radius", 0);
+                editor.putString("filter_map_alternative", null);
 
                 editor.commit();
             }
@@ -319,7 +345,7 @@ public class FilterMenuActivity extends BaseActivity {
 
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -335,6 +361,32 @@ public class FilterMenuActivity extends BaseActivity {
         });
 
 
+        SharedPreferences settings = getSharedPreferences(Config.localStorageName, 0);
+
+        int strength = settings.getInt("connection_strength", 0);
+
+        Log.d(Config.DEBUG_TAG, "strength: " + strength);
+        if (strength < 50) {
+            Button map_button = (Button) findViewById(R.id.filter_map);
+            map_button.setVisibility(View.GONE);
+            filter_map_alternative.setVisibility(View.VISIBLE);
+
+            ArrayList<String> items = new ArrayList<String>();
+            String unit = settings.getString("distance_unit", "km");
+
+            items.add("radius");
+            items.add("10 " + unit);
+            items.add("50 " + unit);
+            items.add("100 " + unit);
+            items.add("500 " + unit);
+            items.add("1000 " + unit);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(FilterMenuActivity.this, android.R.layout.simple_spinner_item, items);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            filter_map_alternative.setAdapter(adapter);
+
+        }
     }
 
     public String generateFilterStorage() {
@@ -347,7 +399,7 @@ public class FilterMenuActivity extends BaseActivity {
             Iterator<Entry<Integer, Boolean>> it = filter_tag_result.entrySet().iterator();
             while (it.hasNext()) {
                 HashMap.Entry pairs = (HashMap.Entry) it.next();
-                System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                 if (((Boolean) pairs.getValue())) {
                     if (!tag_ids.equals("")) {
                         tag_ids += ",";
@@ -359,9 +411,23 @@ public class FilterMenuActivity extends BaseActivity {
             result += "'filter_tag':[" + tag_ids + "],";
 
         }
-        String languageName = filter_language.getSelectedItem().toString();
-        String languageCode = api.translateLanguageNameToCode(languageName);
-        result += "'filter_language':'" + languageCode + "',";
+        if (filter_language != null && filter_language.getSelectedItem() != null) {
+            String languageName = filter_language.getSelectedItem().toString();
+            String languageCode = Config.translateLanguageNameToCode(getApplicationContext(), languageName);
+            result += "'filter_language':'" + languageCode + "',";
+        }
+
+        if (filter_map_alternative != null && filter_map_alternative.getSelectedItem() != null) {
+            String mapDistance = filter_map_alternative.getSelectedItem().toString();
+            if (!mapDistance.equals("radius")) {
+                result += "'filter_map_alternative':'" + mapDistance + "',";
+                SharedPreferences settings = getSharedPreferences(Config.localStorageName, 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("filter_gpsx", String.valueOf(latitude * 100000));
+                editor.putString("filter_gpsy", String.valueOf(longitude * 100000));
+                editor.commit();
+            }
+        }
 
         if (filter_my.isChecked()) {
             result += "'filter_my':true,";
@@ -375,13 +441,13 @@ public class FilterMenuActivity extends BaseActivity {
             result += "'active':false";
         }
         result += "}";
-        System.out.println("FILTER: " + result);
+        Log.d(Config.DEBUG_TAG, "FILTER: " + result);
         return result;
 
     }
 
     public void translateFilterStorage(String storage) throws JSONException {
-        System.out.println("translateFilterStorage");
+        Log.d(Config.DEBUG_TAG, "translateFilterStorage");
 
         if (storage == null) {
             return;
@@ -398,18 +464,29 @@ public class FilterMenuActivity extends BaseActivity {
         } else {
             filter_my.setChecked(false);
         }
-        System.out.println(json.getString("filter_input"));
+        Log.d(Config.DEBUG_TAG, json.getString("filter_input"));
         filter_input.setText(json.getString("filter_input"));
-        System.out.println(filter_input.getText().toString());
+        Log.d(Config.DEBUG_TAG, "filter_input: " + filter_input.getText().toString());
 
         ArrayAdapter langAdap = (ArrayAdapter) filter_language.getAdapter();
         if (json.getString("filter_language") == null) {
             int langPosition = 0;
             filter_language.setSelection(langPosition);
         } else {
-            String languageName = api.translateLanguageCodeToName(json.getString("filter_language"));
+            String languageName = Config.translateLanguageCodeToName(getApplicationContext(), json.getString("filter_language"));
+            // Log.d(Config.DEBUG_TAG, "language code: "+json.getString("filter_language")+", name: "+languageName);
             int langPosition = langAdap.getPosition(languageName);
             filter_language.setSelection(langPosition);
+        }
+
+        ArrayAdapter mapAdap = (ArrayAdapter) filter_map_alternative.getAdapter();
+        if (json.has("filter_map_alternative") && json.getString("filter_map_alternative") == null) {
+            Log.d(Config.DEBUG_TAG, "filter_map_alternative: " + json.getString("filter_map_alternative"));
+            int mapPosition = 0;
+            filter_map_alternative.setSelection(mapPosition);
+        } else {
+            int mapPosition = mapAdap.getPosition(json.getString("filter_map_alternative"));
+            filter_map_alternative.setSelection(mapPosition);
         }
 
         JSONArray tags = json.getJSONArray("filter_tag");
@@ -422,8 +499,8 @@ public class FilterMenuActivity extends BaseActivity {
 
             TagObject tagO = new TagObject(tag, "");
             tagO.setStatus(true);
-            my_tags.add((DataObject) tagO);
-            System.out.println("Saved TAG " + tag);
+            my_tags.add(tagO);
+            Log.d(Config.DEBUG_TAG, "Saved TAG " + tag);
 
         }
 
@@ -443,7 +520,7 @@ public class FilterMenuActivity extends BaseActivity {
             Iterator<Entry<String, String>> it = supported_tags.entrySet().iterator();
             while (it.hasNext()) {
                 HashMap.Entry pairs = (HashMap.Entry) it.next();
-                System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                 //pairs.getKey();
                 TagObject current_item = new TagObject(Integer.valueOf(pairs.getKey().toString()), pairs.getValue().toString());
                 if (my_tags != null) {
@@ -451,7 +528,7 @@ public class FilterMenuActivity extends BaseActivity {
                     while (iter.hasNext()) {
                         TagObject c = (TagObject) iter.next();
                         if (c.getObjectId() == current_item.getObjectId()) {
-                            System.out.println(c.getStatus());
+                            Log.d(Config.DEBUG_TAG, String.valueOf(c.getStatus()));
                             current_item.setStatus(true);
                             break;
                         }
@@ -483,21 +560,26 @@ public class FilterMenuActivity extends BaseActivity {
 
         if (filter_my.isChecked()) {
             filter_active = true;
-            System.out.println("FILTER: filter_my");
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_my");
         }
         if (save_settings.getString("filter_gpsx", null) != null && save_settings.getString("filter_gpsy", null) != null) {
             filter_active = true;
-            System.out.println("FILTER: filter_map");
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_map");
         }
 
         if (!filter_input.getText().toString().equals("")) {
             filter_active = true;
-            System.out.println("FILTER: filter_input");
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_input");
         }
 
         if (filter_language.getSelectedItemPosition() > 0) {
             filter_active = true;
-            System.out.println("FILTER: filter_lang");
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_lang");
+        }
+
+        if (filter_map_alternative.getSelectedItemPosition() > 0) {
+            filter_active = true;
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_map_alternative");
         }
 
         String tag_ids = "";
@@ -505,7 +587,7 @@ public class FilterMenuActivity extends BaseActivity {
             Iterator<Entry<Integer, Boolean>> it = filter_tag_result.entrySet().iterator();
             while (it.hasNext()) {
                 HashMap.Entry pairs = (HashMap.Entry) it.next();
-                System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                 if (((Boolean) pairs.getValue())) {
                     if (!tag_ids.equals("")) {
                         tag_ids += ",";
@@ -517,10 +599,10 @@ public class FilterMenuActivity extends BaseActivity {
         if (!tag_ids.equals("")) {
 
             filter_active = true;
-            System.out.println("FILTER: filter_tag");
+            Log.d(Config.DEBUG_TAG, "FILTER: filter_tag");
         }
         if (filter_active) {
-            System.out.println("FILTER REFRESH");
+            Log.d(Config.DEBUG_TAG, "FILTER REFRESH");
             editor.putString("help", generateFilterStorage());
             editor.putBoolean("filter_active", true);
             if (filter_my.isChecked()) {
@@ -528,8 +610,6 @@ public class FilterMenuActivity extends BaseActivity {
                 editor.putString("filter_gpsx", null);
                 editor.putString("filter_gpsy", null);
                 editor.putInt("filter_radius", 0);
-
-
             }
 
 
@@ -554,12 +634,14 @@ public class FilterMenuActivity extends BaseActivity {
 
             String[] type = urls;
 
-            ApiConnector api = new ApiConnector(FilterMenuActivity.this);
 
+
+            ApiConnector api = new ApiConnector(FilterMenuActivity.this);
 
             if (api.sessionInitiated()) {
                 supported_lng = api.getSupportedLanguages();
                 supported_tags = api.getSupportedTags();
+
             }
             return true;
         }
@@ -573,15 +655,12 @@ public class FilterMenuActivity extends BaseActivity {
                 items.add(getString(R.string.language_all));
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-//                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+//                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     items.add(pairs.getValue().toString());
                 }
 
-
-
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(FilterMenuActivity.this, android.R.layout.simple_spinner_item, items);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
 
                 filter_language.setAdapter(adapter);
 
@@ -597,7 +676,7 @@ public class FilterMenuActivity extends BaseActivity {
                 Iterator<Entry<String, String>> it = supported_tags.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     //pairs.getKey();
                     TagObject current_item = new TagObject(Integer.valueOf(pairs.getKey().toString()), pairs.getValue().toString());
                     if (my_tags != null) {
@@ -605,7 +684,7 @@ public class FilterMenuActivity extends BaseActivity {
                         while (iter.hasNext()) {
                             TagObject c = (TagObject) iter.next();
                             if (c.getObjectId() == current_item.getObjectId()) {
-                                System.out.println(c.getStatus());
+                                Log.d(Config.DEBUG_TAG, String.valueOf(c.getStatus()));
                                 current_item.setStatus(true);
                                 break;
                             }
@@ -663,4 +742,60 @@ public class FilterMenuActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onStart() {
+        Location location = null;
+        super.onStart();
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+
+        SharedPreferences settings = getSharedPreferences("MyCitizen", 0);
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("last_latitude", Double.toString(latitude));
+            editor.putString("last_longitude", Double.toString(longitude));
+        }
+        if (latitude == 0 || longitude == 0) {
+            String deployment_latitude = settings.getString("deployment_latitude", "0");
+            String deployment_longitude = settings.getString("deployment_longitude", "0");
+            latitude = Long.valueOf(settings.getString("last_latitude", deployment_latitude));
+            longitude = Long.valueOf(settings.getString("last_longitude", deployment_longitude));
+        }
+
+        Log.d(Config.DEBUG_TAG, "latitude: " + latitude + ", longitude: " + longitude);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        latitude = location.getLatitude();
+
+        longitude = location.getLongitude();
+        Log.d(Config.DEBUG_TAG, "latitude: " + latitude + ", longitude: " + longitude);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
 }

@@ -36,6 +36,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -69,6 +73,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
     AlertDialog dialog;
     ProgressDialog loader = null;
 
+    Boolean has_portrait = false;
     UserObject myProfile;
 
     int logged_user_id;
@@ -84,7 +89,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
     String selectedImagePath;
 
-    ArrayList<DataObject> tags;
+    ArrayList<DataObject> my_tags;
     ListView taglist;
 
     LocationManager locationManager;
@@ -127,11 +132,16 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
         SharedPreferences settings = ProfileMainActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
+        if (latitude == 0 || longitude == 0) {
+            latitude = Double.valueOf(settings.getString("gps_default_latitude", "0"));
+            longitude = Double.valueOf(settings.getString("gps_default_longitude", "0"));
+        }
+
         logged_user_id = settings.getInt("logged_user_id", 0);
 
         loader = loadingDialog();
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{"user", String.valueOf(logged_user_id)});
+        task.execute("user", String.valueOf(logged_user_id));
 
         profile_name = (EditText) findViewById(R.id.profile_name);
         profile_surname = (EditText) findViewById(R.id.profile_surname);
@@ -368,11 +378,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
             @Override
             public void onClick(View v) {
                 // TODO system zadavani bodu na mapu
-                if (map_edit.isChecked()) {
-                    inEditMode = true;
-                } else {
-                    inEditMode = false;
-                }
+                inEditMode = map_edit.isChecked();
             }
         });
 
@@ -404,39 +410,6 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 mc.zoomOut();
             }
         });
-         
-         /*
-        profile_language.setOnItemSelectedListener(
-                new OnItemSelectedListener() {
-                    public void onItemSelected(
-                            AdapterView<?> parent, View view, int position, long id) {
-                    	language_changed = true;
-                    	AlertDialog.Builder builder = new AlertDialog.Builder(ProfileMainActivity.this);
-	           	        builder.setMessage(getString(R.string.language_quit))
-	           	               .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-	           	                   public void onClick(DialogInterface dialog, int id) {
-	           	                       // FIRE ZE MISSILES!
-	           	                	   dialog.cancel();
-	           	                	  // System.exit(0);
-	           	                   }
-	           	               })
-	           	               .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-	           	                   public void onClick(DialogInterface dialog, int id) {
-	           	                       // User cancelled the dialog
-	           	                	   dialog.cancel();
-	           	                   }
-	           	               });
-	           	        // Create the AlertDialog object and return it
-	           	        dialog = builder.create();
-	           	        
-	           	        dialog.show();
-                    }
-
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        
-                    }
-                }); 
-        */
 
     }
 
@@ -458,7 +431,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 if (Boolean.valueOf(type[1])) {
                     status = true;
                 }
-                System.out.println(status);
+                Log.d(Config.DEBUG_TAG, String.valueOf(status));
                 result = api.changeProfileTag(Integer.valueOf(type[0]), status);
             }
 
@@ -492,7 +465,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
             if (api.sessionInitiated()) {
                 supported_lng = api.getSupportedLanguages();
                 supported_tags = api.getSupportedTags();
-                supported_timers = api.getSupportedTimers();
+                supported_timers = Config.getSupportedTimers(getApplicationContext());
 
                 myProfile = (UserObject) api.getDetail(type[0], Integer.valueOf(type[1]));
             }
@@ -501,6 +474,13 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
         @Override
         protected void onPostExecute(DataObject result) {
+            if (result == null) {
+                Toast.makeText(getApplicationContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
+                if (loader != null) {
+                    loader.dismiss();
+                }
+                return;
+            }
             EditText profile_name = (EditText) findViewById(R.id.profile_name);
             EditText profile_surname = (EditText) findViewById(R.id.profile_surname);
             EditText profile_email = (EditText) findViewById(R.id.profile_email);
@@ -510,7 +490,6 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
             profile_surname.setText(((UserObject) result).getLastName());
             profile_email.setText(((UserObject) result).getEmail());
             profile_phone.setText(((UserObject) result).getPhone());
-            System.out.println("KOZA " + ((UserObject) result).getUrl());
             profile_url.setText(((UserObject) result).getUrl());
 
             original_email = ((UserObject) result).getEmail();
@@ -530,6 +509,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
             }
 
             profile_portrait_image.setImageBitmap(((UserObject) result).getIconBitmap());
+            has_portrait = ((UserObject) result).getIconBitmap() != null;
 
 
             profile_description.setText(((UserObject) result).getDescription());
@@ -539,7 +519,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 Iterator<Entry<String, String>> it = supported_lng.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     //pairs.getKey();
                     items.add(pairs.getValue().toString());
                 }
@@ -548,7 +528,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 profile_language.setAdapter(adapter);
 
                 SharedPreferences settings = ProfileMainActivity.this.getSharedPreferences(Config.localStorageName, 0);
-                System.out.println("SAKRA " + settings.getString("logged_user_language", "English"));
+                Log.d(Config.DEBUG_TAG, "SAKRA " + settings.getString("logged_user_language", "English"));
                 int lngPosition = adapter.getPosition(settings.getString("logged_user_language", "English"));
                 if (lngPosition >= 0) {
                     profile_language.setSelection(lngPosition);
@@ -564,10 +544,10 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 Iterator<Entry<Integer, String>> it = supported_timers.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println("TIMER " + pairs.getKey().toString() + " " + saved_timer);
+                    Log.d(Config.DEBUG_TAG, "TIMER " + pairs.getKey().toString() + " " + saved_timer);
                     if (pairs.getKey().toString().equals(saved_timer)) {
                         saved_text = pairs.getValue().toString();
-                        System.out.println("TIMER HERE");
+                        Log.d(Config.DEBUG_TAG, "TIMER HERE");
                     }
                     items.add(pairs.getValue().toString());
                 }
@@ -584,7 +564,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
             }
 
-            ArrayList<DataObject> my_tags = ((UserObject) result).getTags();
+            my_tags = result.getTags();
 
 
             if (supported_tags != null) {
@@ -592,14 +572,14 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 Iterator<Entry<String, String>> it = supported_tags.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     //pairs.getKey();
                     TagObject current_item = new TagObject(Integer.valueOf(pairs.getKey().toString()), pairs.getValue().toString());
                     Iterator<DataObject> iter = my_tags.iterator();
                     while (iter.hasNext()) {
                         TagObject c = (TagObject) iter.next();
                         if (c.getObjectId() == current_item.getObjectId()) {
-                            System.out.println(c.getStatus());
+                            Log.d(Config.DEBUG_TAG, String.valueOf(c.getStatus()));
                             current_item.setStatus(true);
                             break;
                         }
@@ -632,7 +612,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                         //api.changeProfileTag(tag_id, status);
 
                         Tager task = new Tager();
-                        task.execute(new String[]{String.valueOf(tag_id), String.valueOf(status)});
+                        task.execute(String.valueOf(tag_id), String.valueOf(status));
                     }
 
                     @Override
@@ -677,11 +657,11 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 Environment.DIRECTORY_PICTURES), getPackageName());
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
-                System.out.println("FAILED CREATE DIR");
+                Log.d(Config.DEBUG_TAG, "FAILED CREATE DIR");
                 return null;
             }
         }
-        System.out.println(directory.getPath() + File.separator + "IMG_"
+        Log.d(Config.DEBUG_TAG, directory.getPath() + File.separator + "IMG_"
                 + ".jpg");
         return new File(directory.getPath() + File.separator + "IMG_"
                 + ".jpg");
@@ -690,7 +670,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQ) {
             if (resultCode == RESULT_OK) {
-                Uri photoUri = null;
+                Uri photoUri;
                 if (data == null) {
                     // A known bug here! The image should have saved in fileUri
 
@@ -866,7 +846,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
     protected void onPause() {
         super.onStop();
         SaveProfile task = new SaveProfile();
-        task.execute(new String[]{""});
+        task.execute("");
     }
 
     private class SaveProfile extends AsyncTask<String, Void, String> {
@@ -893,10 +873,10 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 editor.commit();
 
 
-                //System.out.println(ApiConnector.encodeTobase64(myBitmap));
+                //Log.d(Config.DEBUG_TAG, ApiConnector.encodeTobase64(myBitmap));
 
                 String encodedImage = null;
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                //ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if (myBitmap != null) {
 
                     encodedImage = ApiConnector.encodeTobase64(myBitmap);
@@ -911,7 +891,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                     Iterator<Entry<Integer, String>> it = supported_timers.entrySet().iterator();
                     while (it.hasNext()) {
                         HashMap.Entry pairs = (HashMap.Entry) it.next();
-                        System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                        Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                         if (pairs.getValue().equals(saved_text)) {
                             profile_notification_selected_timer = Integer.valueOf(pairs.getKey().toString());
                         }
@@ -922,7 +902,7 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                 }
                 // String lng = "eng";
 
-                String languageCode = api.translateLanguageNameToCode(profile_language.getSelectedItem().toString());
+                String languageCode = Config.translateLanguageNameToCode(getApplicationContext(), profile_language.getSelectedItem().toString());
 
                 editor.putString("logged_user_language", profile_language.getSelectedItem().toString());
                 // Don't save a saved_lng - that is for UI only!
@@ -1001,6 +981,43 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
                             getBaseContext().getResources().getDisplayMetrics());
                 }
                 */
+
+                String field;
+                int filled = 0;
+                Boolean location_filled = false;
+                Boolean description_filled = false;
+                Boolean tags_filled = false;
+
+                field = profile_name.getText().toString();
+                if (field != null && !field.equals("")) {
+                    filled++;
+                }
+                field = profile_surname.getText().toString();
+                if (field != null && !field.equals("")) {
+                    filled++;
+                }
+                field = profile_url.getText().toString();
+                if (field != null && !field.equals("")) {
+                    filled++;
+                }
+                field = String.valueOf(mapCenter.getLongitudeE6());
+                if (field != null && !field.equals("")) {
+                    location_filled = true;
+                }
+                field = profile_description.getText().toString();
+                if (field != null && !field.equals("")) {
+                    description_filled = true;
+                }
+                if (my_tags != null && my_tags.size() > 0) {
+                    tags_filled = true;
+                }
+
+                editor.putInt("profile_filled", filled);
+                editor.putBoolean("location_filled", location_filled);
+                editor.putBoolean("description_filled", description_filled);
+                editor.putBoolean("tags_filled", tags_filled);
+                editor.putBoolean("portrait_filled", has_portrait);
+
                 editor.commit();
                 result = api.changeProfile(profile_name.getText().toString(), profile_surname.getText().toString(), profile_email.getText().toString(), profile_phone.getText().toString(), profile_url.getText().toString(), String.valueOf(profile_notification_selected_timer), profile_description.getText().toString(), String.valueOf(visibility), String.valueOf(mapCenter.getLatitudeE6()), String.valueOf(mapCenter.getLongitudeE6()), encodedImage, languageCode);
 
@@ -1018,9 +1035,9 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
         protected void onPostExecute(String result) {
             if (result.equals("true")) {
                 if (!original_email.equals(profile_email.getText().toString())) {
-                    Toast.makeText(ProfileMainActivity.this, getString(R.string.profile_saved_email_changed) + " " + getString(R.string.language_quit), Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProfileMainActivity.this, getString(R.string.profile_saved_email_changed), Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(ProfileMainActivity.this, getString(R.string.profile_saved) + " " + getString(R.string.language_quit), Toast.LENGTH_LONG).show();
+                    Toast.makeText(ProfileMainActivity.this, getString(R.string.profile_saved), Toast.LENGTH_LONG).show();
                 }
 
 
@@ -1033,8 +1050,20 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
+        SharedPreferences settings = getSharedPreferences("MyCitizen", 0);
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("last_latitude", Double.toString(latitude));
+            editor.putString("last_longitude", Double.toString(longitude));
+        }
+        if (latitude == 0 || longitude == 0) {
+            String deployment_latitude = settings.getString("deployment_latitude", "0");
+            String deployment_longitude = settings.getString("deployment_longitude", "0");
+            latitude = Long.valueOf(settings.getString("last_latitude", deployment_latitude));
+            longitude = Long.valueOf(settings.getString("last_longitude", deployment_longitude));
+        }
 
         gpsCenter = new GeoPoint(latitude, longitude);
 
@@ -1059,5 +1088,27 @@ public class ProfileMainActivity extends ActionBarActivity implements OnTouchLis
 
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.help, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.menu_help:
+                Intent intent = new Intent(ProfileMainActivity.this, HelpActivity.class);
+                intent.putExtra("topic", "profile");
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 }

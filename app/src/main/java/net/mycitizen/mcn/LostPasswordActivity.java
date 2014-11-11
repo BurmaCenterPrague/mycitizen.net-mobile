@@ -42,7 +42,7 @@ public class LostPasswordActivity extends ActionBarActivity {
                 loader = loadingDialog();
 
                 DashboardInit task = new DashboardInit();
-                task.execute(new String[]{email.getText().toString()});
+                task.execute(email.getText().toString());
             }
         });
 
@@ -56,7 +56,7 @@ public class LostPasswordActivity extends ActionBarActivity {
 
                 //String message = editText.getText().toString();
                 //intent.putExtra(EXTRA_MESSAGE, message);
-                intent.putExtra("topic", "forgot_password");
+                intent.putExtra("topic", "forgotten_password");
 
                 startActivity(intent);
             }
@@ -75,7 +75,7 @@ public class LostPasswordActivity extends ActionBarActivity {
             String[] type = urls;
 
             ApiConnector api = new ApiConnector(LostPasswordActivity.this);
-            Boolean data = null;
+            Boolean data;
             //if(api.sessionInitiated()) {
             data = api.requestLostPassword(type[0]);
             //}	

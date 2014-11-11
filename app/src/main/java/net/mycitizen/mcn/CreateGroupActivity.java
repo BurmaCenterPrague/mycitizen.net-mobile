@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -104,10 +105,14 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
 
         SharedPreferences settings = CreateGroupActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
+        if (latitude == 0 || longitude == 0) {
+            latitude = Double.valueOf(settings.getString("gps_default_latitude", "0"));
+            longitude = Double.valueOf(settings.getString("gps_default_longitude", "0"));
+        }
 
         loader = loadingDialog();
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{});
+        task.execute();
 
         creategroup_name = (EditText) findViewById(R.id.creategroup_name);
 
@@ -206,7 +211,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
             @Override
             public void onClick(View v) {
                 SaveProfile task = new SaveProfile();
-                task.execute(new String[]{""});
+                task.execute("");
 
                 finish();
             }
@@ -229,11 +234,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
             @Override
             public void onClick(View v) {
                 // TODO system zadavani bodu na mapu
-                if (map_edit.isChecked()) {
-                    inEditMode = true;
-                } else {
-                    inEditMode = false;
-                }
+                inEditMode = map_edit.isChecked();
             }
         });
 
@@ -258,7 +259,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
             	if(Boolean.valueOf(type[1])) {
             		status = true;
             	}
-            	System.out.println(status);
+            	Log.d(Config.DEBUG_TAG, status);
 				result = api.changeProfileTag(Integer.valueOf(type[0]), status);
             }	
             
@@ -307,7 +308,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
                 Iterator<Entry<String, String>> it = supported_lng.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println(pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, pairs.getKey().toString() + " " + pairs.getValue().toString());
                     //pairs.getKey();
                     items.add(pairs.getValue().toString());
                 }
@@ -324,7 +325,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
                 Iterator<Entry<String, String>> it = supported_tags.entrySet().iterator();
                 while (it.hasNext()) {
                     HashMap.Entry pairs = (HashMap.Entry) it.next();
-                    System.out.println("Tag: " + pairs.getKey().toString() + " " + pairs.getValue().toString());
+                    Log.d(Config.DEBUG_TAG, "Tag: " + pairs.getKey().toString() + " " + pairs.getValue().toString());
                     //pairs.getKey();
                     TagObject current_item = new TagObject(Integer.valueOf(pairs.getKey().toString()), pairs.getValue().toString());
                     /*
@@ -332,7 +333,7 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
             		while(iter.hasNext()) {
             			TagObject c = (TagObject)iter.next();
             			if(c.getObjectId() == current_item.getObjectId()) {
-            				System.out.println(c.getStatus());
+            				Log.d(Config.DEBUG_TAG, c.getStatus());
             				current_item.setStatus(true);
             				break;
             			}
@@ -553,8 +554,21 @@ public class CreateGroupActivity extends ActionBarActivity implements OnTouchLis
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
+
+        SharedPreferences settings = getSharedPreferences("MyCitizen", 0);
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("last_latitude", Double.toString(latitude));
+            editor.putString("last_longitude", Double.toString(longitude));
+        }
+        if (latitude == 0 || longitude == 0) {
+            String deployment_latitude = settings.getString("deployment_latitude", "0");
+            String deployment_longitude = settings.getString("deployment_longitude", "0");
+            latitude = Long.valueOf(settings.getString("last_latitude", deployment_latitude));
+            longitude = Long.valueOf(settings.getString("last_longitude", deployment_longitude));
+        }
 
         if (overlay != null && mapView != null) {
             overlay.updateMyLocation(new GeoPoint(latitude, longitude));

@@ -1,9 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:mycitizen="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menu_help"
-        mycitizen:showAsAction="always"
-        android:orderInCategory="100"
-        android:icon="@drawable/ic_action_help"
-        android:title="@string/help" />
-</menu><!-- From: file:/Users/christoph/Sites/GitHub/mycitizen.net%20mobile/app/src/main/res/menu/help.xml -->

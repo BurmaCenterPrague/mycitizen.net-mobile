@@ -1,12 +1,12 @@
 .DS_Store
-.old_*
-.synkron.syncdb
 *.ser
 .svn
 .settings
-.project
-.classpath
 *.apk
 .gradle
 .idea
-app/build/
+build/
+**/build/
+gradle/
+local.properties
+settings.gradle

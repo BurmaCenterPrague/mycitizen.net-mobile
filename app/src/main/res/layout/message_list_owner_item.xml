@@ -2,17 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:layout_gravity="bottom"
-    android:gravity="bottom"
     android:orientation="horizontal"
-    android:weightSum="20"
-    android:background="#EAE9E3">
+    android:weightSum="10"
+    android:paddingBottom="20dp">
 
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:gravity="center_horizontal">
-        <Button
+        <TextView
             android:id="@+id/message_load_more"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,7 +19,7 @@
             android:padding="30dp"
             android:visibility="gone"
             android:text="@string/load_more">
-        </Button>
+        </TextView>
     </LinearLayout>
 
     <RelativeLayout

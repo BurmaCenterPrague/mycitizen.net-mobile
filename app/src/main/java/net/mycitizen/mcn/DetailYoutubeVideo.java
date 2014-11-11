@@ -64,7 +64,7 @@ public class DetailYoutubeVideo extends YouTubeBaseActivity implements
             }
 
             videoId = getIntent().getStringExtra("videoId");
-            System.out.println("videoId: " + videoId);
+            Log.d(Config.DEBUG_TAG, "videoId: " + videoId);
 
             if (videoId == null || videoId.equals("")) {
                 Toast.makeText(getApplicationContext(), "Wrong video ID.", Toast.LENGTH_LONG).show();
@@ -137,7 +137,7 @@ public class DetailYoutubeVideo extends YouTubeBaseActivity implements
             StringBuilder builder = new StringBuilder();
             HttpClient client = new DefaultHttpClient();
             HttpGet httpGet = new HttpGet(url);
-            System.out.println("Trying url: " + url);
+            Log.d(Config.DEBUG_TAG, "Trying url: " + url);
             try {
                 HttpResponse response = client.execute(httpGet);
                 StatusLine statusLine = response.getStatusLine();
@@ -151,14 +151,14 @@ public class DetailYoutubeVideo extends YouTubeBaseActivity implements
                         builder.append(line);
                     }
                 } else {
-                    System.out.println("Failed to download description");
+                    Log.d(Config.DEBUG_TAG, "Failed to download description");
                 }
             } catch (ClientProtocolException e) {
-                System.out.println("ClientProtocolException");
+                Log.d(Config.DEBUG_TAG, "ClientProtocolException");
                 description = getString(R.string.error_loading_data);
                 description_view.setText(Html.fromHtml(description));
             } catch (IOException e) {
-                System.out.println("IOException");
+                Log.d(Config.DEBUG_TAG, "IOException");
                 description = getString(R.string.error_loading_data);
                 description_view.setText(Html.fromHtml(description));
             }
@@ -169,8 +169,8 @@ public class DetailYoutubeVideo extends YouTubeBaseActivity implements
         @Override
         protected void onPostExecute(String result) {
 
-            System.out.println("Description: " + result);
-            String description = "";
+            Log.d(Config.DEBUG_TAG, "Description: " + result);
+            String description;
             TextView description_view = (TextView) findViewById(R.id.description_view);
             try {
                 JSONObject json = new JSONObject(result);
@@ -180,14 +180,14 @@ public class DetailYoutubeVideo extends YouTubeBaseActivity implements
                 description = text.getString("$t");
             } catch (JSONException e) {
                 description = getString(R.string.error_loading_data);
-                System.out.println("fields not found");
+                Log.d(Config.DEBUG_TAG, "fields not found");
             }
-            // System.out.println(description);
+            // Log.d(Config.DEBUG_TAG, description);
 
             description = description.replaceAll("\\r?\\n", "<br />");
             description = description.replace("  ", " &emsp;");
             // make links clickable
-            description.replaceAll("(\\A|\\s)((http|https|ftp|mailto):\\S+)(\\s|\\z)",
+            description = description.replaceAll("(\\A|\\s)((http|https|ftp|mailto):\\S+)(\\s|\\z)",
                     "$1<a href=\"$2\">$2</a>$4");
             description_view.setText(Html.fromHtml(description));
             description_view.setMovementMethod(LinkMovementMethod.getInstance());

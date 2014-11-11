@@ -34,5 +34,6 @@ public class MyApplication extends Application {
         super.onCreate();
         ACRA.init(this);
         ACRA.getErrorReporter().putCustomData("version", Config.version);
+        ACRA.getErrorReporter().putCustomData("database_version", Integer.toString(DataHandler.DATABASE_VERSION));
     }
 }

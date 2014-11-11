@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013ff. mycitizen.net
+ *
+ * Licensed under the GPLv3 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.gnu.org/licenses/gpl-3.0.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on any "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.mycitizen.mcn;
 
 import android.content.Context;
@@ -12,6 +28,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,14 +42,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.text.Html;
 import android.widget.VideoView;
-
-import java.security.acl.Group;
 
 
 public class DetailActivity extends BaseActivity {
@@ -48,9 +64,11 @@ public class DetailActivity extends BaseActivity {
     TextView online_status;
     ProgressDialog loader = null;
     AlertDialog dialog;
-    String objectType;
-    String objectId;
+    String objectType, objectId;
+    Menu menu;
+
     int contentType;
+    int user_level;
     String url;
     String videoId;
 
@@ -60,9 +78,12 @@ public class DetailActivity extends BaseActivity {
 
     PopupWindow popupMessage;
     LinearLayout layoutOfPopup;
+    RelativeLayout detail_root;
     Button insidePopupButton;
     TextView popupText;
     ListView popupList;
+
+    Button friends_v, connections_v, map_v, message_v;
 
     boolean connection_rights = false;
     boolean map_visible = true;
@@ -88,10 +109,84 @@ public class DetailActivity extends BaseActivity {
         objectId = intent.getStringExtra("ObjectId");
 
         setContentView(R.layout.detail_view);
+        detail_root = (RelativeLayout) findViewById(R.id.detail_root);
+        detail_root.setVisibility(View.INVISIBLE);
         realName = (TextView) findViewById(R.id.real_name);
         //title = (TextView) findViewById(R.id.detail_title);
         information = (TextView) findViewById(R.id.information);
         online_status = (TextView) findViewById(R.id.online_status);
+
+        friends_v = (Button) findViewById(R.id.button_friends);
+
+        if (objectType.equals("group") || objectType.equals("resource")) {
+            friends_v.setVisibility(View.GONE);
+        }
+        connections_v = (Button) findViewById(R.id.button_connections);
+        map_v = (Button) findViewById(R.id.button_map);
+        message_v = (Button) findViewById(R.id.button_messaging);
+
+        friends_v.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMessage.dismiss();
+                if (!api.isNetworkAvailable()) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent;
+                    intent = new Intent(DetailActivity.this, DetailFriendsActivity.class);
+                    intent.putExtra("objectType", objectType);
+                    intent.putExtra("objectId", objectId);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        connections_v.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMessage.dismiss();
+                if (!api.isNetworkAvailable()) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent;
+                    intent = new Intent(DetailActivity.this, DetailConnectionsActivity.class);
+                    intent.putExtra("objectType", objectType);
+                    intent.putExtra("objectId", objectId);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        map_v.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMessage.dismiss();
+                if (!api.isNetworkAvailable()) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent;
+                    intent = new Intent(DetailActivity.this, MapActivity.class);
+                    intent.putExtra("type", "show");
+                    intent.putExtra("objectType", objectType);
+                    intent.putExtra("objectId", objectId);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        message_v.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMessage.dismiss();
+                Intent intent;
+                intent = new Intent(DetailActivity.this, MessagesActivity.class);
+                intent.putExtra("type", "response_inbox");
+                intent.putExtra("objectType", objectType);
+                intent.putExtra("objectId", objectId);
+                intent.putExtra("recipient", title);
+                startActivity(intent);
+            }
+        });
 
         // tag_list = (ListView) findViewById(R.id.tag_list);
         tag_list = new ListView(this);
@@ -102,10 +197,10 @@ public class DetailActivity extends BaseActivity {
 
 
         DashboardInit task = new DashboardInit();
-        task.execute(new String[]{objectType, objectId});
+        task.execute(objectType, objectId);
 
         Button menu_filter = (Button) findViewById(R.id.widget_menu_filter);
-        SharedPreferences icon_settings = DetailActivity.this.getSharedPreferences("MyCitizen", 0);
+        SharedPreferences icon_settings = DetailActivity.this.getSharedPreferences(Config.localStorageName, 0);
         if (icon_settings.getBoolean("filter_active", false)) {
             menu_filter.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.ico_filter_on), null, null);
         }
@@ -127,7 +222,7 @@ public class DetailActivity extends BaseActivity {
         avatar.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("objectType: " + objectType);
+                Log.d(Config.DEBUG_TAG, "objectType: " + objectType);
                 Intent browserIntent;
 
                 if (objectType.equals("user")) {
@@ -142,8 +237,8 @@ public class DetailActivity extends BaseActivity {
                 }
 
                 if (objectType.equals("resource")) {
-                    System.out.println("content_type: " + contentType);
-                    System.out.println("url: " + url);
+                    Log.d(Config.DEBUG_TAG, "content_type: " + contentType);
+                    Log.d(Config.DEBUG_TAG, "url: " + url);
 
                     switch (contentType) {
                         case 30: // organization
@@ -182,29 +277,9 @@ public class DetailActivity extends BaseActivity {
                                 startActivity(browserIntent);
                             }
 
-                        /*
-                    RelativeLayout video_wrapper = (RelativeLayout) findViewById(R.id.detail_video_webview_wrapper);
-                    if (video_wrapper.getVisibility() == View.VISIBLE) {
-                        video_wrapper.setVisibility(View.GONE);
-                    } else {
-
-
-                        video_wrapper.setVisibility(View.VISIBLE);
-                        WebView mWebView = (WebView) findViewById(R.id.detail_video_webview);
-                        mWebView.getSettings().setJavaScriptEnabled(true);
-                        mWebView.getSettings().setAppCacheEnabled(true);
-                        mWebView.getSettings().setDomStorageEnabled(true);
-                        mWebView.getSettings().
-                        //  WebView.getSettings().setPluginState(WebSettings.PluginState.ON);
-                        mWebView.loadUrl("http://player.vimeo.com/video/24577973?player_id=player&autoplay=1&title=0&byline=0&portrait=0&api=1&maxheight=480&maxwidth=800");
-
-                    }
-                    */
                             break;
 
                         case 51: // media_youtube
-
-                            // YouTube: toggle open+start/close
 
                             Intent intent = new Intent(DetailActivity.this, DetailYoutubeVideo.class);
                             intent.putExtra("videoId", videoId);
@@ -212,26 +287,6 @@ public class DetailActivity extends BaseActivity {
 
                             startActivity(intent);
 
-
-                            /* old way
-                            RelativeLayout video_wrapper = (RelativeLayout) findViewById(R.id.detail_video_youtube_wrapper);
-                            if (video_wrapper.getVisibility() == View.VISIBLE) {
-                                video_wrapper.setVisibility(View.GONE);
-                                if (videoView != null) {
-                                    videoView.stopPlayback();
-                                }
-                                return;
-                            } else {
-                                videoView = (VideoView) findViewById(R.id.detail_video_youtube);
-                                mController = new MediaController(DetailActivity.this);
-                                videoView.setMediaController(mController);
-                                video_wrapper.setVisibility(View.VISIBLE);
-                                videoView.requestFocus();
-                                RTSPUrlTask task = new RTSPUrlTask();
-                                task.execute(url);
-                            }
-
-                            */
                             break;
 
                         case 55: // media_soundcloud
@@ -269,9 +324,6 @@ public class DetailActivity extends BaseActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(DetailActivity.this, DashboardMenuActivity.class);
 
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
-
                 startActivity(intent);
             }
         });
@@ -279,16 +331,13 @@ public class DetailActivity extends BaseActivity {
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
 
         CheckUnreadMessages messages = new CheckUnreadMessages();
-        messages.execute(new String[]{});
+        messages.execute();
 
         messages_button.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(DetailActivity.this, MessagesActivity.class);
-
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
                 intent.putExtra("type", "dialog_inbox");
 
                 startActivity(intent);
@@ -304,9 +353,8 @@ public class DetailActivity extends BaseActivity {
             SharedPreferences settings = DetailActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
             int logged_user_id = settings.getInt("logged_user_id", 0);
-            System.out.println("IDDDD " + logged_user_id + " " + objectId);
             if (logged_user_id > 0 && Integer.valueOf(objectId) == logged_user_id) {
-                System.out.println("VISIBILITY GONE");
+                Log.d(Config.DEBUG_TAG, "VISIBILITY GONE");
                 button_subscribe.setVisibility(View.GONE);
                 button_unsubscribe.setVisibility(View.GONE);
             }
@@ -317,9 +365,8 @@ public class DetailActivity extends BaseActivity {
             SharedPreferences settings = DetailActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
             int logged_user_id = settings.getInt("logged_user_id", 0);
-            System.out.println("IDDDD " + logged_user_id + " " + objectId);
             if (logged_user_id > 0 && Integer.valueOf(objectId) == logged_user_id) {
-                System.out.println("VISIBILITY GONE");
+                Log.d(Config.DEBUG_TAG, "VISIBILITY GONE");
                 button_subscribe.setVisibility(View.GONE);
                 button_unsubscribe.setVisibility(View.GONE);
             }
@@ -330,9 +377,8 @@ public class DetailActivity extends BaseActivity {
             SharedPreferences settings = DetailActivity.this.getSharedPreferences(Config.localStorageName, 0);
 
             int logged_user_id = settings.getInt("logged_user_id", 0);
-            System.out.println("IDDDD " + logged_user_id + " " + objectId);
             if (logged_user_id > 0 && Integer.valueOf(objectId) == logged_user_id) {
-                System.out.println("VISIBILITY GONE");
+                Log.d(Config.DEBUG_TAG, "VISIBILITY GONE");
                 button_subscribe.setVisibility(View.GONE);
                 button_unsubscribe.setVisibility(View.GONE);
             }
@@ -349,7 +395,7 @@ public class DetailActivity extends BaseActivity {
                     String objectAction = "1";
 
                     SubscribeInit task = new SubscribeInit();
-                    task.execute(new String[]{objectType, objectId, objectAction});
+                    task.execute(objectType, objectId, objectAction);
                 }
             }
         });
@@ -362,7 +408,7 @@ public class DetailActivity extends BaseActivity {
                     Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(DetailActivity.this);
-                    builder.setMessage(getString(R.string.really_unsubscribe))
+                    builder.setMessage(getString(R.string.really_disconnect))
                             .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     // FIRE ZE MISSILES!
@@ -371,7 +417,7 @@ public class DetailActivity extends BaseActivity {
                                     String objectAction = "0";
 
                                     UnSubscribeInit task = new UnSubscribeInit();
-                                    task.execute(new String[]{objectType, objectId, objectAction});
+                                    task.execute(objectType, objectId, objectAction);
 
                                 }
                             })
@@ -404,7 +450,6 @@ public class DetailActivity extends BaseActivity {
         protected DataObject doInBackground(String... urls) {
             String[] type = urls;
 
-
             ApiConnector api = new ApiConnector(DetailActivity.this);
             DataObject object = null;
             if (api.sessionInitiated()) {
@@ -421,20 +466,29 @@ public class DetailActivity extends BaseActivity {
             if (result == null) {
                 if (!api.isNetworkAvailable()) {
                     Toast.makeText(getApplicationContext(), getString(R.string.item_not_available_offline), Toast.LENGTH_LONG).show();
-
                     DetailActivity.this.finish();
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.detail_unaccessible), Toast.LENGTH_LONG).show();
-
                     DetailActivity.this.finish();
                 }
             } else {
+                detail_root.setVisibility(View.VISIBLE);
                 if (objectType.equals("user")) {
                     try {
                         title = ((UserObject) result).getName();
                         actionBar.setTitle(((UserObject) result).getName());
-                        realName.setText(((UserObject) result).getRealName());
+                        String realName_s = ((UserObject) result).getRealName();
+                        if (realName_s != null && !realName_s.equals("")) {
+                            realName.setText(realName_s);
+                        } else {
+                            realName.setText(title);
+                        }
+
                         realName.setGravity(Gravity.CENTER_HORIZONTAL);
+
+                        if (((UserObject) result).getStatus().equals("0")) {
+                            realName.setTextColor(getResources().getColor(R.color.opaque_red));
+                        }
 
                         online_status.setText(Html.fromHtml(((UserObject) result).getOnlineStatusOutput()));
                     } catch (NullPointerException e) {
@@ -443,11 +497,10 @@ public class DetailActivity extends BaseActivity {
                     }
 
                     if (((UserObject) result).getIconBitmap() != null) {
-
                         avatar.setImageBitmap(((UserObject) result).getIconBitmap());
 
                     } else {
-                        System.out.println("WTF");
+                        Log.d(Config.DEBUG_TAG, "WTF");
                         avatar.setImageBitmap(api.defaultUserIcon());
                     }
                     try {
@@ -508,10 +561,11 @@ public class DetailActivity extends BaseActivity {
 
                         if (((UserObject) result).getPosition() == null) {
                             map_visible = false;
+                            map_v.setVisibility(View.INVISIBLE);
                         }
 
 
-                        SharedPreferences settings = DetailActivity.this.getSharedPreferences(Config.localStorageName, 0);
+                        SharedPreferences settings = getApplicationContext().getSharedPreferences(Config.localStorageName, 0);
 
                         int logged_user_id = settings.getInt("logged_user_id", 0);
 
@@ -526,6 +580,41 @@ public class DetailActivity extends BaseActivity {
                         int user_access_level = settings.getInt("user_access_level", 1);
                         if (user_access_level > 1) {
                             connection_rights = true;
+                        }
+
+                        ImageView connection_v = (ImageView) findViewById(R.id.connection_status);
+                        if (((UserObject) result).getRelationshipMeUser() != 2) {
+                            connection_v.setAlpha(0.2f);
+                            message_v.setVisibility(View.INVISIBLE);
+                        }
+
+                        ImageView role_v = (ImageView) findViewById(R.id.user_role);
+                        int user_role = ((UserObject) result).getAccess();
+                        if (user_role == 3) {
+                            role_v.setImageResource(R.drawable.ico_administrator);
+                        } else if (user_role == 2) {
+                            role_v.setImageResource(R.drawable.ico_moderator);
+                        } else {
+                            role_v.setImageResource(R.drawable.ic_action_person);
+                        }
+                        user_level = user_role;
+
+
+                            if (menu != null) {
+                                MenuItem adminMenu = menu.findItem(R.menu.admin);
+                                if (adminMenu != null) {
+                                    if (settings.getInt("user_access_level", 0) <= user_role) {
+                                        menu.getItem(0).setVisible(false);
+                                    }
+                                }
+                            }
+
+
+                        ImageView source_v = (ImageView) findViewById(R.id.data_source);
+                        if (((UserObject) result).getSource().equals(ApiConnector.NETWORK)) {
+                            source_v.setImageResource(R.drawable.ic_action_cloud);
+                        } else {
+                            source_v.setImageResource(R.drawable.ic_action_storage);
                         }
 
                     } catch (NullPointerException e) {
@@ -545,14 +634,20 @@ public class DetailActivity extends BaseActivity {
                         url = "";
                     }
 
+
                 } else if (objectType.equals("group")) {
                     try {
                         title = ((GroupObject) result).getTitle();
                         realName.setText(((GroupObject) result).getTitle());
                         actionBar.setTitle(((GroupObject) result).getTitle());
                     } catch (NullPointerException e) {
-                        title = "Undefined Name";
-                        actionBar.setTitle("Undefined Name");
+                        title = getString(R.string.undefined_name);
+                        actionBar.setTitle(R.string.undefined_name);
+                    }
+                    online_status.setVisibility(View.GONE);
+
+                    if (((GroupObject) result).getStatus().equals("0")) {
+                        realName.setTextColor(getResources().getColor(R.color.opaque_red));
                     }
 
                     try {
@@ -568,9 +663,9 @@ public class DetailActivity extends BaseActivity {
                             avatar.setImageBitmap(((GroupObject) result).getIconBitmap());
 
                         }
-                        System.out.println("Relationship me -> group: " + ((GroupObject) result).getRelationshipMeGroup());
+                        Log.d(Config.DEBUG_TAG, "Relationship me -> group: " + ((GroupObject) result).getRelationshipMeGroup());
                         if (((GroupObject) result).getRelationshipMeGroup() == 0) {
-                            System.out.println("Setting to gone");
+                            Log.d(Config.DEBUG_TAG, "Setting to gone");
                             button_unsubscribe.setVisibility(View.GONE);
                             button_subscribe.setVisibility(View.VISIBLE);
                         }
@@ -579,28 +674,42 @@ public class DetailActivity extends BaseActivity {
                             button_subscribe.setVisibility(View.GONE);
                             button_unsubscribe.setVisibility(View.VISIBLE);
                         }
-                        /*
-                        if (((GroupObject) result).getRelationshipMeGroup() == 2) {
-                            connection_rights = true;
-                            button_subscribe.setVisibility(View.GONE);
-                            button_unsubscribe.setVisibility(View.VISIBLE);
-                        }
-                        if (((GroupObject) result).getRelationshipMeGroup() == 3) {
-                            button_subscribe.setVisibility(View.VISIBLE);
-                            button_unsubscribe.setVisibility(View.GONE);
-                        }
-                        */
+
                     } catch (NullPointerException e) {
 
                     }
                     if (((GroupObject) result).getPosition() == null) {
                         map_visible = false;
+                        map_v.setVisibility(View.INVISIBLE);
                     }
                     try {
                         subscriptionStatus = String.valueOf(((GroupObject) result).getRelationshipMeGroup());
                     } catch (NullPointerException e) {
-
                     }
+
+                    ImageView connection_v = (ImageView) findViewById(R.id.connection_status);
+                    if (((GroupObject) result).getRelationshipMeGroup() == 0){
+                        connection_v.setAlpha(0.2f);
+                        message_v.setVisibility(View.INVISIBLE);
+                    }
+
+                    SharedPreferences settings = getApplicationContext().getSharedPreferences(Config.localStorageName, 0);
+                    if (menu != null) {
+                        MenuItem adminMenu = menu.findItem(R.menu.admin);
+                        if (adminMenu != null) {
+                            if (settings.getInt("user_access_level", 0) <= 1) {
+                                menu.getItem(0).setVisible(false);
+                            }
+                        }
+                    }
+
+                    ImageView source_v = (ImageView) findViewById(R.id.data_source);
+                    if (((GroupObject) result).getSource().equals(ApiConnector.NETWORK)) {
+                        source_v.setImageResource(R.drawable.ic_action_cloud);
+                    } else {
+                        source_v.setImageResource(R.drawable.ic_action_storage);
+                    }
+
                 } else if (objectType.equals("resource")) {
                     int subtype = ((ResourceObject) result).getSubType();
                     switch (subtype) {
@@ -645,9 +754,15 @@ public class DetailActivity extends BaseActivity {
                         realName.setText(((ResourceObject) result).getTitle());
                         actionBar.setTitle(((ResourceObject) result).getTitle());
                     } catch (NullPointerException e) {
-                        title = "Undefined Title";
-                        actionBar.setTitle("Undefined Title");
+                        title = getString(R.string.undefined_name);
+                        actionBar.setTitle(R.string.undefined_name);
                     }
+                    if (((ResourceObject) result).getStatus().equals("0")) {
+                        realName.setTextColor(getResources().getColor(R.color.opaque_red));
+                    }
+
+                    online_status.setVisibility(View.GONE);
+
                     //avatar.
                     try {
                         Context ctx = getApplicationContext();
@@ -658,7 +773,7 @@ public class DetailActivity extends BaseActivity {
                         information.setText("");
                     }
                     try {
-                        System.out.println("Relationship me -> resource: " + ((ResourceObject) result).getRelationshipMeResource());
+                        Log.d(Config.DEBUG_TAG, "Relationship me -> resource: " + ((ResourceObject) result).getRelationshipMeResource());
                         if (((ResourceObject) result).getRelationshipMeResource() == 0) {
                             button_unsubscribe.setVisibility(View.GONE);
                             button_subscribe.setVisibility(View.VISIBLE);
@@ -684,11 +799,35 @@ public class DetailActivity extends BaseActivity {
                     }
                     if (((ResourceObject) result).getPosition() == null) {
                         map_visible = false;
+                        map_v.setVisibility(View.INVISIBLE);
                     }
                     try {
                         subscriptionStatus = String.valueOf(((ResourceObject) result).getRelationshipMeResource());
                     } catch (NullPointerException e) {
 
+                    }
+
+                    ImageView connection_v = (ImageView) findViewById(R.id.connection_status);
+                    if (((ResourceObject) result).getRelationshipMeResource() == 0) {
+                        connection_v.setAlpha(0.2f);
+                        message_v.setVisibility(View.INVISIBLE);
+                    }
+
+                    SharedPreferences settings = getApplicationContext().getSharedPreferences(Config.localStorageName, 0);
+                    if (menu != null) {
+                        MenuItem adminMenu = menu.findItem(R.menu.admin);
+                        if (adminMenu != null) {
+                            if (settings.getInt("user_access_level", 0) <= 1) {
+                                menu.getItem(0).setVisible(false);
+                            }
+                        }
+                    }
+
+                    ImageView source_v = (ImageView) findViewById(R.id.data_source);
+                    if (((ResourceObject) result).getSource().equals(ApiConnector.NETWORK)) {
+                        source_v.setImageResource(R.drawable.ic_action_cloud);
+                    } else {
+                        source_v.setImageResource(R.drawable.ic_action_storage);
                     }
                 }
                 ActivityCompat.invalidateOptionsMenu(DetailActivity.this);
@@ -863,52 +1002,57 @@ public class DetailActivity extends BaseActivity {
                 subscriptionStatus = result;
             }
 
+
+            if (!connection_rights) {
+                if (friends_v != null) {
+                    friends_v.setVisibility(View.GONE);
+                }
+                if (connections_v != null) {
+                    connections_v.setVisibility(View.GONE);
+                }
+                if (message_v != null) {
+                    message_v.setVisibility(View.GONE);
+                }
+
+            }
+            if (!map_visible) {
+                map_v.setVisibility(View.GONE);
+            }
+
             loader.dismiss();
             finish();
         }
     }
 
+
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
 
-        if (objectType.equals("group")) {
-            inflater.inflate(R.menu.detail_group, menu);
-        } else if (objectType.equals("resource")) {
-            inflater.inflate(R.menu.detail_resource, menu);
-        } else {
-            inflater.inflate(R.menu.detail, menu);
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(Config.localStorageName, 0);
+
+        if ( ((objectType.equals("group") || objectType.equals("resource")) && settings.getInt("user_access_level", 0) > 1)
+                || ((objectType.equals("user") && settings.getInt("user_access_level", 0) > user_level) ) ) {
+            inflater.inflate(R.menu.admin, menu);
         }
+
 
         inflater.inflate(R.menu.detail_tags, menu);
         inflater.inflate(R.menu.help, menu);
 
-        if (!connection_rights) {
-            MenuItem menu_friends = menu.findItem(R.id.menu_friends);
-            MenuItem menu_connections = menu.findItem(R.id.menu_connections);
-            MenuItem menu_messages = menu.findItem(R.id.menu_messages);
-            if (menu_friends != null) {
-                menu_friends.setVisible(false);
-            }
-            if (menu_connections != null) {
-                menu_connections.setVisible(false);
-            }
-            if (menu_messages != null) {
-                menu_messages.setVisible(false);
-            }
 
-        }
-        if (!map_visible) {
-            menu.findItem(R.id.menu_locations).setVisible(false);
-        }
+        this.menu = menu;
         return super.onCreateOptionsMenu(menu);
 
     }
 
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
+
+        // TODO add handling of activate, deactivate
+
         Intent intent;
         switch (item.getItemId()) {
+/*
             case R.id.menu_friends:
                 popupMessage.dismiss();
                 if (!api.isNetworkAvailable()) {
@@ -954,7 +1098,7 @@ public class DetailActivity extends BaseActivity {
 
                 startActivity(intent);
                 return true;
-
+*/
 
             case R.id.menu_tags:
                 if (popupMessage.isShowing()) {
@@ -995,79 +1139,6 @@ public class DetailActivity extends BaseActivity {
         popupMessage.setContentView(layoutOfPopup);
     }
 
-    /*
-    private class RTSPUrlTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
-            String response = getRTSPVideoUrl(urls[0]);
-            System.out.println("response: " + response);
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            System.out.println("result: " + result);
-            startPlaying(result);
-        }
-
-        public String getRTSPVideoUrl(String urlYoutube) {
-            try {
-                String gdy = "http://gdata.youtube.com/feeds/api/videos/";
-                DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
-                        .newDocumentBuilder();
-                String id = extractYoutubeId(urlYoutube);
-                URL url = new URL(gdy + id);
-                HttpURLConnection connection = (HttpURLConnection) url
-                        .openConnection();
-                Document doc = dBuilder.parse(connection.getInputStream());
-                Element el = doc.getDocumentElement();
-                NodeList list = el.getElementsByTagName("media:content");
-                String cursor = urlYoutube;
-                for (int i = 0; i < list.getLength(); i++) {
-                    Node node = list.item(i);
-                    if (node != null) {
-                        NamedNodeMap nodeMap = node.getAttributes();
-                        HashMap<String, String> maps = new HashMap<String, String>();
-                        for (int j = 0; j < nodeMap.getLength(); j++) {
-                            Attr att = (Attr) nodeMap.item(j);
-                            maps.put(att.getName(), att.getValue());
-                        }
-                        if (maps.containsKey("yt:format")) {
-                            String f = maps.get("yt:format");
-                            if (maps.containsKey("url"))
-                                cursor = maps.get("url");
-                            if (f.equals("1"))
-                                return cursor;
-                        }
-                    }
-                }
-                return cursor;
-            } catch (Exception ex) {
-                return urlYoutube;
-            }
-        }
-
-        public String extractYoutubeId(String url) throws MalformedURLException {
-            String query = new URL(url).getQuery();
-            String[] param = query.split("&");
-            String id = null;
-            for (String row : param) {
-                String[] param1 = row.split("=");
-                if (param1[0].equals("v")) {
-                    id = param1[1];
-                }
-            }
-            return id;
-        }
-    }
-
-    void startPlaying(String url) {
-        uriYouTube = Uri.parse(url);
-        videoView.setVideoURI(uriYouTube);
-        System.out.println("starts playing");
-        videoView.start();
-    }
-*/
 
 
 }

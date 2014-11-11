@@ -11,14 +11,12 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.acl.Group;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -34,9 +32,7 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -45,10 +41,11 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
 
 public class ApiConnector {
-    final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+    private final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
@@ -59,13 +56,14 @@ public class ApiConnector {
     protected String password;
     protected Config cfg;
 
-    /*
-    private String small_plus = "/9j/4AAQSkZJRgABAQEASABIAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2NjIpLCBxdWFsaXR5ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8IAEQgAFAAUAwERAAIRAQMRAf/EABgAAAIDAAAAAAAAAAAAAAAAAAYHBAUI/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEAMQAAABKStDsBCSLkfAhzYh/8QAGhAAAgMBAQAAAAAAAAAAAAAABAYCAwUHJP/aAAgBAQABBQL39E1s9LBMrV3WB2al58DMpQULAL4KRT0c6q4Z1SlAl6PEEpAG/8QAFBEBAAAAAAAAAAAAAAAAAAAAMP/aAAgBAwEBPwEf/8QAFBEBAAAAAAAAAAAAAAAAAAAAMP/aAAgBAgEBPwEf/8QAJxAAAgIBAgUEAwEAAAAAAAAAAgQBAwUAERIhIkFRBhNh4SQxcfD/2gAIAQEABj8CcAHLcfgE7Jp/HnY2C78/H1p6304+/jXk2CXkrLOkzHz8f7bRRlZFPIr2FReE9yjvp/05a81j3knCMpVs9uwx8/MfWsi45kcmnWs/YUQd3BXeEbdZ8urfvOsll0zmpW1o4r35cUedFlRK5TIrDuLCx8BT/dGnl8k7erXO/tRbtBbedVrr1jTTXHCID+o1/8QAHxAAAgICAwADAAAAAAAAAAAAAREAITFBYZGxgdHh/9oACAEBAAE/IbbVSm/0WwjR4a0XMvJQZNi+yxDxZrACLAcvsHU1IvamGVv32JZg2+MBGi+ggSxMsV0vn6DMZADkKBK/eVNmYFNgVfsGfOHQJ//aAAwDAQACAAMAAAAQkkkkH//EABQRAQAAAAAAAAAAAAAAAAAAADD/2gAIAQMBAT8QH//EABQRAQAAAAAAAAAAAAAAAAAAADD/2gAIAQIBAT8QH//EABwQAQEAAwEAAwAAAAAAAAAAAAERACExQVFhof/aAAgBAQABPxBdr9HvNdAiQOipc2TU4QV6tCvuLbRvikmZYQE4Q8YrbYzFO2oVYeWlEwRUQi0AAKKcmMbZTEyiF2j8AdjjJUzyQrIB0kBrwwRvkWYSj57oWiO8hgISfAP1Xaqqq5//2Q==";
-    private String big_plus = "/9j/4AAQSkZJRgABAQEASABIAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2NjIpLCBxdWFsaXR5ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8IAEQgAQABAAwERAAIRAQMRAf/EABkAAQEBAQEBAAAAAAAAAAAAAAgHAAYJAf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhADEAAAAVScSEkk5isC2O2OJPP8UpfjECC0P8JJXBIBnMJgNpJSTnpiHojBiziFPM0+npiHojBiziFPM0rJXBIBnMJgNxJBbAAFGX8xAQtj/O2OJCSSYxWRbHbH/8QAHBAAAgIDAQEAAAAAAAAAAAAABAUGBwABAgMW/9oACAEBAAEFAsk8vXxQZ9azpt0SwKN2MwKC2htd0p6jEvXysbJfJ/GKJyij5M2itPii+QawNdwYsDY8SqnxSvIUo+MtohJ/GVprWfbbSen4rwKvy7GJIwdJsSSQ8uCK8EgVQ92plDAnZrBYHyuWsbsHGNnM5+0yDTn4vF12DkGsw9MFoBOwjmA2wmCwzlitY0mOSbOYN8XkGg32mLqSHHNZmaXrQBtmnWuh2pk9Pyrgpfl2LiCA6SXEDh5cEq4GAqhFttKJfGPGVpihT4y2itwCk+YbMNhoxmGv1KrgFG8hRT5M2iEY8YomyTxBfKxntUOlPRIBIXQwBJvSKqHTbqMRBfFBs//EABQRAQAAAAAAAAAAAAAAAAAAAGD/2gAIAQMBAT8BAf/EABQRAQAAAAAAAAAAAAAAAAAAAGD/2gAIAQIBAT8BAf/EADgQAAEDAgEHCQgCAwEAAAAAAAMBAgQAERIFFCExQmGBEBMiMkFRUpHwJDNDY3GCwdEjYhWSseH/2gAIAQEABj8CrnJZLld7sDOu/wBd9ObGJ/jY/gB1+Lv1aryJJjr8x6uq8eSYC/Leraa2SRMpR/Afr/7fu9Y4hLFb7wD+uzkJLJZ5V6IReN1KQivlzZDrIia13JTD5aXOZC6c2aths+q9vrXWCLFDGb3CYjawSooZLe4rEdTz5GXNZCac3ctxv+i9nrVSEHjiTY7rKi603LQ5Y+gVOgYXgf8AqiRmuvHhfxNT+20vno+2ly0diLIPdoL7DO1ePrXyZNiiK4YTqRSNboxWw2/6tZSilK4gQKNRtdpw3xXt5JyJloDEQ4LNPbbZ2Lw/O6mRnOtHmpzTkvtbK/j7qkyF1lK5/mtRYrOqETRpwSiii5NdKCxbIZxsGLfay1C9izPNsfxceLFbcndU32LPM5wfFwYcN9y99CHKya6KBy2cZpseHfbClSoq6jCcPzS1R5DdDhEa9OC1JjrrEVzPJaiymdUwmkTilFLFyksUL3XaFwMeHdfElQvbc8znH8LBhw23r31N9tzPNsHwseLFfendQiSspOlAat3BaHBi3XxLUqUuoInE8kvUeO3S4pGsTitEktbaPN/lav8AbaTz0/dS5GO9EkAu4F9tnanD87uTJsoYnPABSIRzdnFhtfyrKUognMAdRoNztq2K9vPkTIoHopz2ce2wzsTj610yS5t48JOdcttrZT8/bRIj7MKnTCXwOrmyI+JNjuuip2b0pgMtJmx00ZyxLsf9U7PWqrxZQZKfKIjqvKlBjJ80iNp4MipnJ10Zy9LMZ9E7fWukGNHy5sh11Vda71ocRlnlXpmL438nNyx2K33chnXZ/wCbqc6MxMpR/GDrcW/q9YZEcoHdxGK2sMeOU7u4bFdTXSWJk2P4z9bg392rBEHcrveSH6Xv9d3J/8QAIxAAAQMEAQUBAQAAAAAAAAAAAQARMSFBUWFxEIGhscHwkf/aAAgBAQABPyFC5Q71fYsNqcmiD4I4FRm2r7Q7Q7nPJTNDuc8FA4BgaDNDV9oJjh3o+xcbFODToFok8MsDgSTgZIQCHwDkMAsBiyaiSp6AKnGBOyG8M08BHZZtTyExODD9AlTnIgZIhTXNiXBcHF0AIUQsSOUg4OQU1xLQuInm9BOwlFiWBsgew26HEnZDYOrURgI4k7MMwFqJyelBEySFibIgcaFXkFGAVncXfuKsIU8kP1DWbjQA+I4kozRshYrGIX7ADqb3X7ADuf1Qdo5i3VAzWMwmlXe+/wCkWRyQsQH4qQBTyQfEfZ+NAH6jmaTBsgYpGZX7ADuf1X7ADqb3QFo4i3UAzSMSmlQXvv8AhBkYkLkA+pjgWgYRHN6CYjqLkuDZE9qJdBe1ue8YCusRkIGtbmvmQprE4PSoyZIC5NkAeBoqsgs4Gsai79xETJOBDB4NQRg5ARCF8gxIQS4OYKYaao7QKnEOJ0V12P6sqi7Hf3ZTCTVHaJU5lhGicITJyGSWAubIwZJhck8CBoZJ6AhQ1j3L7Kd6odFORQEbavpBKDJPB/QhUnQeH+BGopiahjTV9ILDhm8kWGlO9en/2gAMAwEAAgADAAAAEIBIBBJIAAJJIJJIIJJIIAIBAAJIAJIABP/EABQRAQAAAAAAAAAAAAAAAAAAAGD/2gAIAQMBAT8QAf/EABQRAQAAAAAAAAAAAAAAAAAAAGD/2gAIAQIBAT8QAf/EAB8QAQEBAQACAgMBAAAAAAAAAAERIQAxQVFxYeHwgf/aAAgBAQABPxDlANGGjKeB+1MIYK7TyUckWW4nfHNmhV+ftuLNChc/ZdRY5IC2bbMTnj3xlmjj1lQo7I7oHQdag7gmVJ4Ic3gGBQMEfLG4KAIA9ByGD0sGxEOUxFiAEQCEr32FX8vEEiR76Gj+Tm5VziSoryiquAUMpShJx/wqKoH2PPsuo0AhfIJc4DgLcnu1YUyAzcT28iFhNUCLA5ZQ4wHkdUvqVpqbL00iwQXS8Mljq2lhoBR7x+FMjb23iVasIDUFFJjT0Up+Rhyor2fKt4MKEvY1+3V5OpWS0QyaKmmFEo/tnP7DfhN/tnP6DPlcEOMFlQTBUYopBAjeRh4TgJXV9EdT/Rwqp2cRbwQUJehp9mJwDaIIqoaFUDRAqFf2zn9Bnyuf2zn9hvwmhHGizoTRQIpoFIH+TDwnASuL6o6B9jqY3m0aV2g2GB6eVIymLDEi8i1KEU5hyeSwyGrO8MKIKXsUllkdGc6YFQOfSYbI2Vk4tHpES0aQk1r6Kx/Ax68ZzFMiTyTreQKCikLiqfgtBQfY9PjdMi4a/wAoVqiA+umKT/bn47hSf5c+l8JJmCH8IFqipAzUTKv4LUgD0HQfGRwAF8EBwwUoenzVC62CEZWi6UkCCWeRZKtti+Pmocw54lXwhPIOMEq9AMvDxk5Vtqyyr5+aJ2Wd46rEAGyCYFtLv//Z";
-*/
+    public static String DATABASE = "d";
+    public static String NETWORK = "n";
 
-    private long repeat_measuring_speed = 60000; // in milliseconds
-    private long retrieve_lists_timeout = 300000; // in milliseconds
+
+    private long measureSpeedTimeout = 60000; // in milliseconds
+    private long getDataCacheLifetime = 60000; // in milliseconds
+    private int connectionTimeout = 5000; // in milliseconds
+    private int readTimeout = 20000; // in milliseconds
 
     public ApiConnector(Context ctx) {
         this.context = ctx;
@@ -94,24 +92,43 @@ public class ApiConnector {
             api_params = "resource_id=" + id;
         }
 
+
         String responseBody;
+        String source;
 
-        if (isNetworkAvailable()) {
+        // check when last time saved data
+        long last_update = 0;
+        Boolean forceLoadFromDB = false;
 
-            System.out.println("Retrieving detail from network: " + type);
+        String lastUpdate = getLocalResult(type, "last_update", api_params);
+        if (lastUpdate != null) {
+            last_update = Long.parseLong(lastUpdate);
+        }
+
+        Log.d(Config.DEBUG_TAG, "last_update: " + last_update + ", difference: " + (System.currentTimeMillis() - last_update));
+        if (System.currentTimeMillis() - last_update < getDataCacheLifetime) {
+            forceLoadFromDB = true;
+        }
+
+
+        if (isNetworkAvailable() && !forceLoadFromDB) {
+
+            Log.d(Config.DEBUG_TAG, "Retrieving detail from network: " + type);
             responseBody = getNetworkResult(api_url, api_params);
+            source = NETWORK;
 
         } else {
 
-            System.out.println("Retrieving detail from database " + type);
+            Log.d(Config.DEBUG_TAG, "Retrieving detail from database " + type);
             responseBody = getLocalResult(type, "detail", api_params);
+            source = DATABASE;
 
         }
 
         if (responseBody == null) {
             return null;
         }
-
+        Log.d(Config.DEBUG_TAG, "getDetail, responseBody: " + responseBody);
         try {
 
             JSONObject responseobject = new JSONObject(responseBody);
@@ -121,22 +138,26 @@ public class ApiConnector {
             }
 
 
-            if (isNetworkAvailable()) {
+            if (isNetworkAvailable() && !forceLoadFromDB) {
                 DataHandler db = new DataHandler(context);
-                System.out.println(responseBody);
+                Log.d(Config.DEBUG_TAG, "getDetail, responseBody: " + responseBody);
                 LinkedHashMap<String, String> params = db.prepareData("detail", type, responseBody);
                 LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
                 search_params.put("id", String.valueOf(id));
 
-                if (db.objectExists(search_params)) {
-                    db.updateObject(type, id, params);
-                } else {
+                if (id != 0) {
+                    if (db.objectExists(search_params)) {
+                        db.updateObject(type, id, params);
+                    } else {
 
-                    if (params != null) {
-                        params.put("id", String.valueOf(id));
-                        params.put("type", type);
+                        if (params != null) {
+                            params.put("id", String.valueOf(id));
+                            params.put("type", type);
+                            params.put("last_update", Long.toString(System.currentTimeMillis()));
 
-                        db.insertObject(type, params);
+                            Log.d(Config.DEBUG_TAG, "save params: " + params.toString());
+                            db.insertObject(type, params);
+                        }
                     }
                 }
                 db.close();
@@ -170,20 +191,24 @@ public class ApiConnector {
                     String image = responseobject.getString("user_portrait");
                     ((UserObject) object).setIconId(image);
                 }
+                if (responseobject.has("status")) {
+                    String status = responseobject.getString("status");
+                    ((UserObject) object).setStatus(status);
+                }
                 if (responseobject.has("user_phone")) {
                     String phone = responseobject.getString("user_phone");
                     ((UserObject) object).setPhone(phone);
                 }
                 if (responseobject.has("user_url")) {
                     String url = responseobject.getString("user_url");
-                    System.out.println("user_url: " + responseobject.getString("user_url"));
+                    Log.d(Config.DEBUG_TAG, "user_url: " + responseobject.getString("user_url"));
                     ((UserObject) object).setUrl(url);
                 }
                 if (responseobject.has("user_send_notifications") && !responseobject.isNull("user_send_notifications")) {
                     int timer = responseobject.getInt("user_send_notifications");
                     ((UserObject) object).setNotificationTimer(String.valueOf(timer));
                 }
-
+                ((UserObject) object).setSource(source);
 
             } else if (type.equals("group")) {
                 String name = responseobject.getString("group_name");
@@ -205,10 +230,20 @@ public class ApiConnector {
                     String image = responseobject.getString("group_portrait");
                     ((GroupObject) object).setIconId(image);
                 }
+                if (responseobject.has("status")) {
+                    String status = responseobject.getString("status");
+                    ((GroupObject) object).setStatus(status);
+                }
+                ((GroupObject) object).setSource(source);
+
             } else if (type.equals("resource")) {
                 String name = responseobject.getString("resource_name");
                 ((ResourceObject) object).setTitle(name);
 
+                if (responseobject.has("status")) {
+                    String status = responseobject.getString("status");
+                    ((ResourceObject) object).setStatus(status);
+                }
                 String gps_x = responseobject.getString("resource_position_x");
                 String gps_y = responseobject.getString("resource_position_y");
                 ((ResourceObject) object).setPosition(gps_x, gps_y);
@@ -235,7 +270,7 @@ public class ApiConnector {
                 }
                 ((ResourceObject) object).setSubType(subtype);
 
-                String media_type = null;
+                String media_type;
                 if (responseobject.has("media_type")) {
 
                     media_type = responseobject.getString("media_type");
@@ -260,7 +295,7 @@ public class ApiConnector {
                 ((ResourceObject) object).setTrashFlag(trash);
                 if (!responseobject.isNull("message_text")) {
                     String extratext = responseobject.getString("message_text");
-                    System.out.println("message: " + extratext);
+                    Log.d(Config.DEBUG_TAG, "message: " + extratext);
                     ((ResourceObject) object).setSecondaryTitle(extratext);
                 }
 
@@ -322,10 +357,23 @@ public class ApiConnector {
                     relationship_me_resource = responseobject.optInt("logged_user_member");
                 }
                 ((ResourceObject) object).setRelationshipMeResource(relationship_me_resource);
+                /*
                 if (responseobject.has("owner_portrait")) {
                     String image = responseobject.getString("owner_portrait");
                     ((ResourceObject) object).setIconId(image);
+                }*/
+                if (responseobject.has("owner_portrait_id")) {
+                    int owner_portrait_id = responseobject.getInt("owner_portrait_id");
+
+                    UserObject owner;
+                    owner = (UserObject) getDetail("user", owner_portrait_id);
+                    if (owner != null) {
+                        String icon_id = owner.getIconId();
+                        Log.d(Config.DEBUG_TAG, "owner_portrait_id: " + owner_portrait_id + ", icon_id: " + icon_id);
+                        ((ResourceObject) object).setIconId(icon_id);
+                    }
                 }
+                ((ResourceObject) object).setSource(source);
             }
 
             JSONArray object_tags = responseobject.getJSONArray("tags");
@@ -340,7 +388,7 @@ public class ApiConnector {
 
                 TagObject tag_to_add = new TagObject(Integer.valueOf(tag_id), tag_name);
                 tag_to_add.setTag_parent_id(tag_parent_id);
-                tags.add((DataObject) tag_to_add);
+                tags.add(tag_to_add);
 
 
             }
@@ -366,26 +414,37 @@ public class ApiConnector {
         ArrayList<DataObject> objects = new ArrayList<DataObject>();
         String api_url = cfg.getApiUrl() + "Base/Data.json";
         String api_params = null;
+        Boolean messages = false;
 
         if (type.equals("user")) {
-            api_params = "type[0]=1&filter[count]=" + length;
+            api_params = "type[0]=1";
         } else if (type.equals("group")) {
-            api_params = "type[1]=2&filter[count]=" + length;
+            api_params = "type[1]=2";
         } else if (type.equals("resource")) {
-            api_params = "type[2]=3&filter[count]=" + length;
+            api_params = "type[2]=3";
+        } else if (type.equals("default_resource")) {
+            api_params = "type[2]=3&filter[type][0]=2&filter[type][1]=3&filter[type][2]=4&filter[type][3]=5&filter[type][5]=6";
+            type = "resource";
+        } else if  (type.equals("messages")) {
+            SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+            int logged_user_id = settings.getInt("logged_user_id", 0);
+            api_params = "type[2]=3&filter[type][0]=1&filter[type][1]=8&filter[type][2]=9&filter[type][3]=10&filter[user_id]=" + logged_user_id;
+            type = "resource";
+            messages = true;
         }
+
         String filter_override = createFilter();
 
         if (filter_override != null && use_filter_override) {
-            api_params += filter_override;
+            api_params += "&" + filter_override;
         }
 
         if (filter != null) {
             api_params += "&" + filter;
         }
 
-        System.out.println("api_params: " + api_params);
-        String responseBody;
+        Log.d(Config.DEBUG_TAG, "filter_override: " + filter_override + ", filter: " + filter + ", api_params: " + api_params);
+        String[] responseBody = new String[2];
 
         SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
         long time_users_retrieved = settings.getLong("time_users_retrieved", 0);
@@ -407,23 +466,91 @@ public class ApiConnector {
             length_retrieved = length_resources_retrieved;
         }
 
-        int length_int = Integer.parseInt(length);
-        String source = "";
+
+        int length_int = 0;
+        if (length != null) {
+            length_int = Integer.parseInt(length);
+        }
+        String source;
         SharedPreferences.Editor editor = settings.edit();
 
 
-        if (filter != null && filter != "" && !isNetworkAvailable()) {
+        if (filter != null && !filter.equals("") && !isNetworkAvailable()) {
+            Log.d(Config.DEBUG_TAG, "getData skipped because of filter: " + filter);
             // cannot use complex filtering on local database (e.g. items connected to group or database)
             return null;
         }
 
-        if ((isNetworkAvailable()
-                && settings.getBoolean("filter_active", false)
-                && (time_lists_retrieved + retrieve_lists_timeout < System.currentTimeMillis() || length_retrieved < length_int)
-                || (filter != null && filter != ""))) {
 
-            System.out.println("Retrieving data from network: " + type);
-            responseBody = getNetworkResult(api_url, api_params);
+        Boolean retrieve_from_database = true;
+        Boolean retrieve_from_network = false;
+        String api_params_db = null;
+
+        if (filter != null && !filter.equals("")) {
+            Log.d(Config.DEBUG_TAG, "getData: filter != null && !empty");
+            retrieve_from_database = false;
+            retrieve_from_network = true;
+        }
+        if (time_lists_retrieved + getDataCacheLifetime < System.currentTimeMillis()) {
+            retrieve_from_database = false;
+            retrieve_from_network = true;
+            Log.d(Config.DEBUG_TAG, "getData: current time - time lists retrieved: " + (System.currentTimeMillis() - (time_lists_retrieved + getDataCacheLifetime)) + ", timeout: " + getDataCacheLifetime);
+        }
+
+        if (settings.getBoolean("filter_active", true) && filter != null) {
+            // todo: add to condition those filter parameters that cannot be retrieved from local DB
+            retrieve_from_database = false;
+            retrieve_from_network = true;
+            Log.d(Config.DEBUG_TAG, "getData: filter_active: " + settings.getBoolean("filter_active", false) + ", filter: " + filter);
+        }
+        if (length_retrieved < length_int) {
+            retrieve_from_database = true;
+            retrieve_from_network = true;
+
+            api_params_db = api_params + "&filter[count]=" + length;
+            api_params += "&filter[count]=" + (length_int - length_retrieved) + "&filter[limit]=" + length_retrieved;
+            Log.d(Config.DEBUG_TAG, "getData: length_retrieved: " + length_retrieved + ", length_int: " + length_int);
+        } else {
+            if (length != null) {
+                api_params += "&filter[count]=" + length;
+            }
+        }
+        if (!isNetworkAvailable()) {
+            retrieve_from_database = true;
+            retrieve_from_network = false;
+            Log.d(Config.DEBUG_TAG, "getData: no network");
+        }
+
+
+        if (api_params_db == null) {
+            api_params_db = api_params;
+        }
+
+
+        if (retrieve_from_database) {
+            Log.d(Config.DEBUG_TAG, "Retrieving data from database: type - " + type + " api_params_db - " + api_params_db);
+            responseBody[0] = getLocalResult(type, "dashboard", api_params_db);
+
+            // TODO re-enable???
+            /*
+            // Check if database contains already all items from previous request:
+            int response_length;
+            try {
+                JSONArray response_check_length = new JSONArray(responseBody[0]);
+                response_length = response_check_length.length();
+            } catch (JSONException e) {
+                response_length = 0;
+            }
+            if (response_length >= length_int) {
+                retrieve_from_network = false;
+            }
+            */
+        }
+
+        if (retrieve_from_network) {
+
+            Log.d(Config.DEBUG_TAG, "Retrieving data from network: " + type);
+            responseBody[1] = getNetworkResult(api_url, api_params);
 
             if (type.equals("user")) {
                 editor.putLong("time_users_retrieved", System.currentTimeMillis());
@@ -436,339 +563,447 @@ public class ApiConnector {
                 editor.putInt("length_resources_retrieved", length_int);
             }
 
-            source = "network";
-            editor.putString("data_source", "network");
+            // editor.putString("data_source", "network");
 
-        } else {
-
-            System.out.println("Retrieving data from database: type - " + type + " api_params - " + api_params);
-            responseBody = getLocalResult(type, "dashboard", api_params);
-
-            source = "database";
-            editor.putString("data_source", "database");
         }
         editor.commit();
 
 
-        if (responseBody == null) {
+        if (responseBody[0] == null && responseBody[1] == null) {
+            Log.d(Config.DEBUG_TAG, "both responseBodies are null");
             return null;
         }
 
 
         try {
+            Boolean load_more = false;
+            String load_more_title = context.getString(R.string.load_more);
 
-            JSONArray response = new JSONArray(responseBody);
+            List<Integer> displayedIds = new ArrayList<Integer>();
 
+            for (int j = 0; j < 2; j++) {
 
-            for (int i = 0; i < response.length(); i++) {
-                JSONObject responseobject = response.getJSONObject(i);
+                if (responseBody[j] == null) continue;
 
-                // Don't even display hidden items
-                int hidden = 0;
-                try {
-                    hidden = responseobject.getInt("hidden");
-                } catch (JSONException e) {
-                    System.out.println("no 'hidden'");
-                } finally {
-                    System.out.println("hidden: " + hidden);
-                    if (hidden == 1) {
-                        continue;
-                    }
+                if (j == 0) {
+                    source = DATABASE;
+                } else {
+
+                    source = NETWORK;
                 }
 
-                String connectionStatus = "0";
-                String language = "eng";
-
-                DataObject object = null;
-                if (type.equals("user")) {
-                    // SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
-
-                    int logged_user_id = settings.getInt("logged_user_id", 0);
-
-                    int id = responseobject.getInt("id");
-
-                    /*
-                    if (id == 0 && source.equals("database")) {
-                        continue;
-                    }
-                    */
-
-                    String name = responseobject.getString("name");
-                    String object_type = responseobject.getString("type_name");
-
-                    String now_online = "";
-                    if (responseobject.has("now_online") && isNetworkAvailable()) {
-                        now_online = responseobject.getString("now_online");
-                    }
-                    System.out.println("online_status: " + now_online);
-
-                    String image = null;
-                    if (responseobject.has("avatar")) {
-                        image = responseobject.getString("avatar");
-                    }
-                    if (responseobject.has("language_iso_639_3")) {
-                        language = responseobject.getString("language_iso_639_3");
-                    }
+                JSONArray response = new JSONArray(responseBody[j]);
+                Log.d(Config.DEBUG_TAG, "size of response: "+response.length());
 
 
-                    if (responseobject.has("user_logged_user") && responseobject.has("logged_user_user")) {
-                        if (responseobject.getString("user_logged_user").equals("2") && responseobject.getString("logged_user_user").equals("2")) {
-                            connectionStatus = "1";
-                            responseobject.put("user_object_status", "1");
-                        } else {
-                            connectionStatus = "0";
-                            responseobject.put("user_object_status", "0");
+                for (int i = 0; i < response.length(); i++) {
+                    JSONObject responseobject = response.getJSONObject(i);
+
+                    // Don't even display hidden items
+                    int hidden = 0;
+                    try {
+                        hidden = responseobject.getInt("hidden");
+                    } catch (JSONException e) {
+                        Log.d(Config.DEBUG_TAG, "no 'hidden'");
+                    } finally {
+                        Log.d(Config.DEBUG_TAG, "hidden: " + hidden);
+                        if (hidden == 1) {
+                            continue;
                         }
-                    } else if (responseobject.has("user_object_status")) {
-                        connectionStatus = responseobject.getString("user_object_status");
                     }
 
-
-                    object = new UserObject(id);
-                    ((UserObject) object).setName(name);
-                    ((UserObject) object).setIconId(image);
-                    ((UserObject) object).setNow_online(now_online);
-                    ((UserObject) object).setConnectionStatus(connectionStatus);
-                    ((UserObject) object).setLanguage(language);
-
-                    // save retrieved data to DB
-                    if (isNetworkAvailable()) {
-                        DataHandler db = new DataHandler(context);
-
-                        LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
-                        LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
-                        search_params.put("id", String.valueOf(id));
-
-                        if (db.objectExists(search_params)) {
-                            db.updateObject("user", id, params);
-                        } else {
-
-                            if (params != null) {
-                                params.put("id", String.valueOf(id));
-                                params.put("type", "user");
-
-                                db.insertObject("user", params);
-                            }
+                    int id = -1;
+                    Boolean dupe = false;
+                    id = responseobject.getInt("id");
+                    Log.d(Config.DEBUG_TAG, "getData, cycle: "+j+" id: "+id);
+                    if (j == 0) {
+                        displayedIds.add(id);
+                    } else {
+                        if (displayedIds.contains(id)) {
+                            Log.d(Config.DEBUG_TAG, "getData, caught duplicate!");
+                            dupe = true;
                         }
-                        db.close();
-
                     }
 
-                } else if (type.equals("group")) {
-                    int id = responseobject.getInt("id");
-                    if (source.equals("database") && id == 0) {
-                        continue;
-                    }
-                    String name = responseobject.getString("name");
-                    String object_type = responseobject.getString("type_name");
+                    String connectionStatus = "0";
+                    String language = "eng";
+
+                    DataObject object = null;
+
+                    String name = "";
+
+                    if (type.equals("user")) {
+                        // SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+
+                        int logged_user_id = settings.getInt("logged_user_id", 0);
+
+                        // id = responseobject.getInt("id");
+
+                        name = responseobject.getString("name");
+                        String object_type = responseobject.getString("type_name");
+
+                        String now_online = "";
+                        if (responseobject.has("now_online") && isNetworkAvailable()) {
+                            now_online = responseobject.getString("now_online");
+                        }
+                        Log.d(Config.DEBUG_TAG, "online_status: " + now_online);
+
+                        String image = null;
+                        if (responseobject.has("user_portrait")) {
+                            image = responseobject.getString("user_portrait");
+                        }
+                        if (responseobject.has("language_iso_639_3")) {
+                            language = responseobject.getString("language_iso_639_3");
+                        }
 
 
-                    object = new GroupObject(id);
-                    ((GroupObject) object).setTitle(name);
-                    if (responseobject.has("avatar")) {
-                        String image = responseobject.getString("avatar");
-                        ((GroupObject) object).setIconId(image);
-                    }
-                    if (responseobject.has("language_iso_639_3")) {
-                        language = responseobject.getString("language_iso_639_3");
-                    }
-/*
-                    if (id == 0 && source.equals("database")) {
-                        continue;
-                    }
-*/
+                        object = new UserObject(id);
 
-                    if (responseobject.has("logged_user_member")) {
-                        connectionStatus = responseobject.getString("logged_user_member");
-                    }
+                        if (responseobject.has("status")) {
+                            String status = responseobject.getString("status");
 
-                    ((GroupObject) object).setConnectionStatus(connectionStatus);
-                    ((GroupObject) object).setLanguage(language);
+                                ((UserObject) object).setStatus(status);
 
-                    // save retrieved data to DB
-                    if (isNetworkAvailable()) {
-                        DataHandler db = new DataHandler(context);
+                        }
 
-                        LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
-                        LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
-                        search_params.put("id", String.valueOf(id));
-                        System.out.println("NULL " + responseobject.toString());
-                        if (db.objectExists(search_params)) {
-                            db.updateObject("group", id, params);
-                        } else {
+                        if (responseobject.has("user_logged_user")) {
+                            int user_logged_user = responseobject.getInt("user_logged_user");
+                            ((UserObject) object).setRelationshipUserMe(user_logged_user);
+                        }
 
-                            if (params != null) {
-                                params.put("id", String.valueOf(id));
-                                params.put("type", "group");
+                        if (responseobject.has("logged_user_user")) {
+                            int logged_user_user = responseobject.getInt("logged_user_user");
+                            ((UserObject) object).setRelationshipMeUser(logged_user_user);
+                        }
 
-                                db.insertObject("group", params);
+
+                        if (responseobject.has("access_level")) {
+                            int access = responseobject.optInt("access_level");
+                            ((UserObject) object).setAccess(access);
+                        } else if (responseobject.has("user_access_level")) {
+                            int access = responseobject.optInt("user_access_level");
+                            ((UserObject) object).setAccess(access);
+                        }
+
+                        if (responseobject.has("user_position_x") && responseobject.has("user_position_y")) {
+                            String gps_x = responseobject.getString("user_position_x");
+                            String gps_y = responseobject.getString("user_position_y");
+                            ((UserObject) object).setPosition(gps_x, gps_y);
+                        }
+
+                        ((UserObject) object).setName(name);
+                        ((UserObject) object).setIconId(image);
+                        ((UserObject) object).setNow_online(now_online);
+                        ((UserObject) object).setLanguage(language);
+                        ((UserObject) object).setSource(source);
+
+                        // save retrieved data to DB
+                        if (source.equals(NETWORK)) {
+                            DataHandler db = new DataHandler(context);
+
+                            LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
+                            LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
+                            search_params.put("id", String.valueOf(id));
+
+                            if (db.objectExists(search_params)) {
+                                db.updateObject("user", id, params);
                             } else {
-                                System.out.println("NULL " + responseobject.toString());
+
+                                if (params != null) {
+                                    params.put("id", String.valueOf(id));
+                                    params.put("type", "user");
+
+                                    db.insertObject("user", params);
+                                }
+                            }
+                            db.close();
+
+                        }
+
+                    } else if (type.equals("group")) {
+                        // id = responseobject.getInt("id");
+
+                        name = responseobject.getString("name");
+                        String object_type = responseobject.getString("type_name");
+
+
+                        object = new GroupObject(id);
+
+                        if (responseobject.has("status")) {
+                            String status = responseobject.getString("status");
+
+                                ((GroupObject) object).setStatus(status);
+
+                        }
+
+                        ((GroupObject) object).setTitle(name);
+                        if (responseobject.has("group_portrait")) {
+                            String image = responseobject.getString("group_portrait");
+                            ((GroupObject) object).setIconId(image);
+                        }
+                        if (responseobject.has("language_iso_639_3")) {
+                            language = responseobject.getString("language_iso_639_3");
+                        }
+
+                        if (responseobject.has("logged_user_member")) {
+                            int logged_user_member = responseobject.getInt("logged_user_member");
+                            ((GroupObject) object).setRelationshipMeGroup(logged_user_member);
+                        }
+
+                        if (responseobject.has("group_position_x") && responseobject.has("group_position_y")) {
+                            String gps_x = responseobject.getString("group_position_x");
+                            String gps_y = responseobject.getString("group_position_y");
+                            ((GroupObject) object).setPosition(gps_x, gps_y);
+                        }
+
+                        ((GroupObject) object).setLanguage(language);
+                        ((GroupObject) object).setSource(source);
+
+                        // save retrieved data to DB
+                        if (source.equals(NETWORK)) {
+                            DataHandler db = new DataHandler(context);
+
+                            LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
+                            LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
+                            search_params.put("id", String.valueOf(id));
+                            Log.d(Config.DEBUG_TAG, "NULL " + responseobject.toString());
+                            if (db.objectExists(search_params)) {
+                                db.updateObject("group", id, params);
+                            } else {
+
+                                if (params != null) {
+                                    params.put("id", String.valueOf(id));
+                                    params.put("type", "group");
+
+                                    db.insertObject("group", params);
+                                } else {
+                                    Log.d(Config.DEBUG_TAG, "NULL " + responseobject.toString());
+                                }
+                            }
+                            db.close();
+
+                        }
+                    } else if (type.equals("resource")) {
+                        // id = responseobject.getInt("id");
+
+                        name = responseobject.getString("name");
+                        String object_type = responseobject.getString("type_name");
+                        int sub_type = responseobject.getInt("type");
+
+                        object = new ResourceObject(id);
+
+                        if (responseobject.has("status")) {
+                            String status = responseobject.getString("status");
+
+                                ((ResourceObject) object).setStatus(status);
+
+                        }
+
+                        ((ResourceObject) object).setTitle(name);
+
+                        ((ResourceObject) object).setSubType(sub_type);
+
+                        if (responseobject.has("language_iso_639_3")) {
+                            language = responseobject.getString("language_iso_639_3");
+                        }
+                        ((ResourceObject) object).setLanguage(language);
+
+                        if (!responseobject.isNull("resource_data")) {
+                            JSONObject object_data = responseobject.getJSONObject("resource_data");
+                            if (object_data.has("message_text")) {
+
+                                String message_text = object_data.getString("message_text");
+
+                                ((ResourceObject) object).setSecondaryTitle(message_text);
                             }
                         }
-                        db.close();
+                        if (responseobject.has("message_text")) {
 
-                    }
-                } else if (type.equals("resource")) {
-                    int id = responseobject.getInt("id");
-                    /*
-                    if (id == 0 && source.equals("database")) {
-                        continue;
-                    }
-                    */
-                    String name = responseobject.getString("name");
-                    String object_type = responseobject.getString("type_name");
-                    int sub_type = responseobject.getInt("type");
-
-                    object = new ResourceObject(id);
-                    ((ResourceObject) object).setTitle(name);
-
-                    ((ResourceObject) object).setSubType(sub_type);
-
-                    if (responseobject.has("language_iso_639_3")) {
-                        language = responseobject.getString("language_iso_639_3");
-                    }
-                    ((ResourceObject) object).setLanguage(language);
-
-                    if (!responseobject.isNull("resource_data")) {
-                        JSONObject object_data = responseobject.getJSONObject("resource_data");
-                        if (object_data.has("message_text")) {
-
-                            String message_text = object_data.getString("message_text");
-
+                            String message_text = responseobject.getString("message_text");
+                            Log.d(Config.DEBUG_TAG, "MESSAGE2: " + message_text);
                             ((ResourceObject) object).setSecondaryTitle(message_text);
                         }
-                    }
-                    if (responseobject.has("message_text")) {
-
-                        String message_text = responseobject.getString("message_text");
-                        System.out.println("MESSAGE2: " + message_text);
-                        ((ResourceObject) object).setSecondaryTitle(message_text);
-                    }
 
 
-                    if (responseobject.has("media_type")) {
+                        if (responseobject.has("media_type")) {
 
-                        String media_type = responseobject.getString("media_type");
+                            String media_type = responseobject.getString("media_type");
 
-                        ((ResourceObject) object).setContentType(media_type);
-                    }
-
-                    String url;
-                    if (!responseobject.isNull("event_url") && !responseobject.getString("event_url").equals("")) {
-                        url = responseobject.getString("event_url");
-                        ((ResourceObject) object).setUrl(url);
-                    }
-
-                    if (!responseobject.isNull("organization_url") && !responseobject.getString("organization_url").equals("")) {
-                        url = responseobject.getString("organization_url");
-                        ((ResourceObject) object).setUrl(url);
-                    }
-
-                    if (!responseobject.isNull("text_information_url") && !responseobject.getString("text_information_url").equals("")) {
-                        url = responseobject.getString("text_information_url");
-                        ((ResourceObject) object).setUrl(url);
-                    }
-
-                    if (!responseobject.isNull("other_url") && !responseobject.getString("other_url").equals("")) {
-                        url = responseobject.getString("other_url");
-                        ((ResourceObject) object).setUrl(url);
-                    }
-
-                    if (!responseobject.isNull("media_link") && !responseobject.getString("media_link").equals("")) {
-                        url = responseobject.getString("media_link");
-                        ((ResourceObject) object).setUrl(url);
-                    }
-
-                    if (responseobject.has("trashed")) {
-                        if (!responseobject.isNull("trashed")) {
-                            int trashed = responseobject.getInt("trashed");
-
-                            Boolean tr = false;
-                            if (trashed > 0) {
-                                tr = true;
-                            }
-                            ((ResourceObject) object).setDeleted(tr);
+                            ((ResourceObject) object).setContentType(media_type);
                         }
-                    }
-                    if (responseobject.has("resource_trash")) {
-                        if (!responseobject.isNull("resource_trash")) {
-                            int trashed = responseobject.getInt("resource_trash");
 
-                            Boolean tr = false;
-                            if (trashed > 0) {
-                                tr = true;
-                            }
-                            ((ResourceObject) object).setDeleted(tr);
+                        if (responseobject.has("resource_position_x") && responseobject.has("resource_position_y")) {
+                            String gps_x = responseobject.getString("resource_position_x");
+                            String gps_y = responseobject.getString("resource_position_y");
+                            ((ResourceObject) object).setPosition(gps_x, gps_y);
                         }
-                    }
 
-                    if (responseobject.has("author")) {
-                        if (!responseobject.isNull("author")) {
-                            int author_id = responseobject.getInt("author");
-
-                            ((ResourceObject) object).setResponseUser(author_id);
+                        String url;
+                        if (!responseobject.isNull("event_url") && !responseobject.getString("event_url").equals("")) {
+                            url = responseobject.getString("event_url");
+                            ((ResourceObject) object).setUrl(url);
                         }
-                    }
 
-                    if (responseobject.has("owner_portrait")) {
-                        String image = responseobject.getString("owner_portrait");
-                        ((ResourceObject) object).setIconId(image);
-                    }
-
-                    if (responseobject.has("resource_type")) {
-                        if (!responseobject.isNull("resource_type")) {
-                            int subtype = responseobject.getInt("resource_type");
-                            System.out.println("SUBTYPE: " + subtype);
-                            ((ResourceObject) object).setSubType(subtype);
+                        if (!responseobject.isNull("organization_url") && !responseobject.getString("organization_url").equals("")) {
+                            url = responseobject.getString("organization_url");
+                            ((ResourceObject) object).setUrl(url);
                         }
-                    }
 
-                    if (responseobject.has("logged_user_member")) {
-                        connectionStatus = responseobject.getString("logged_user_member");
-                    }
+                        if (!responseobject.isNull("text_information_url") && !responseobject.getString("text_information_url").equals("")) {
+                            url = responseobject.getString("text_information_url");
+                            ((ResourceObject) object).setUrl(url);
+                        }
 
-                    ((ResourceObject) object).setConnectionStatus(connectionStatus);
+                        if (!responseobject.isNull("other_url") && !responseobject.getString("other_url").equals("")) {
+                            url = responseobject.getString("other_url");
+                            ((ResourceObject) object).setUrl(url);
+                        }
 
-                    // save retrieved data to DB
-                    if (isNetworkAvailable()) {
-                        DataHandler db = new DataHandler(context);
-                        LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
-                        LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
-                        search_params.put("id", String.valueOf(id));
+                        if (!responseobject.isNull("media_link") && !responseobject.getString("media_link").equals("")) {
+                            url = responseobject.getString("media_link");
+                            ((ResourceObject) object).setUrl(url);
+                        }
 
-                        if (db.objectExists(search_params)) {
-                            db.updateObject("resource", id, params);
-                        } else {
+                        if (responseobject.has("trashed")) {
+                            if (!responseobject.isNull("trashed")) {
+                                int trashed = responseobject.getInt("trashed");
 
-                            if (params != null) {
-                                params.put("id", String.valueOf(id));
-                                params.put("type", "resource");
-
-                                db.insertObject("resource", params);
+                                Boolean tr = false;
+                                if (trashed > 0) {
+                                    tr = true;
+                                }
+                                ((ResourceObject) object).setDeleted(tr);
                             }
                         }
-                        db.close();
+                        if (responseobject.has("resource_trash")) {
+                            if (!responseobject.isNull("resource_trash")) {
+                                int trashed = responseobject.getInt("resource_trash");
+
+                                Boolean tr = false;
+                                if (trashed > 0) {
+                                    tr = true;
+                                }
+                                ((ResourceObject) object).setDeleted(tr);
+                            }
+                        }
+
+                        if (responseobject.has("author")) {
+                            if (!responseobject.isNull("author")) {
+                                int author_id = responseobject.getInt("author");
+
+                                ((ResourceObject) object).setResponseUser(author_id);
+                            }
+                        }
+
+                        if (responseobject.has("owner_portrait_id")) {
+                            int owner_portrait_id = responseobject.getInt("owner_portrait_id");
+
+                            UserObject owner;
+                            owner = (UserObject) getDetail("user", owner_portrait_id);
+                            if (owner != null) {
+                                String icon_id = owner.getIconId();
+                                Log.d(Config.DEBUG_TAG, "owner_portrait_id: " + owner_portrait_id + ", icon_id: " + icon_id);
+                                ((ResourceObject) object).setIconId(icon_id);
+                            }
+                        }
+
+                        if (responseobject.has("resource_type")) {
+                            if (!responseobject.isNull("resource_type")) {
+                                int subtype = responseobject.getInt("resource_type");
+                                Log.d(Config.DEBUG_TAG, "SUBTYPE: " + subtype);
+                                ((ResourceObject) object).setSubType(subtype);
+                            }
+                        }
+
+                        if (responseobject.has("logged_user_member")) {
+                            int logged_user_member = responseobject.getInt("logged_user_member");
+                            ((ResourceObject) object).setRelationshipMeResource(logged_user_member);
+                        }
+
+                        ((ResourceObject) object).setSource(source);
+
+                        // save retrieved data to DB
+                        if (source.equals(NETWORK)) {
+                            DataHandler db = new DataHandler(context);
+                            LinkedHashMap<String, String> params = db.prepareData("dashboard", type, responseobject.toString());
+                            LinkedHashMap<String, String> search_params = new LinkedHashMap<String, String>();
+                            search_params.put("id", String.valueOf(id));
+
+                            if (db.objectExists(search_params)) {
+                                db.updateObject("resource", id, params);
+                            } else {
+
+                                if (params != null) {
+                                    params.put("id", String.valueOf(id));
+                                    params.put("type", "resource");
+
+                                    db.insertObject("resource", params);
+                                }
+                            }
+                            db.close();
+
+                        }
+
 
                     }
+                    if (id == 0) {
+                        load_more = true;
+                        load_more_title = name;
 
-
+                    } else {
+                        if (!dupe) {
+                            objects.add(object);
+                        }
+                    }
                 }
-                objects.add(object);
+
             }
 
-            // todo: shift object with id 0 to the end
-            // or: when writing to db, first delete with id=-1
+            if (load_more) {
+                DataObject object = null;
+                if (retrieve_from_network) {
+                    source = NETWORK;
+                } else {
+                    source = DATABASE;
+                }
+                if (type.equals("user")) {
+                    object = new UserObject(0);
+                    ((UserObject) object).setName(load_more_title);
+                    ((UserObject) object).setSource(source);
+                    ((UserObject) object).setRelationshipMeUser(0);
+                    ((UserObject) object).setStatus("1");
+                    objects.add(object);
+                }
+                if (type.equals("group")) {
+                    object = new GroupObject(0);
+                    ((GroupObject) object).setTitle(load_more_title);
+                    ((GroupObject) object).setSource(source);
+                    ((GroupObject) object).setRelationshipMeGroup(0);
+                    ((GroupObject) object).setStatus("1");
+                    objects.add(object);
+                } else if (type.equals("resource")) {
+                    object = new ResourceObject(0);
+                    ((ResourceObject) object).setTitle(load_more_title);
+                    ((ResourceObject) object).setSource(source);
+                    ((ResourceObject) object).setRelationshipMeResource(0);
+                    ((ResourceObject) object).setStatus("1");
+                    if (messages) {
+                        objects.add(0, object);
+                    } else {
+                        objects.add(object);
+                    }
+                }
 
+            }
 
             return objects;
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-            failFunction();
-            return null;
-        }
 
+        }catch(JSONException e){
+                e.printStackTrace();
+                failFunction();
+                return null;
+            }
 
     }
 
@@ -786,84 +1021,41 @@ public class ApiConnector {
         String languageCode;
         String languageName;
 
-        try {
+        if (deployment_languages != null) {
+            try {
 
-            languages_json_o = new JSONObject(deployment_languages);
-            languages_json_a = languages_json_o.getJSONArray("languages");
+                languages_json_o = new JSONObject(deployment_languages);
+                languages_json_a = languages_json_o.getJSONArray("languages");
 
-            for (int i = 0; i < languages_json_a.length(); i++) {
+                for (int i = 0; i < languages_json_a.length(); i++) {
 
-                json_data = languages_json_a.getJSONObject(i);
+                    json_data = languages_json_a.getJSONObject(i);
 
-                languageCode = json_data.getString("iso_code");
-                languageName = json_data.getString("name");
-                languages.put(languageCode, languageName);
-                System.out.println("Deployment languages - name: " + languageName + ", code: " + languageCode);
+                    languageCode = json_data.getString("iso_code");
+                    languageName = json_data.getString("name");
+                    languages.put(languageCode, languageName);
+                    Log.d(Config.DEBUG_TAG, "Deployment languages - name: " + languageName + ", code: " + languageCode);
 
+                }
+            } catch (JSONException e) {
+                Log.d(Config.DEBUG_TAG, "Error parsing deployment languages.");
             }
-        } catch (JSONException e) {
-            System.out.println("Error parsing deployment languages.");
         }
 
         return languages;
 
-    /*
-        LinkedHashMap<String, String> languages = new LinkedHashMap<String, String>();
-        languages.put("en", "English");
-        languages.put("ces", "Čeština");
-        languages.put("hlt", "Matu");
-        languages.put("mrh", "Mara");
-        languages.put("zom", "Zolai");
-
-        return languages;
-*/
     }
 
-
-    public String translateLanguageNameToCode(String languageName) {
-
-        LinkedHashMap<String, String> languages = getSupportedLanguages();
-        Iterator<Map.Entry<String, String>> it = languages.entrySet().iterator();
-        while (it.hasNext()) {
-            HashMap.Entry pairs = (HashMap.Entry) it.next();
-            if (pairs.getValue().toString().equals(languageName)) {
-                return pairs.getKey().toString();
-            }
-        }
-
-        return "eng";
-    }
-
-    public String translateLanguageCodeToName(String languageCode) {
-
-        LinkedHashMap<String, String> languages = getSupportedLanguages();
-        Iterator<Map.Entry<String, String>> it = languages.entrySet().iterator();
-        while (it.hasNext()) {
-            HashMap.Entry pairs = (HashMap.Entry) it.next();
-            if (pairs.getKey().toString().equals(languageCode)) {
-                return pairs.getValue().toString();
-            }
-        }
-
-        return "English";
-    }
-
-    public LinkedHashMap<Integer, String> getSupportedTimers() {
-
-        LinkedHashMap<Integer, String> notifications = new LinkedHashMap<Integer, String>();
-        notifications.put(0, "-");
-        notifications.put(1, context.getString(R.string.once_per_hour));
-        notifications.put(24, context.getString(R.string.once_per_day));
-        notifications.put(168, context.getString(R.string.once_per_week));
-
-        return notifications;
-
-    }
 
     public LinkedHashMap<String, String> getSupportedTags() {
 
+        SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+        long last_time_retrieved_tags = settings.getLong("last_time_retrieved_tags", 0);
+
+        long timeout = 600000;
+
         String responseBody;
-        if (isNetworkAvailable()) {
+        if (isNetworkAvailable() && last_time_retrieved_tags + timeout < System.currentTimeMillis()) {
             responseBody = getNetworkResult(cfg.getApiUrl() + "Base/Tags.json", null);
             if (responseBody != null) {
                 DataHandler db = new DataHandler(context);
@@ -873,9 +1065,11 @@ public class ApiConnector {
                     db.insertTags(responseBody);
                 }
                 db.close();
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("last_time_retrieved_tags", System.currentTimeMillis());
+                editor.commit();
             }
         } else {
-
             responseBody = getLocalResult("tags", "tags", null);
         }
 
@@ -922,16 +1116,16 @@ public class ApiConnector {
         String session = null;
 
         HttpURLConnection connection;
-        OutputStreamWriter request = null;
+        OutputStreamWriter request;
 
-        URL url = null;
-        String response = null;
+        URL url;
+        String response;
         String parameters = "PASS=" + password + "&USER=" + login;
 
         try {
 
             url = new URL(cfg.getApiUrl() + "Base/Login.json");
-            HttpURLConnection http = null;
+            HttpURLConnection http;
 
             if (url.getProtocol().toLowerCase().equals("https")) {
                 trustAllHosts();
@@ -954,13 +1148,15 @@ public class ApiConnector {
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; U; Android 2.2; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1");
             }
             connection.setDoOutput(true);
+            connection.setConnectTimeout(connectionTimeout);
+            connection.setReadTimeout(readTimeout);
 
             request = new OutputStreamWriter(connection.getOutputStream());
             request.write(parameters);
             request.flush();
             request.close();
 
-            String line = "";
+            String line;
             InputStreamReader isr = new InputStreamReader(connection.getInputStream());
             BufferedReader reader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();
@@ -971,7 +1167,7 @@ public class ApiConnector {
 
             // Response from server after login process will be stored in response variable.
             response = sb.toString();
-            System.out.println(response);
+            Log.d(Config.DEBUG_TAG, response);
             JSONObject result = new JSONObject(response);
             boolean status = result.getBoolean("result");
 
@@ -989,7 +1185,7 @@ public class ApiConnector {
             reader.close();
 
             if (connection.getHeaderFields() != null) {
-                System.out.println("COOKIE: " + connection.getHeaderFields());
+                Log.d(Config.DEBUG_TAG, "COOKIE: " + connection.getHeaderFields());
                 if (connection.getHeaderFields().get("Set-Cookie") != null) {
                     for (String cookie : connection.getHeaderFields().get("Set-Cookie")) {
                         if (cookie != null) {
@@ -1024,7 +1220,7 @@ public class ApiConnector {
                 editor.putInt("logged_user_id", result.getInt("user_id"));
 
                 JSONObject data = result.getJSONObject("data");
-                //System.out.println(result.getJSONObject("data").toString());
+                //Log.d(Config.DEBUG_TAG, result.getJSONObject("data").toString());
                   /*
                   if(data.getInt("user_language") == 1) {
     	  			editor.putString("logged_user_language", "English");
@@ -1051,9 +1247,10 @@ public class ApiConnector {
 
                 editor.putInt("user_access_level", data.getInt("user_access_level"));
 
+                editor.putInt("number_visits", settings.getInt("number_visits",0)+1);
 
                 JSONArray tags = data.getJSONArray("tags");
-                System.out.println("Loading tags");
+                Log.d(Config.DEBUG_TAG, "Loading tags");
                 String logged_user_tags = "";
                 for (int i = 0; i < tags.length(); i++) {
                     JSONObject o = tags.getJSONObject(i);
@@ -1097,15 +1294,15 @@ public class ApiConnector {
     protected boolean apiExists(String apiurl) {
 
         HttpURLConnection connection;
-        OutputStreamWriter request = null;
+        OutputStreamWriter request;
 
-        URL url = null;
-        String response = null;
+        URL url;
+        String response;
         String parameters = "";
 
         try {
             url = new URL(apiurl + "Base/Login.json");
-            HttpURLConnection http = null;
+            HttpURLConnection http;
             // By default, this implementation of HttpURLConnection requests that servers use gzip compression.
 
             if (url.getProtocol().toLowerCase().equals("https")) {
@@ -1121,6 +1318,8 @@ public class ApiConnector {
             connection = http;
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.setConnectTimeout(connectionTimeout);
+            connection.setReadTimeout(readTimeout);
 
             //String ua = new WebView(context).getSettings().getUserAgentString();
             //connection.setRequestProperty("User-Agent",ua);
@@ -1131,7 +1330,7 @@ public class ApiConnector {
             request.flush();
             request.close();
 
-            String line = "";
+            String line;
             InputStreamReader isr = new InputStreamReader(connection.getInputStream());
             BufferedReader reader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();
@@ -1147,11 +1346,7 @@ public class ApiConnector {
             reader.close();
 
             JSONObject result = new JSONObject(response);
-            if (result.has("result")) {
-                return true;
-            }
-
-            return false;
+            return result.has("result");
 
         } catch (IOException e) {
             // Error
@@ -1206,7 +1401,7 @@ public class ApiConnector {
             if (saved_login != null && saved_password != null) {
                 String res = createSession(saved_login, saved_password);
                 if (res.equals("success")) {
-                    System.out.println("sessionInitiated success");
+                    Log.d(Config.DEBUG_TAG, "sessionInitiated success");
                     return true;
                 }
             }
@@ -1252,8 +1447,8 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
-            String result_str = (String) result.getString("result_str");
+            boolean status = result.getBoolean("result");
+            String result_str = result.getString("result_str");
 
             if (!status) {
                 return null;
@@ -1288,15 +1483,10 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
+            return status;
 
-            }
-
-
-            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1322,14 +1512,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("group_creation_rights");
+            boolean status = result.getBoolean("group_creation_rights");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1354,15 +1539,10 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
+            return status;
 
-            }
-
-
-            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1387,14 +1567,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1410,6 +1585,7 @@ public class ApiConnector {
 
         responseBody = getNetworkResult(cfg.getApiUrl() + "Base/UnreadMessages.json", null);
 
+        // todo reduce network requests
 
         if (responseBody == null) {
             return "0";
@@ -1417,7 +1593,7 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
             if (!status) {
                 return "0";
@@ -1449,14 +1625,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1481,14 +1652,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1513,14 +1679,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1545,14 +1706,9 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
-
-            }
-
-            return true;
+            return status;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1573,7 +1729,7 @@ public class ApiConnector {
         } else {
             api_params = "firstName=" + firstName + "&lastName=" + lastName + "&email=" + userEmail + "&phone=" + userPhone + "&url=" + userUrl + "&user_send_notifications=" + userTimer + "&description=" + userDescription + "&visibility=" + visibilityLevel + "&position_gpsx=" + (gpsx) + "&position_gpsy=" + gpsy + "&language_iso_639_3=" + language;
         }
-        System.out.println("changeProfile: "+api_params);
+        Log.d(Config.DEBUG_TAG, "changeProfile: " + api_params);
         String responseBody;
         if (isNetworkAvailable()) {
             responseBody = getNetworkResult(cfg.getApiUrl() + "Base/ChangeProfile.json", api_params);
@@ -1586,17 +1742,12 @@ public class ApiConnector {
         }
 
         try {
-            System.out.println(responseBody);
+            Log.d(Config.DEBUG_TAG, responseBody);
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
+            return status;
 
-            }
-
-
-            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1628,7 +1779,7 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
             if (!status) {
                 return result.getString("message");
@@ -1663,15 +1814,10 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
+            return status;
 
-            }
-
-
-            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1698,15 +1844,10 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
-            if (!status) {
-                return false;
+            return status;
 
-            }
-
-
-            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1716,16 +1857,17 @@ public class ApiConnector {
 
     }
 
-    public String registerUser(String user_login, String user_email, String user_password, String language) {
+    public String registerUser(String user_login, String user_email, String user_password, String language, String answer) {
 
 
-        String api_params = "login=" + user_login + "&email=" + user_email + "&password=" + user_password + "&language=" + language;
+        String api_params = "login=" + user_login + "&email=" + user_email + "&password=" + user_password + "&language=" + language + "&answer=" + answer;
 
         String responseBody;
         if (isNetworkAvailable()) {
             responseBody = getNetworkResult(cfg.getApiUrl() + "Base/Register.json", api_params);
         } else {
-            responseBody = getLocalResult("user", cfg.getApiUrl() + "Base/Register.json", api_params);
+            return context.getString(R.string.not_available_offline);
+        //    responseBody = getLocalResult("user", cfg.getApiUrl() + "Base/Register.json", api_params);
         }
 
         if (responseBody == null) {
@@ -1734,7 +1876,7 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
             if (!status) {
                 return result.getString("error");
@@ -1769,7 +1911,7 @@ public class ApiConnector {
         try {
 
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
+            boolean status = result.getBoolean("result");
 
             if (!status) {
                 return result.getString("error");
@@ -1789,9 +1931,16 @@ public class ApiConnector {
     public int hasUnreadMessages() {
         String api_params = "";
 
+        SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
+        long lastRequest = settings.getLong("last_checked_unread", 0);
+        long timeout = 60000;
+
         String responseBody;
-        if (isNetworkAvailable()) {
+        if (isNetworkAvailable() && lastRequest + timeout < System.currentTimeMillis()) {
             responseBody = getNetworkResult(cfg.getApiUrl() + "Base/Hasmessage.json", api_params);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putLong("last_checked_unread", System.currentTimeMillis());
+            editor.commit();
         } else {
             responseBody = getLocalResult("user", cfg.getApiUrl() + "Base/Hasmessage.json", api_params);
         }
@@ -1801,8 +1950,8 @@ public class ApiConnector {
         }
         try {
             JSONObject result = new JSONObject(responseBody);
-            boolean status = (Boolean) result.getBoolean("result");
-            int count = (int) result.getInt("message_count");
+            boolean status = result.getBoolean("result");
+            int count = result.getInt("message_count");
             return count;
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1816,20 +1965,10 @@ public class ApiConnector {
         //LinkedHashMap<String,String> help = new LinkedHashMap<String,String>();
         SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
         String loc = "eng";
-        if (settings.getString("ui_language", null) != null) {
-            loc = "eng";
-            if (settings.getString("ui_language", null) == "ces") {
-                loc = "ces";
-            } else if (settings.getString("ui_language", null) == "hlt") {
-                loc = "hlt";
-            } else if (settings.getString("ui_language", null) == "mrh") {
-                loc = "mrh";
-            } else if (settings.getString("ui_language", null) == "zom") {
-                loc = "zom";
-            } else {
-                loc = "eng";
-            }
+        String ui_language = settings.getString("ui_language", null);
 
+        if (ui_language != null) {
+            loc = ui_language;
         }
 
         StringBuffer stringBuffer = new StringBuffer();
@@ -1919,7 +2058,7 @@ public class ApiConnector {
                 if (filter_object.has("filter_language")) {
                     String filter_language_iso = filter_object.getString("filter_language");
 
-                    // System.out.println("api.createFilter, filter_language: "+filter_language);
+                    // Log.d(Config.DEBUG_TAG, "api.createFilter, filter_language: "+filter_language);
                     // String filter_language_iso = "eng";
                     if (!filter_language_iso.equals("")) {
                         /*
@@ -1945,17 +2084,53 @@ public class ApiConnector {
                     }
                 }
 
+                int radius_meters = 10000;
+                double gpsx = 0;
+                double gpsy = 0;
+
                 String location_filter_gpsx = settings.getString("filter_gpsx", null);
                 String location_filter_gpsy = settings.getString("filter_gpsy", null);
+
+                if (filter_object.has("filter_map_alternative") && location_filter_gpsx != null && location_filter_gpsy != null) {
+                    // String location_filter_gpsx = filter_object.getString("filter_gpsx");
+                    // String location_filter_gpsy = filter_object.getString("filter_gpsy");
+                    try {
+                        gpsx = Double.valueOf(location_filter_gpsx) / 1000000;
+                        gpsy = Double.valueOf(location_filter_gpsy) / 1000000;
+                        String filter_map_alternative = filter_object.getString("filter_map_alternative");
+                        String unit = settings.getString("distance_unit", "km");
+                        int factor = 1000;
+                        int radius = Integer.parseInt(filter_map_alternative.replace(" " + unit, ""));
+                        if (unit.equals("mi") || unit.equals("mile")) {
+                            factor = 1600;
+                        }
+                        radius_meters = radius * factor;
+                    } catch (NumberFormatException e) {
+                        Log.d(Config.DEBUG_TAG, "Damn! The default value of the radius selector tried to sneak into an integer!");
+                    } finally {
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putInt("filter_radius", radius_meters);
+                        editor.commit();
+
+                        filter_params += "&filter[mapfilter][center][lat]=" + gpsx + "&filter[mapfilter][center][lng]=" + gpsy + "&filter[mapfilter][radius][length]=" + radius_meters;
+                    }
+
+
+                }
+
+
+
                 int location_filter_radius = settings.getInt("filter_radius", 0);
 
                 if (location_filter_gpsx != null && location_filter_gpsy != null && location_filter_radius > 0) {
-                    double gpsx = Double.valueOf(location_filter_gpsx) / 1000000;
-                    double gpsy = Double.valueOf(location_filter_gpsy) / 1000000;
+                    gpsx = Double.valueOf(location_filter_gpsx) / 1000000;
+                    gpsy = Double.valueOf(location_filter_gpsy) / 1000000;
 
                     filter_params += "&filter[mapfilter][center][lat]=" + gpsx + "&filter[mapfilter][center][lng]=" + gpsy + "&filter[mapfilter][radius][length]=" + location_filter_radius;
 
                 }
+
+                Log.d(Config.DEBUG_TAG, "filter_params: " + filter_params);
 
 
             } catch (JSONException e) {
@@ -1984,28 +2159,28 @@ public class ApiConnector {
         if(inbox_filter != null) {
 			try {
 				JSONObject filter_object = new JSONObject(inbox_filter);
-							
+
 				if(filter_object.has("filter_removed")) {
 					Boolean filter_trash = filter_object.getBoolean("filter_removed");
 					if(filter_trash) {
-					
-						
-					
+
+
+
 						filter_params += "&filter[trash]=1";
-					} 
+					}
 				}
-				
+
 				if(filter_object.has("filter_opened")) {
 					Boolean filter_open = filter_object.getBoolean("filter_opened");
 					if(filter_open) {
-					
-						
-					
+
+
+
 						filter_params += "&filter[opened]=0";
-					} 
+					}
 				}
-		    	
-		    	
+
+
 			} catch (JSONException e) {
 				e.printStackTrace();
 				failFunction();
@@ -2049,7 +2224,7 @@ public class ApiConnector {
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo != null) {
-            System.out.println("CONNECTIVITY: " + activeNetworkInfo.isConnected());
+            Log.d(Config.DEBUG_TAG, "CONNECTIVITY: " + activeNetworkInfo.isConnected());
         }
         //return  false;
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
@@ -2061,30 +2236,30 @@ public class ApiConnector {
 
         // Determine only if last time more than x seconds ago
         long last_determined = settings.getLong("time_connection_measured", 0);
-        long time_passed = last_determined + repeat_measuring_speed;
-        System.out.println("Determine connection quality, last time " + (System.currentTimeMillis() - last_determined) / 1000 + " seconds ago.");
-        if (time_passed < System.currentTimeMillis()) {
+        long end_time_lock = last_determined + measureSpeedTimeout;
+        Log.d(Config.DEBUG_TAG, "Determine connection quality, last time " + (System.currentTimeMillis() - last_determined) / 1000 + " seconds ago.");
+        if (end_time_lock < System.currentTimeMillis()) {
             determineConnectionQuality();
         } else {
-            System.out.println("... skipped");
+            Log.d(Config.DEBUG_TAG, "... skipped");
         }
 
         String MYCITIZEN_SID = settings.getString("MYCITIZEN_SID", null);
         String ua = settings.getString("UserAgent", null);
 
         HttpURLConnection connection;
-        OutputStreamWriter request = null;
+        OutputStreamWriter request;
 
-        URL url = null;
+        URL url;
 
         if (api_params != null) {
-            System.out.println("api_params: " + api_params);
+            Log.d(Config.DEBUG_TAG, "api_params: " + api_params);
         }
         try {
 
             url = new URL(api_url);
 
-            HttpURLConnection http = null;
+            HttpURLConnection http;
 
             if (url.getProtocol().toLowerCase().equals("https")) {
                 trustAllHosts();
@@ -2101,34 +2276,31 @@ public class ApiConnector {
             connection.setRequestProperty("Cookie", "MYCITIZEN_SID=" + MYCITIZEN_SID);
             //connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty("User-Agent", ua);
+            connection.setConnectTimeout(connectionTimeout);
+            connection.setReadTimeout(readTimeout);
             connection.setDoOutput(true);
 
             request = new OutputStreamWriter(connection.getOutputStream());
+            int speed = settings.getInt("connection_strength", 0);
 
-            // todo: Why two different cases?
             if (api_params != null) {
-                int speed = settings.getInt("connection_strength", 0);
-                if (speed <= 50) {
-                    api_params += "&speed=0";
-                } else {
-                    api_params += "&speed=1";
-                }
-                request.write(api_params);
-            } else {
-                int speed = settings.getInt("connection_strength", 0);
+                api_params += "&";
+            }
+
                 if (speed <= 50) {
                     api_params += "speed=0";
+                    getDataCacheLifetime = 600000;
                 } else {
                     api_params += "speed=1";
+                    getDataCacheLifetime = 60000;
                 }
                 request.write(api_params);
-
-            }
 
             request.flush();
             request.close();
 
-            String line = "";
+            Log.d(Config.DEBUG_TAG, "getNetworkResult, api_params: "+api_params);
+            String line;
             InputStreamReader isr = new InputStreamReader(connection.getInputStream());
             BufferedReader reader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();
@@ -2138,17 +2310,26 @@ public class ApiConnector {
 
             String responseBody = sb.toString();
 
+            Log.d(Config.DEBUG_TAG, "responseBody: "+responseBody);
+
             isr.close();
             reader.close();
+
+            // CQ should not be zero if we can receive stuff
+            if (speed < 10) {
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putLong("last_network_request", 4000);
+                editor.commit();
+            }
 
             return responseBody;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-
             failFunction();
         }
+        Log.d(Config.DEBUG_TAG, "getNetworkResult returning null");
         return null;
 
     }
@@ -2160,7 +2341,7 @@ public class ApiConnector {
         try {
             long start_time = System.currentTimeMillis();
             URL url = new URL(cfg.getApiUrl() + "Base/Login.json");
-            HttpURLConnection urlc = null;
+            HttpURLConnection urlc;
             if (url.getProtocol().toLowerCase().equals("https")) {
                 trustAllHosts();
                 HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
@@ -2191,7 +2372,7 @@ public class ApiConnector {
             editor.putLong("last_network_request", 5000);
             editor.commit();
         } catch (MalformedURLException e1) {
-            System.out.println("e malformed");
+            Log.d(Config.DEBUG_TAG, "e malformed");
             e1.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -2203,21 +2384,25 @@ public class ApiConnector {
         DataHandler db = new DataHandler(context);
         SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
         SharedPreferences.Editor editor = settings.edit();
+        String returnValue;
         //editor.putLong("last_network_request", 10000);
         editor.commit();
 
         LinkedHashMap<String, String> p = createLocalFilter(params);
 
         if (url.equals("detail")) {
-            return db.getObject(type, p);
+            returnValue = db.getObject(type, p);
         } else if (url.equals("dashboard")) {
-            return db.getObjects(type, p);
+            returnValue = db.getObjects(type, p);
         } else if (url.equals("tags")) {
-            return db.getTags();
+            returnValue = db.getTags();
+        } else if (url.equals("last_update")) {
+            returnValue = db.getLastUpdate(type, p);
         } else {
-            db.close();
-            return null;
+            returnValue = null;
         }
+        db.close();
+        return returnValue;
 
     }
 
@@ -2229,7 +2414,7 @@ public class ApiConnector {
             byte[] b = baos.toByteArray();
             String imageEncoded = Base64.encodeToString(b, Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
 
-            System.out.println("Encoded: " + imageEncoded);
+            Log.d(Config.DEBUG_TAG, "Encoded: " + imageEncoded);
             return imageEncoded;
         } else return "";
     }
@@ -2327,10 +2512,14 @@ public class ApiConnector {
             // todo testing: Instead of returning to LoginActivity, switch to offline mode.
             SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putLong("last_network_request", 5000);
+            editor.putLong("last_network_request", 10000);
+            editor.putInt("connection_strength", 1);
             editor.putLong("time_connection_measured", System.currentTimeMillis());
             editor.commit();
-            Toast.makeText(this.context, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+
+            Log.d(Config.DEBUG_TAG, "Switched to offline because of wrong data.");
+//              Toast here causes RuntimeException
+//            Toast.makeText(this.context, R.string.error_loading_data, Toast.LENGTH_LONG).show();
             /*
             Intent intent = new Intent(context, LoginActivity.class);
             intent.putExtra("type", "apiError");
@@ -2372,21 +2561,21 @@ public class ApiConnector {
 
     protected Boolean getDeploymentInfo() {
         if (!isNetworkAvailable()) {
-            System.out.println("getDeploymentInfo: no network");
+            Log.d(Config.DEBUG_TAG, "getDeploymentInfo: no network");
             return true;
         }
         SharedPreferences settings = context.getSharedPreferences(Config.localStorageName, 0);
         SharedPreferences.Editor editor = settings.edit();
 
         HttpURLConnection connection;
-        OutputStreamWriter request = null;
+        OutputStreamWriter request;
 
-        URL url = null;
-        String response = null;
+        URL url;
+        String response;
 
         try {
             url = new URL(cfg.getApiUrl() + "Base/Deployment.json");
-            HttpURLConnection http = null;
+            HttpURLConnection http;
 
             if (url.getProtocol().toLowerCase().equals("https")) {
                 trustAllHosts();
@@ -2400,6 +2589,8 @@ public class ApiConnector {
             connection = http;
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            connection.setConnectTimeout(connectionTimeout);
+            connection.setReadTimeout(readTimeout);
 
             String ua = settings.getString("userAgent", null);
 
@@ -2414,7 +2605,7 @@ public class ApiConnector {
             request.flush();
             request.close();
 
-            String line = "";
+            String line;
             InputStreamReader isr = new InputStreamReader(connection.getInputStream());
             BufferedReader reader = new BufferedReader(isr);
             StringBuilder sb = new StringBuilder();
@@ -2424,10 +2615,9 @@ public class ApiConnector {
             }
 
             response = sb.toString();
-            System.out.println("getDeploymentInfo: " + response);
+            // Log.d(Config.DEBUG_TAG, "getDeploymentInfo: " + response);
             JSONObject result = new JSONObject(response);
 
-            // todo save data to settings
             if (result.has("name")) {
                 editor.putString("deployment_name", result.getString("name"));
             }
@@ -2442,6 +2632,12 @@ public class ApiConnector {
             }
             if (result.has("support_url")) {
                 editor.putString("support_url", result.getString("support_url"));
+            }
+            if (result.has("gps_default_latitude")) {
+                editor.putString("gps_default_latitude", result.getString("gps_default_latitude"));
+            }
+            if (result.has("gps_default_longitude")) {
+                editor.putString("gps_default_longitude", result.getString("gps_default_longitude"));
             }
             editor.commit();
 
@@ -2464,5 +2660,41 @@ public class ApiConnector {
     }
 
 
+    public ArrayList<String> createActivities(String timeframe) {
+        ArrayList<String> data = new ArrayList<String>();
 
+        if (!isNetworkAvailable()) {
+            Log.d(Config.DEBUG_TAG, "createActivities: no network");
+            return null;
+        }
+
+        String api_url = cfg.getApiUrl() + "Base/Activity.json";
+
+        String api_params = "timeframe="+timeframe;
+        String response = getNetworkResult(api_url, api_params);
+
+
+
+        try {
+
+            JSONObject result = new JSONObject(response);
+
+            if (result.has("header")) {
+                data.add(result.getString("header"));
+            }
+            if (result.has("html")) {
+                data.add(result.getString("html"));
+
+            }
+            Log.d(Config.DEBUG_TAG, "data: "+data.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            failFunction();
+            return null;
+        } finally {
+            return data;
+        }
+
+    }
 }

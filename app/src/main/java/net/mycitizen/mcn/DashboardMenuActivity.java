@@ -10,6 +10,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -39,7 +43,7 @@ public class DashboardMenuActivity extends BaseActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         actionBar = getSupportActionBar();
-        actionBar.setTitle("MyCitizen.net");
+        actionBar.setTitle(R.string.dashboard);
         actionBar.setIcon(null);
 
         api = new ApiConnector(this);
@@ -50,14 +54,14 @@ public class DashboardMenuActivity extends BaseActivity {
 
         SharedPreferences user_settings = DashboardMenuActivity.this.getSharedPreferences("MyCitizen", 0);
 
-        Button dashboard_help = (Button) findViewById(R.id.dashboard_help);
-        dashboard_help.setOnClickListener(new OnClickListener() {
+        Button dashboard_activity = (Button) findViewById(R.id.dashboard_activity);
+        dashboard_activity.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(DashboardMenuActivity.this, HelpActivity.class);
+                Intent intent = new Intent(DashboardMenuActivity.this, ActivitiesActivity.class);
 
-                intent.putExtra("topic", "dashboard");
+                intent.putExtra("timeframe", "today");
                 startActivity(intent);
             }
         });
@@ -67,7 +71,7 @@ public class DashboardMenuActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (!api.isNetworkAvailable()) {
-                    Toast.makeText(getApplicationContext(), "This section is not avalable in offline mode.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(DashboardMenuActivity.this, ProfileMainActivity.class);
                     //String message = editText.getText().toString();
@@ -83,7 +87,7 @@ public class DashboardMenuActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (!api.isNetworkAvailable()) {
-                    Toast.makeText(getApplicationContext(), "This section is not avalable in offline mode.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.not_available_offline), Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(DashboardMenuActivity.this, CreateGroupActivity.class);
                     //String message = editText.getText().toString();
@@ -96,7 +100,7 @@ public class DashboardMenuActivity extends BaseActivity {
 
         boolean can_create_group = user_settings.getBoolean("create_group_rights", false);
         if (!can_create_group) {
-            dashboard_create_group.setEnabled(false);
+            dashboard_create_group.setVisibility(View.GONE); //setEnabled(false);
         }
         Button dashboard_refresh = (Button) findViewById(R.id.dashboard_refresh);
         if (!api.isNetworkAvailable()) {
@@ -111,10 +115,6 @@ public class DashboardMenuActivity extends BaseActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_data), Toast.LENGTH_LONG).show();
                     Toast.makeText(getApplicationContext(), getString(R.string.please_wait), Toast.LENGTH_LONG).show();
-
-                    // 1. Determine the Connection Quality
-                    // 2. Retrieve the Deployment information
-                    // 3. Reset timeout to retrieve Users, Groups and Resources and save to database
 
                     fillDatabaseTask task = new fillDatabaseTask();
                     task.execute();
@@ -131,16 +131,27 @@ public class DashboardMenuActivity extends BaseActivity {
 
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(DashboardMenuActivity.this);
-                builder.setMessage("Do you really want to logout?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                builder.setMessage(getString(R.string.logout_confirmation_question))
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // FIRE ZE MISSILES!
                                 dialog.cancel();
                                 SharedPreferences save_settings = DashboardMenuActivity.this.getSharedPreferences("MyCitizen", 0);
                                 SharedPreferences.Editor editor = save_settings.edit();
 
+
                                 editor.putString("login", null);
                                 editor.putString("password", null);
+                                editor.putBoolean("create_group_rights", false);
+
+                                editor.putLong("time_connection_measured", 0);
+                                editor.putLong("time_users_retrieved", 0);
+                                editor.putLong("time_groups_retrieved", 0);
+                                editor.putLong("time_resources_retrieved", 0);
+                                editor.putInt("length_users_retrieved", 0);
+                                editor.putInt("length_groups_retrieved", 0);
+                                editor.putInt("length_resources_retrieved", 0);
+                                editor.putLong("last_time_retrieved_tags", 0);
 
                                 editor.commit();
 
@@ -150,15 +161,12 @@ public class DashboardMenuActivity extends BaseActivity {
 
                                 Intent intent2 = new Intent(DashboardMenuActivity.this, LoginActivity.class);
 
-                                //String message = editText.getText().toString();
-                                //intent.putExtra(EXTRA_MESSAGE, message);
-
                                 startActivity(intent2);
 
                                 finish();
                             }
                         })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // User cancelled the dialog
                                 dialog.cancel();
@@ -213,7 +221,7 @@ public class DashboardMenuActivity extends BaseActivity {
         messages_button = (Button) findViewById(R.id.widget_menu_messages);
 
         CheckUnreadMessages messagesCheck = new CheckUnreadMessages();
-        messagesCheck.execute(new String[]{});
+        messagesCheck.execute();
 
         messages_button.setOnClickListener(new OnClickListener() {
 
@@ -241,6 +249,7 @@ public class DashboardMenuActivity extends BaseActivity {
         String visibility = save_settings.getString("logged_user_visibility", null);
         String deployment_name = save_settings.getString("deployment_name","");
         String deployment_description = save_settings.getString("deployment_description","");
+        String user_language = save_settings.getString("logged_user_language", "unknown");
 
         String messages = "0";
         String data_source = "";
@@ -251,21 +260,48 @@ public class DashboardMenuActivity extends BaseActivity {
             data_source = "Data loaded from database.";
         }
 
-        String text = "<div><table><tr><td colspan=2><h1>" + getString(R.string.dashboard) + "</h1></td></tr>" +
+        String profile_general_ok;
+        String profile_tags_ok;
+        String profile_portrait_ok;
+        String profile_description_ok;
+        String profile_location_ok;
+
+
+        // int logged_user_id = save_settings.getInt("logged_user_id", 0);
+        int profile_filled = save_settings.getInt("profile_filled",0);
+        Boolean location_filled = save_settings.getBoolean("location_filled", false);
+        Boolean description_filled = save_settings.getBoolean("description_filled", false);
+        Boolean tags_filled = save_settings.getBoolean("tags_filled", false);
+        Boolean portrait_filled = save_settings.getBoolean("portrait_filled", false);
+        profile_general_ok = (profile_filled > 0) ? "<font color='green'>✓</font>" : "<font color='red'>&nbsp;x</font>";
+        profile_location_ok = (location_filled) ? "<font color='green'>✓</font>" : "<font color='red'>&nbsp;x</font>";
+        profile_description_ok = (description_filled) ? "<font color='green'>✓</font>" : "<font color='red'>&nbsp;x</font>";
+        profile_tags_ok = (tags_filled) ? "<font color='green'>✓</font>" : "<font color='red'>&nbsp;x</font>";
+        profile_portrait_ok = (portrait_filled) ? "<font color='green'>✓</font>" : "<font color='red'>&nbsp;x</font>";
+
+        String text = "<html><body style=\"background-color:#eae9e3;\"><div><table>" +
                 "<tr><td><b>Version:</b></td><td><span>" + Config.version + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.deployment) + ":</b></td><td><span><a href=\"http://" + used_api + "\">"+deployment_name+"</a></span></td></tr>" +
                 "<tr><td colspan=\"2\"><span>" + deployment_description + "</span></td></tr>" +
+                "<tr><td colspan=\"2\">&nbsp;</td></tr>"+
                 "<tr><td><b>" + getString(R.string.username) + ":</b></td><td><span>" + username + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.visibility) + ":</b></td><td><span>" + visibility + "</span></td></tr>" +
                 "<tr><td><b>" + getString(R.string.dashboard_messages) + ":</b></td><td><span>" + messages + " " + getString(R.string.dashboard_new_messages) +
+                "<tr><td><b>" + getString(R.string.language) + ":</b></td><td><span>" + user_language + "</span></td></tr>" +
                 //"</span></td></tr></table>" + data_source +
-                "</div>";
-        dashboard_info.loadData(text, "text/html", "UTF-8");
+                "<tr><td colspan=\"2\"><b>" + getString(R.string.profile_completed) + ":</b></td></tr>"+
+                "<tr><td>" + "General" + "</td><td>" + profile_general_ok + "</td></tr>"+
+                "<tr><td>" + getString(R.string.description) + "</td><td>" + profile_description_ok + "</td></tr>"+
+                "<tr><td>" + getString(R.string.tags) + "</td><td>" + profile_tags_ok + "</td></tr>"+
+                "<tr><td>" + "Avatar" + "</td><td>" + profile_portrait_ok + "</td></tr>"+
+                "<tr><td>" + "Location" + "</td><td>" + profile_location_ok + "</td></tr>"+
+                "</div></body></html>";
+        dashboard_info.loadData(text, "text/html; charset=UTF-8", "UTF-8");
         //dashboard_info.setText(Html.fromHtml(text));
         loader = loadingDialog();
 
-        DashboardInit task = new DashboardInit();
-        task.execute(new String[]{""});
+        CanCreateGroup task2 = new CanCreateGroup();
+        task2.execute("");
 
 
     }
@@ -276,7 +312,7 @@ public class DashboardMenuActivity extends BaseActivity {
 
     }
 
-    private class DashboardInit extends AsyncTask<String, Void, String> {
+    private class CanCreateGroup extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
             runOnUiThread(new Runnable() {
@@ -291,14 +327,11 @@ public class DashboardMenuActivity extends BaseActivity {
             String[] type = urls;
 
             ApiConnector api = new ApiConnector(DashboardMenuActivity.this);
-            String result = "";
+            String result;
             String unread_messages = "0";
             boolean can_create_groups = false;
             if (api.sessionInitiated()) {
-
                 if (api.isNetworkAvailable()) {
-
-                    //unread_messages = api.getUnreadMessages();
                     can_create_groups = api.CanCreateGroups();
                 }
             }
@@ -315,7 +348,7 @@ public class DashboardMenuActivity extends BaseActivity {
 
 
                 if (!can_create_groups) {
-                    dashboard_create_group.setEnabled(false);
+                    dashboard_create_group.setVisibility(View.GONE);//setEnabled(false);
                 }
             }
 
@@ -354,7 +387,7 @@ public class DashboardMenuActivity extends BaseActivity {
         protected void onPostExecute(Void result) {
 
             Toast.makeText(DashboardMenuActivity.this, getString(R.string.finished), Toast.LENGTH_LONG).show();
-            System.out.println("Executed: " + result);
+            Log.d(Config.DEBUG_TAG, "Executed: " + result);
 
             settings = getSharedPreferences(Config.localStorageName, 0);
             SharedPreferences.Editor editor = settings.edit();
@@ -367,5 +400,27 @@ public class DashboardMenuActivity extends BaseActivity {
 
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.help, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.menu_help:
+                Intent intent = new Intent(DashboardMenuActivity.this, HelpActivity.class);
+                intent.putExtra("topic", "dashboard");
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 }

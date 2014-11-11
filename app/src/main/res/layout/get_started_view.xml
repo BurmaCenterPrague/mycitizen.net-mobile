@@ -23,8 +23,19 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
-        android:scaleType="fitXY"
+        android:scaleType="fitStart"
         android:src="@drawable/bg" />
+
+    <LinearLayout
+        android:id="@+id/login_top"
+        android:layout_width="fill_parent"
+        android:layout_height="5dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/login_top"
+        android:orientation="vertical">
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/get_started1_top_menu"
@@ -33,7 +44,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
         android:layout_weight="1" >
 
 			<TextView
@@ -41,8 +53,9 @@
 			    android:layout_height="wrap_content"
 			    android:layout_gravity="bottom"
 			    android:text="@string/get_started_in_3_steps"
-			    android:textSize="18dp"
-			    android:textStyle="bold" />
+			    android:textSize="24dp"
+			    android:textStyle="bold"
+                android:textColor="@color/login_top"/>
 
 	</LinearLayout>
 
@@ -100,7 +113,6 @@
 	    android:layout_marginRight="20dp"
 	    android:layout_marginTop="20dp"
 	    android:layout_weight="1"
-
         android:layout_above="@id/get_started1_bottom_menu"
         android:layout_below="@id/get_started1_top_menu"
 	    android:orientation="vertical" >
@@ -134,7 +146,7 @@
 		    android:layout_height="fill_parent"
 		    android:layout_weight="1"
 		    android:orientation="horizontal"
-            android:visibility="gone">
+            >
 
 			<RadioGroup
 			    android:id="@+id/distance_unit"
@@ -155,20 +167,16 @@
 			    android:layout_width="fill_parent"
 			    android:layout_height="wrap_content"
 			    android:layout_weight="1"
-			    android:text="miles" />
+			    android:text="mi" />
 
 			</RadioGroup>
 		</LinearLayout>
 
-
 	</LinearLayout>
 
 
-
 </RelativeLayout>
-
     <RelativeLayout
-
         android:id="@+id/get_started_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -189,13 +197,25 @@
             android:src="@drawable/bg" />
 
         <LinearLayout
+            android:id="@+id/login_top"
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/login_top"
+            android:orientation="vertical">
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/get_started2_top_menu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
             android:layout_weight="1" >
 
             <TextView
@@ -203,9 +223,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:text="@string/get_started_in_3_steps"
-                android:textColor="@color/black"
-                android:textSize="18dp"
-                android:textStyle="bold" />
+                android:textSize="24dp"
+                android:textStyle="bold"
+                android:textColor="@color/login_top" />
 
         </LinearLayout>
 
@@ -329,8 +349,19 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
-        android:scaleType="fitXY"
+        android:scaleType="fitStart"
         android:src="@drawable/bg" />
+
+        <LinearLayout
+            android:id="@+id/login_top"
+            android:layout_width="fill_parent"
+            android:layout_height="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/login_top"
+            android:orientation="vertical">
+        </LinearLayout>
 
     <LinearLayout
         android:id="@+id/get_started3_top_menu"
@@ -339,7 +370,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
         android:layout_weight="1" >
 
 			<TextView
@@ -347,8 +379,9 @@
 			    android:layout_height="wrap_content"
 			    android:layout_gravity="bottom"
 			    android:text="@string/get_started_in_3_steps"
-			    android:textSize="18dp"
-			    android:textStyle="bold" />
+                android:textSize="24dp"
+                android:textStyle="bold"
+                android:textColor="@color/login_top" />
 
 	</LinearLayout>
 
@@ -420,7 +453,7 @@
 				    android:layout_height="60dp"
 				    android:layout_marginBottom="10dp"
 				    android:layout_marginTop="10dp"
-				    android:background="@drawable/bottom_menu_button"
+				    android:background="@drawable/button"
 				    android:text="@string/get_started_register"
 				    android:textColor="@color/black" />
 
@@ -430,7 +463,7 @@
 				    android:layout_height="60dp"
 				    android:layout_marginBottom="10dp"
 				    android:layout_marginTop="10dp"
-				    android:background="@drawable/bottom_menu_button"
+				    android:background="@drawable/button"
 				    android:text="@string/get_started_login"
 				    android:textColor="@color/black" />
 

@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 public class SplashActivity extends ActionBarActivity {
     public ApiConnector api;
@@ -30,7 +31,7 @@ public class SplashActivity extends ActionBarActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         actionBar = getSupportActionBar();
-        actionBar.setTitle("MyCitizen");
+        actionBar.setTitle("MyCitizen.net");
         actionBar.setIcon(null);
 
         SharedPreferences settings = SplashActivity.this.getSharedPreferences(Config.localStorageName, 0);
@@ -40,19 +41,8 @@ public class SplashActivity extends ActionBarActivity {
         saved_password = settings.getString("password", null);
 
         if (settings.getString("ui_language", null) != null) {
-            String loc = "en";
-            if (settings.getString("ui_language", null).equals("ces")) {
-                loc = "cs_MM";
-            } else if (settings.getString("ui_language", null).equals("hlt")) {
-                loc = "ht_MM";
-            } else if (settings.getString("ui_language", null).equals("mrh")) {
-                loc = "mt_MM";
-            } else if (settings.getString("ui_language", null).equals("zom")) {
-                loc = "zm_MM";
-            } else {
-                loc = "en";
-            }
-            System.out.println("Locale set to saved language: " + settings.getString("ui_language", null));
+            String loc = Config.codeToLocale(getApplicationContext(), settings.getString("ui_language", null));
+            Log.d(Config.DEBUG_TAG, "Locale set to saved language: " + settings.getString("ui_language", null));
             Locale locale = new Locale(loc);
 
             Locale.setDefault(locale);
@@ -60,23 +50,31 @@ public class SplashActivity extends ActionBarActivity {
             config.locale = locale;
             getBaseContext().getResources().updateConfiguration(config,
                     getBaseContext().getResources().getDisplayMetrics());
+            super.onConfigurationChanged(config);
         }
 
-        //api = new ApiConnector(LoginActivity.this);
 
         if (saved_login != null && saved_password != null) {
-
-
+            // resetting temporary variables
+            SharedPreferences user_settings = getSharedPreferences("MyCitizen", 0);
+            SharedPreferences.Editor editor = user_settings.edit();
+            editor.putInt("connection_strength", 50);
+            editor.putLong("time_connection_measured", 0);
+            editor.putLong("last_network_request", 2001);
+            editor.putLong("time_connection_measured", 0);
+            editor.putLong("time_users_retrieved", 0);
+            editor.putLong("time_groups_retrieved", 0);
+            editor.putLong("time_resources_retrieved", 0);
+            editor.putLong("last_time_retrieved_tags", 0);
+            editor.commit();
             loader = loadingDialog();
 
+
             AppInit task = new AppInit();
-            task.execute(new String[]{"nothing"});
+            task.execute("nothing");
         } else {
 
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-
-            //String message = editText.getText().toString();
-            //intent.putExtra(EXTRA_MESSAGE, message);
 
             startActivity(intent);
 
@@ -106,6 +104,9 @@ public class SplashActivity extends ActionBarActivity {
             api.sessionInit(saved_login, saved_password);
 
             if (api.sessionInitiated()) {
+
+                api.determineConnectionQuality();
+
                 return true;
             } else {
                 return false;
@@ -118,8 +119,6 @@ public class SplashActivity extends ActionBarActivity {
             if (result) {
                 Intent intent = new Intent(SplashActivity.this, WidgetActivity.class);
 
-                //String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
 
                 startActivity(intent);
                 try {

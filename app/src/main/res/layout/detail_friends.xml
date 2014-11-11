@@ -82,22 +82,10 @@
 	    android:layout_height="wrap_content"
 	    android:layout_above="@id/detail_friends_bottom_menu"
 	    android:layout_below="@id/detail_friends_top_menu"
-	    android:layout_marginBottom="10dp"
-	    android:layout_marginLeft="10dp"
-	    android:layout_marginRight="10dp"
-	    android:layout_marginTop="10dp"
+	    android:layout_margin="10dp"
 	    android:layout_weight="8"
 	    android:orientation="vertical" >
 
-			<TextView
-			    android:id="@+id/user_friends_title"
-			    android:layout_width="fill_parent"
-			    android:layout_height="wrap_content"
-			    android:text=""
-			    android:textSize="18dp"
-			    android:textStyle="bold" >
-			    
-			</TextView>
 
 	    	<ListView
 	    	    android:id="@+id/user_friends"

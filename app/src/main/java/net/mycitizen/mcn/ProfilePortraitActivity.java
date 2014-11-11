@@ -102,7 +102,7 @@ public class ProfilePortraitActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQ) {
             if (resultCode == RESULT_OK) {
-                Uri photoUri = null;
+                Uri photoUri;
                 if (data == null) {
                     // A known bug here! The image should have saved in fileUri
                     Toast.makeText(this, "Image saved successfully",

@@ -44,6 +44,7 @@
 		    android:layout_weight="1"
 		    android:text="@string/filter_messages"
 		    android:textStyle="bold"
+            android:textSize="18sp"
             android:padding="5dp"/>
 
 		</LinearLayout>
@@ -51,30 +52,36 @@
 		<LinearLayout
 		    android:layout_width="wrap_content"
 		    android:layout_height="fill_parent"
+            android:gravity="center"
 		    android:layout_weight="1" >
 
 		<ToggleButton
 		    android:id="@+id/inbox_message_toggle"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
+		    android:layout_width="30dp"
+		    android:layout_height="wrap_content"
 		    android:layout_weight="1"
-		    android:textOff="@string/viewed_off"
-		    android:textOn="@string/viewed_on" />
+            android:background="@drawable/toggle_filter_new"
+            android:textOff=""
+            android:textOn=""
+		     />
 
 		</LinearLayout>
 
 		<LinearLayout
 		    android:layout_width="wrap_content"
 		    android:layout_height="fill_parent"
+            android:gravity="center"
 		    android:layout_weight="1" >
 
 		<ToggleButton
 		    android:id="@+id/inbox_trash_toggle"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
+		    android:layout_width="30dp"
+		    android:layout_height="wrap_content"
 		    android:layout_weight="1"
-		    android:textOff="@string/trash_off"
-		    android:textOn="@string/trash_on" />
+            android:background="@drawable/toggle_filter_trash"
+            android:textOff=""
+            android:textOn=""
+		     />
 
 		</LinearLayout>
 

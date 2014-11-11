@@ -27,6 +27,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.util.Log;
 
 
 public class DataUpdater extends Service {
@@ -57,7 +58,7 @@ public class DataUpdater extends Service {
     public void onCreate() {
         super.onCreate();
 
-        System.out.println("DataUpdater start");
+        Log.d(Config.DEBUG_TAG, "DataUpdater start");
         PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = mgr.newWakeLock(PowerManager.FULL_WAKE_LOCK, "MyWakeLock");
 
@@ -103,7 +104,7 @@ public class DataUpdater extends Service {
             String responseBody = httpclient.execute(httpget, responseHandler);
 
             JSONArray response = new JSONArray(responseBody);
-            System.out.println("updating data response length" + response.length());
+            Log.d(Config.DEBUG_TAG, "updating data response length" + response.length());
             // Build the return string.
 
 	        /*
@@ -305,7 +306,7 @@ public class DataUpdater extends Service {
 
         } catch (FileNotFoundException e) {
             //e.printStackTrace();
-            System.out.println("skipping " + name);
+            Log.d(Config.DEBUG_TAG, "skipping " + name);
             if (ucon != null) {
                 ucon.disconnect();
             }

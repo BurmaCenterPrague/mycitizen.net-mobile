@@ -1,35 +1,43 @@
 package net.mycitizen.mcn;
 
 
+import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.widget.ToggleButton;
+
+import java.util.Locale;
 
 public class LoginActivity extends ActionBarActivity {
     public ApiConnector api;
 
     ProgressDialog loader = null;
 
-    String login_field;
-    String password_field;
+    String login_field_1;
+    String password_field_1;
 
     CheckBox remember_me;
 
-    Button password, login;
+    Button password_field, login_field, login_button, forgotten_password;
 
     ActionBar actionBar;
 
@@ -47,12 +55,6 @@ public class LoginActivity extends ActionBarActivity {
         setContentView(R.layout.login_view);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        //BitmapDrawable draw = (BitmapDrawable)getResources().getDrawable(R.drawable.all_background);
-        //RelativeLayout background = (RelativeLayout)findViewById(R.id.background);
-        //draw.setTileModeX(TileMode.REPEAT);
-        //draw.setTileModeY(TileMode.CLAMP);
-        //background.setBackgroundDrawable(draw);
-
         actionBar = getSupportActionBar();
         actionBar.setTitle("Login");
         actionBar.setIcon(null);
@@ -64,6 +66,19 @@ public class LoginActivity extends ActionBarActivity {
         String saved_password = settings.getString("password", null);
         String api = settings.getString("usedApi", "");
 
+        if (settings.getString("ui_language", null) != null) {
+            String loc = Config.codeToLocale(getApplicationContext(), settings.getString("ui_language", null));
+            Log.d(Config.DEBUG_TAG, "Locale set to language: " + settings.getString("ui_language", null));
+            Locale locale = new Locale(loc);
+
+            Locale.setDefault(locale);
+            Configuration config = new Configuration();
+            config.locale = locale;
+            getBaseContext().getResources().updateConfiguration(config,
+                    getBaseContext().getResources().getDisplayMetrics());
+            super.onConfigurationChanged(config);
+        }
+
 
         if (settings.getString("userAgent", null) == null) {
             SharedPreferences.Editor editor = settings.edit();
@@ -71,7 +86,7 @@ public class LoginActivity extends ActionBarActivity {
             editor.commit();
         }
 
-        System.out.println("LoginActivity.java: SAVED " + saved_login + " " + saved_password);
+        Log.d(Config.DEBUG_TAG, "LoginActivity.java: SAVED " + saved_login + " " + saved_password);
 
 
         if (saved_login != null && saved_password != null) {
@@ -82,50 +97,86 @@ public class LoginActivity extends ActionBarActivity {
             EditText password_f = (EditText) findViewById(R.id.login_password);
             password_f.setText(saved_password);
 
-            login_field = saved_login;
-            password_field = saved_password;
+            login_field_1 = saved_login;
+            password_field_1 = saved_password;
 
-            LogingIn task = new LogingIn();
-            task.execute(new String[]{"nothing"});
-
+                LoggingIn task = new LoggingIn();
+                task.execute("nothing");
 
         }
 
         remember_me = (CheckBox) findViewById(R.id.login_remember);
 
         if (activityType != null && activityType.equals("fromRegister")) {
-            EditText login = (EditText) findViewById(R.id.login_login);
-            login.setText(intent.getStringExtra("username"));
-            EditText password = (EditText) findViewById(R.id.login_password);
-            password.setText(intent.getStringExtra("password"));
+            EditText login_field = (EditText) findViewById(R.id.login_login);
+            login_field.setText(intent.getStringExtra("username"));
+            EditText password_field = (EditText) findViewById(R.id.login_password);
+            password_field.setText(intent.getStringExtra("password"));
             Toast.makeText(getApplicationContext(), getString(R.string.registration_finish), Toast.LENGTH_LONG).show();
         } else if (activityType != null && activityType.equals("apiError")) {
             Toast.makeText(getApplicationContext(), getString(R.string.apierror), Toast.LENGTH_LONG).show();
         }
 
-        login = (Button) findViewById(R.id.login_submit);
 
-        //Typeface tf_mm3 = Typeface.createFromAsset(getAssets(), "fonts/mm3.ttf");
-        //login.setTypeface(tf_mm3);
+        final ToggleButton show_password = (ToggleButton) findViewById(R.id.show_password);
 
-        login.setOnClickListener(new OnClickListener() {
+        show_password.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
+                EditText password_field = (EditText) findViewById(R.id.login_password);
+
+                if (show_password.isChecked()) {
+                    password_field.setTransformationMethod(null);
+                    password_field.setSelection(password_field.getText().length());
+                } else {
+                    password_field.setTransformationMethod(new PasswordTransformationMethod());
+                    password_field.setSelection(password_field.getText().length());
+                }
+            }
+        });
+
+        final ImageView logo = (ImageView) findViewById(R.id.logo);
+
+        logo.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://mycitizen.net"));
+                startActivity(browserIntent);
+            }
+        });
+
+
+        login_button = (Button) findViewById(R.id.login_submit);
+
+        //Typeface tf_mm3 = Typeface.createFromAsset(getAssets(), "fonts/mm3.ttf");
+        //login.setTypeface(tf_mm3);
+
+        login_button.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+
+                ApiConnector api = new ApiConnector(getApplicationContext());
+                if (!api.isNetworkAvailable()) {
+                    Toast.makeText(getApplicationContext(), R.string.not_available_offline, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 loader = loadingDialog();
 
-                EditText login = (EditText) findViewById(R.id.login_login);
-                EditText password = (EditText) findViewById(R.id.login_password);
+                EditText login_field = (EditText) findViewById(R.id.login_login);
+                EditText password_field = (EditText) findViewById(R.id.login_password);
 
 
-                if (!login.getText().toString().equals("") && !password.getText().toString().equals("")) {
+                if (!login_field.getText().toString().equals("") && !password_field.getText().toString().equals("")) {
 
-                    login_field = login.getText().toString();
-                    password_field = password.getText().toString();
+                    login_field_1 = login_field.getText().toString();
+                    password_field_1 = password_field.getText().toString();
 
-                    LogingIn task = new LogingIn();
-                    task.execute(new String[]{"nothing"});
+                    LoggingIn task = new LoggingIn();
+                    task.execute("nothing");
 
 
                 } else {
@@ -146,6 +197,7 @@ public class LoginActivity extends ActionBarActivity {
                 //intent.putExtra(EXTRA_MESSAGE, message);
 
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -165,8 +217,8 @@ public class LoginActivity extends ActionBarActivity {
         });
 
 
-        password = (Button) findViewById(R.id.login_forgotten_password);
-        password.setOnClickListener(new OnClickListener() {
+        forgotten_password = (Button) findViewById(R.id.login_forgotten_password);
+        forgotten_password.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -180,10 +232,7 @@ public class LoginActivity extends ActionBarActivity {
             }
         });
 
-        if (api.equals("")) {
-            password.setEnabled(false);
-            login.setEnabled(false);
-        }
+        welcomeScreen();
 
     }
 
@@ -191,22 +240,47 @@ public class LoginActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences settings = LoginActivity.this.getSharedPreferences(Config.localStorageName, 0);
-
-        String saved_login = settings.getString("login", null);
-        String saved_password = settings.getString("password", null);
-        String api = settings.getString("usedApi", "");
-
-        if (api.equals("")) {
-            password.setEnabled(false);
-            login.setEnabled(false);
-        } else {
-            password.setEnabled(true);
-            login.setEnabled(true);
-        }
+        welcomeScreen();
 
     }
 
+
+    private void welcomeScreen() {
+        SharedPreferences settings = LoginActivity.this.getSharedPreferences(Config.localStorageName, 0);
+
+        EditText password_field = (EditText) findViewById(R.id.login_password);
+        EditText login_field = (EditText) findViewById(R.id.login_login);
+        String api = settings.getString("usedApi", "");
+        Button login_submit = (Button) findViewById(R.id.login_submit);
+        Button login_forgotten_password = (Button) findViewById(R.id.login_forgotten_password);
+        CheckBox remember_me = (CheckBox) findViewById(R.id.login_remember);
+        LinearLayout login_welcome = (LinearLayout) findViewById(R.id.login_welcome);
+        ToggleButton show_password = (ToggleButton) findViewById(R.id.show_password);
+
+
+        Log.d(Config.DEBUG_TAG, "api: " + api);
+        if (api.equals("")) {
+            password_field.setVisibility(View.GONE); //setEnabled(false);
+            login_field.setVisibility(View.GONE); //setEnabled(false);
+            login_submit.setVisibility(View.GONE);
+            login_forgotten_password.setEnabled(false);
+            login_forgotten_password.setText("");
+            remember_me.setVisibility(View.GONE);
+            show_password.setVisibility(View.GONE);
+            login_welcome.setVisibility(View.VISIBLE);
+
+        } else {
+            password_field.setVisibility(View.VISIBLE); //setEnabled(true);
+            login_field.setVisibility(View.VISIBLE); //setEnabled(true);
+            login_submit.setVisibility(View.VISIBLE);
+            login_forgotten_password.setEnabled(true);
+            login_forgotten_password.setText(R.string.forgotpassword);
+            remember_me.setVisibility(View.VISIBLE);
+            show_password.setVisibility(View.VISIBLE);
+            login_welcome.setVisibility(View.GONE);
+        }
+
+    }
 
     private ProgressDialog loadingDialog() {
 
@@ -214,14 +288,14 @@ public class LoginActivity extends ActionBarActivity {
 
     }
 
-    private class LogingIn extends AsyncTask<String, Void, String> {
+    private class LoggingIn extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
             //Looper.prepare();
             api = new ApiConnector(LoginActivity.this);
 
             api.removeSession();
-            String result = api.sessionInit(login_field, password_field);
+            String result = api.sessionInit(login_field_1, password_field_1);
 
             if (api.sessionInitiated()) {
                 return "success";
@@ -232,67 +306,74 @@ public class LoginActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(String result) {
+
+            SharedPreferences settings = LoginActivity.this.getSharedPreferences(Config.localStorageName, 0);
+
+            String saved_login = settings.getString("login", null);
+            String saved_password = settings.getString("password", null);
+
+            SharedPreferences save_settings = LoginActivity.this.getSharedPreferences("MyCitizen", 0);
+            SharedPreferences.Editor editor = save_settings.edit();
+
             if (result.equals("success")) {
 
-
-                SharedPreferences settings = LoginActivity.this.getSharedPreferences(Config.localStorageName, 0);
-
-                String saved_login = settings.getString("login", null);
-                String saved_password = settings.getString("password", null);
-
                 if (saved_login == null || saved_password == null) {
-                    SharedPreferences save_settings = LoginActivity.this.getSharedPreferences("MyCitizen", 0);
-                    SharedPreferences.Editor editor = save_settings.edit();
 
-                    editor.putString("current_login", login_field);
+
+                    editor.putString("current_login", login_field_1);
 
                     if (remember_me.isChecked()) {
-
-                        editor.putString("login", login_field);
-                        editor.putString("password", password_field);
-                        System.out.println("SAVING " + login_field + " " + password_field);
+                        editor.putString("login", login_field_1);
+                        editor.putString("password", password_field_1);
                         editor.commit();
 
-                        Intent intent = new Intent(LoginActivity.this, WidgetActivity.class);
-                        intent.putExtra("origin", "login");
-
-                        //String message = editText.getText().toString();
-                        //intent.putExtra(EXTRA_MESSAGE, message);
-
-                        startActivity(intent);
-                        if (loader != null) {
-                            loader.dismiss();
-                        }
-
-                        finish();
-
                     } else {
-
-                        editor.putString("login", null);
+                        editor.putString("login", login_field_1);
                         editor.putString("password", null);
 
                         editor.commit();
 
-                        Intent intent = new Intent(LoginActivity.this, WidgetActivity.class);
-
-                        //String message = editText.getText().toString();
-                        //intent.putExtra(EXTRA_MESSAGE, message);
-
-                        startActivity(intent);
-                        loader.dismiss();
-                        finish();
                     }
 
+                    Intent incoming_intent = getIntent();
+                    String activityType = incoming_intent.getStringExtra("type");
+
+                    Intent intent;
+                    int visits = settings.getInt("number_visits",0);
+                    Log.d(Config.DEBUG_TAG, "visits: " + visits);
+
+                    int filled = 0;
+
+                    int logged_user_id = settings.getInt("logged_user_id", 0);
+                    Log.d(Config.DEBUG_TAG, "logged_user_id: " + logged_user_id);
+
+                    if (logged_user_id != 0) {
+                       filled = settings.getInt("profile_filled",0);
+                    }
+
+                    Log.d(Config.DEBUG_TAG, "filled: " + filled);
+
+                    intent = new Intent(LoginActivity.this, WidgetActivity.class);
+                    if ((activityType != null && activityType.equals("fromRegister")) || (visits < 15 && filled < 2)) {
+                        intent.putExtra("profile", "incomplete");
+                    }
+
+                    intent.putExtra("origin", "login");
+
+
+                    startActivity(intent);
+                    if (loader != null) {
+                        loader.dismiss();
+                    }
+
+                    finish();
                 }
 
             } else {
                 if (loader != null) {
                     loader.dismiss();
                 }
-                System.out.println("LOGIN RESPONSE " + result);
-                SharedPreferences save_settings = LoginActivity.this.getSharedPreferences("MyCitizen", 0);
-                SharedPreferences.Editor editor = save_settings.edit();
-
+                Log.d(Config.DEBUG_TAG, "LOGIN RESPONSE " + result);
 
                 if (result.equals("not_active")) {
                     editor.putString("login", null);
@@ -300,12 +381,12 @@ public class LoginActivity extends ActionBarActivity {
 
                     editor.commit();
                     Toast.makeText(getApplicationContext(), getString(R.string.login_error_unactive), Toast.LENGTH_LONG).show();
-                } else if (result.equals("unkonwn_user")) {
+                } else if (result.equals("login_failed")) {
                     editor.putString("login", null);
                     editor.putString("password", null);
 
                     editor.commit();
-                    Toast.makeText(getApplicationContext(), getString(R.string.login_error_unkonown_user), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.login_error_login_failed), Toast.LENGTH_LONG).show();
                 } else if (result.equals("ip_blocked")) {
                     editor.putString("login", null);
                     editor.putString("password", null);
@@ -313,7 +394,46 @@ public class LoginActivity extends ActionBarActivity {
                     editor.commit();
                     Toast.makeText(getApplicationContext(), getString(R.string.ip_blocked), Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.login_error_unkonown_error), Toast.LENGTH_LONG).show();
+
+                    if (saved_login != null && saved_password != null) {
+
+                        Toast.makeText(getApplicationContext(), getString(R.string.apierror)+" " +"Trying to start in offline mode.", Toast.LENGTH_LONG).show();
+                        Log.d(Config.DEBUG_TAG, "Bad data from API, but logged in before - continue in offline mode");
+
+
+                        Intent incoming_intent = getIntent();
+                        String activityType = incoming_intent.getStringExtra("type");
+
+                        Intent intent;
+                        int visits = settings.getInt("number_visits",0);
+                        Log.d(Config.DEBUG_TAG, "visits: " + visits);
+
+                        int filled = 0;
+
+                        int logged_user_id = settings.getInt("logged_user_id", 0);
+                        Log.d(Config.DEBUG_TAG, "logged_user_id: " + logged_user_id);
+
+                        if (logged_user_id != 0) {
+                            filled = settings.getInt("profile_filled",0);
+                        }
+
+                        Log.d(Config.DEBUG_TAG, "filled: " + filled);
+
+                        intent = new Intent(LoginActivity.this, WidgetActivity.class);
+                        if ((activityType != null && activityType.equals("fromRegister")) || (visits < 15 && filled < 2)) {
+                            intent.putExtra("profile", "incomplete");
+                        }
+
+                        intent.putExtra("origin", "login");
+
+
+                        startActivity(intent);
+                        if (loader != null) {
+                            loader.dismiss();
+                        }
+
+                        finish();
+                    }
                 }
             }
 
@@ -333,10 +453,8 @@ public class LoginActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-
-
         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-        builder.setMessage(getString(R.string.really_quit))
+        /*builder.setMessage(getString(R.string.really_quit))
                 .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // FIRE ZE MISSILES!
@@ -353,7 +471,8 @@ public class LoginActivity extends ActionBarActivity {
         // Create the AlertDialog object and return it
         dialog = builder.create();
 
-        dialog.show();
+        dialog.show();*/
+        finish();
 
     }
 
